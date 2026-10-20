@@ -11,8 +11,9 @@ and releases.
 - An active `main` ruleset requires a PR, one approval, stale-review dismissal,
   approval after the latest reviewable push, and resolved review conversations.
   The GitHub Actions `Workflow lint` check is required, with the branch up to
-  date before merging. Force pushes and branch deletion are blocked; no bypass
-  actors are configured.
+  date before merging. Repository administrators may bypass review and check
+  requirements when merging a PR. Their bypass is PR-only: direct pushes, force
+  pushes, and branch deletion remain protected.
 - Secret scanning, push protection, private vulnerability reporting, Dependabot
   alerts, and Dependabot security updates are enabled.
 - Actions default to read-only tokens and cannot approve PR reviews. Only
