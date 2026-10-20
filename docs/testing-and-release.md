@@ -3,8 +3,18 @@
 ## Current executable checks
 
 The repository has no application test runner, dependency manifest, Android
-build, or content validator yet. The existing Pages workflow deploys a placeholder
-site; it is not evidence of application validation.
+build, or content validator yet. The Pages workflow deploys only the placeholder
+`index.html`; it is not evidence of application validation.
+
+The `Repository checks` workflow runs on pull requests and pushes to `main`.
+Its `Workflow lint` job checks whitespace with `git diff --check HEAD^ HEAD`
+and validates workflow syntax, expressions, and shell commands with actionlint
+v1.7.12. CI verifies the downloaded Linux archive against a pinned SHA-256 before
+execution. With that actionlint version installed locally, run `actionlint`
+from the repository root; shell analysis additionally requires ShellCheck on
+the local PATH. These checks do not validate product behavior, rendered HTML,
+or content contracts. Require the check in branch rules only after its first
+successful PR run.
 
 For documentation changes, check relative links and Markdown structure and use:
 

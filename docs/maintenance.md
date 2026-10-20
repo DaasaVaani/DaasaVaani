@@ -1,9 +1,39 @@
 # Repository maintenance checklist
 
-These are recommended setup and recurring tasks, **not claims that settings are
-enabled**. Repository settings were not changed or verified as part of this
-documentation update. Record dated setup evidence and revisit this checklist
-after incidents, major tooling changes, and releases.
+The checklist below describes ongoing targets. The dated verification records
+settings actually checked; revisit them after incidents, major tooling changes,
+and releases.
+
+## Verified configuration on 2026-10-21
+
+- The repository is public; organization base access is read-only. Only the two
+  organization owners were listed with repository administration access.
+- An active `main` ruleset requires a PR, one approval, stale-review dismissal,
+  approval after the latest reviewable push, and resolved review conversations.
+  Force pushes and branch deletion are blocked; no bypass actors are configured.
+- Secret scanning, push protection, private vulnerability reporting, Dependabot
+  alerts, and Dependabot security updates are enabled.
+- Actions default to read-only tokens and cannot approve PR reviews. Only
+  GitHub-owned actions are allowed, and all outside contributors require workflow
+  approval. The deploy workflow runs only on pushes to `main`; the Pages
+  environment permits only `main`.
+- Ordinary members cannot create repositories, teams, or Pages sites. New
+  repositories default to enabled secret scanning, push protection, Dependabot
+  alerts, and Dependabot security updates.
+
+Remaining owner tasks:
+
+- Have every owner enroll in 2FA, retain recovery methods, then require
+  organization-wide 2FA. One owner was still unenrolled; enforcement was left
+  disabled to avoid removing their access.
+- Repository deletion/transfer and visibility restrictions remained enabled for
+  repository administrators after the API update attempt. Review these controls
+  manually in organization member privileges; do not assume they were disabled.
+- Organization Actions policies and PAT/OAuth approval and expiration controls
+  could not be fully verified with the available token permissions.
+- After the pinned workflows merge, enable repository SHA-pin enforcement.
+  After `Workflow lint` has run successfully on a PR, require that status check
+  in the `main` ruleset. Enabling either prematurely can block existing work.
 
 ## Before inviting broader contributions
 
@@ -23,9 +53,10 @@ after incidents, major tooling changes, and releases.
 
 ## Deployment and release safety
 
-- The current Pages workflow uploads the repository root. Before adding real
-  drafts/provenance, switch it to validated public build output and verify that
-  internal data is absent. Until then, treat tracked files as potentially public.
+- The Pages workflow stages only the current `index.html` placeholder in a
+  dedicated artifact directory. When the real site build is introduced, replace
+  this allowlist with validated public build output and verify that internal
+  data is absent. All tracked source files remain public in this repository.
 - Configure Pages environments/deployment permissions deliberately.
 - Store API and APK signing credentials in protected secret storage. Keep a
   secure signing-key backup and restrict release access.
@@ -37,14 +68,17 @@ after incidents, major tooling changes, and releases.
 
 ## Dependency and workflow updates
 
-- Review GitHub Actions dependencies regularly; evaluate immutable commit pinning
-  and track corresponding release versions when workflow changes are approved.
+- GitHub Actions are pinned to immutable commits. Dependabot proposes weekly
+  updates; review them and their corresponding release versions before merging.
+  The workflow linter release and archive checksum are pinned separately in
+  `validate.yml`; update both together after checking the upstream release.
 - Once manifests/toolchains exist, configure an appropriate dependency update
   service and commit lockfiles as required by the selected ecosystem.
 - Review release notes, license changes, security advisories, and compatibility;
   run relevant checks before merging updates. Avoid blind automatic merges.
 - Test updates against API 26, supported browsers, and content-format compatibility.
-- No dependency automation or additional CI is configured by these documents.
+- Repository CI checks workflow syntax and whitespace, not application or
+  content correctness. No application dependency ecosystem is selected yet.
 
 ## Suggested recurring review
 

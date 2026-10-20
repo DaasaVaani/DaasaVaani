@@ -32,7 +32,8 @@ Observed on 2026-10-20; recheck these facts before implementation:
 | Surface | Current state |
 | --- | --- |
 | Root `index.html` | A welcome-page placeholder, not the planned lyrics website. |
-| `.github/workflows/deploy.yml` | Publishes the repository root to GitHub Pages on pushes to `main`. It has no content-generation or validation step. |
+| `.github/workflows/deploy.yml` | Publishes only the placeholder `index.html` to GitHub Pages on pushes to `main`. It has no content-generation step. |
+| `.github/workflows/validate.yml` | Checks workflow syntax and whitespace on PRs and pushes to `main`; not application or content validation. |
 | `library/` and `settings/` | Intended source locations; no content/settings contract is implemented. |
 | Android | No app implementation or build manifest is present. |
 | Build/test tooling | No application dependency manifest, test runner, or documented app build command is present. |
