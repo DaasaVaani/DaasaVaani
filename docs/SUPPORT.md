@@ -7,7 +7,7 @@ available lyrics product, and there is no established application support window
 
 - Read the [project README](../README.md), [requirements](requirements.md), and
   [documentation index](README.md) first.
-- Search [existing issues](https://github.com/DaasaVaani/DaasaVaani/issues).
+- Search [existing issues](https://github.com/DaasaVaani/DaasaVaani.github.io/issues).
 - Open a bug report for reproducible problems or a feature request for proposals.
 - For general questions, open a clearly titled issue explaining what you tried.
 - For lyrics, transliteration, or attribution corrections, include the video ID,

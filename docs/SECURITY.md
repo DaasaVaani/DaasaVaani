@@ -16,7 +16,7 @@ Do not disclose potential vulnerabilities, exploit details, or exposed secrets
 in public issues, discussions, or PRs.
 
 Use GitHub's
-[Report a vulnerability](https://github.com/DaasaVaani/DaasaVaani/security/advisories/new)
+[Report a vulnerability](https://github.com/DaasaVaani/DaasaVaani.github.io/security/advisories/new)
 route. Private vulnerability reporting was enabled and verified through GitHub's
 API on 2026-10-21. You can also find it under the repository's Security tab.
 

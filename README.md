@@ -102,7 +102,7 @@ The planned website will be fully static on GitHub Pages, without an application
 backend, server-side database, or server-side user-list storage. Static artifact downloads,
 local browser/app storage, explicit YouTube playback, and maintainer-side GitHub
 Actions remain allowed. Signed Android APKs will be
-distributed through [GitHub Releases](https://github.com/DaasaVaani/DaasaVaani/releases).
+distributed through [GitHub Releases](https://github.com/DaasaVaani/DaasaVaani.github.io/releases).
 This is the intended distribution route, not a claim that an app release exists.
 Google Play distribution is deferred.
 
@@ -137,8 +137,8 @@ Markdown. Drafts must never enter public artifacts or offline packages.
 Git is sufficient to clone and review the current documentation:
 
 ```text
-git clone https://github.com/DaasaVaani/DaasaVaani.git
-cd DaasaVaani
+git clone https://github.com/DaasaVaani/DaasaVaani.github.io.git
+cd DaasaVaani.github.io
 ```
 
 Start with the [documentation index](docs/README.md) and
@@ -160,7 +160,7 @@ permission, or working code.
 
 ## Support and community
 
-- Use [GitHub Issues](https://github.com/DaasaVaani/DaasaVaani/issues) for
+- Use [GitHub Issues](https://github.com/DaasaVaani/DaasaVaani.github.io/issues) for
   non-sensitive bugs, feature requests, and project questions; search existing
   issues first.
 - Include environment information and reproducible steps, but never credentials
