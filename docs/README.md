@@ -8,18 +8,34 @@ This folder is the shared context for humans and AI coding agents.
    performance targets, exclusions, and acceptance scenarios.
 2. [AI development guide](ai-development.md): task workflow, repository facts,
    approval rules, and handoff expectations.
-3. [Architecture and decision gates](architecture.md): component ownership and
+3. [Approved individual design decisions](design-decisions.md): selected
+   libraries/approaches, alternatives/trade-offs, superseded choices and open
+   questions; consolidated final design approval remains pending.
+4. [Architecture and decision gates](architecture.md): component ownership and
    decisions that must precede implementation.
-4. [Data contracts](data-contracts.md): contract boundaries and schema-design
+5. [Data contracts](https://github.com/DaasaVaani/shared/blob/main/docs/data-contracts.md): contract boundaries and schema-design
    checklist; not an approved serialization schema.
-5. [Implementation roadmap](implementation-roadmap.md): dependency-ordered slices
+6. [Implementation roadmap](implementation-roadmap.md): dependency-ordered slices
    and exit criteria; not a claim of completed work.
-6. [Testing and release](testing-and-release.md): validation coverage, evidence,
+7. [Testing and release](testing-and-release.md): validation coverage, evidence,
    and deployment safeguards.
 
 Read the relevant sections of the requirements before using a supporting guide.
 Requirements define intended behavior; code and recorded validation establish
 what is actually implemented. A guide is not evidence of implementation.
+
+## Repository ownership
+
+- [Website/PWA](https://github.com/DaasaVaani/DaasaVaani.github.io): root Pages at [daasavaani.github.io](https://daasavaani.github.io/).
+- [Android](https://github.com/DaasaVaani/AndroidApp): native app and core.
+- [Shared](https://github.com/DaasaVaani/shared): contracts, specs, fixtures, UI catalogs/generator and committed UI resources.
+- [Library](https://github.com/DaasaVaani/library): reviewed content, ingestion, validation and publisher; planned Pages at [daasavaani.github.io/library/](https://daasavaani.github.io/library/).
+
+`library/` is absent and `settings/` is empty in Website. Legacy-looking Markdown
+reported in a separate sibling path is unreviewed and not established as
+authoritative; source assessment/migration is pending and unauthorized. Website consumes published Library
+artifacts only. Consumers pin Shared independently. Bootstrap does not mean app
+builds, Library Pages, Website integration or app CI are implemented.
 
 ## Documentation ownership
 
@@ -29,7 +45,7 @@ what is actually implemented. A guide is not evidence of implementation.
 - [Security policy](SECURITY.md): private vulnerability reporting and support status.
 - [Code of Conduct](CODE_OF_CONDUCT.md): participation standards and reporting routes.
 - [Support](SUPPORT.md): where and how to ask for help.
-- [Content rights](content-rights.md): source permissions, attribution, and rights concerns.
+- [Content rights](https://github.com/DaasaVaani/library/blob/main/docs/content-rights.md): source permissions, attribution, and rights concerns.
 - [Maintenance checklist](maintenance.md): GitHub protections, dependency review, and release upkeep.
 
 ### Placement and updates
@@ -45,6 +61,8 @@ what is actually implemented. A guide is not evidence of implementation.
   only when the detail warrants one, and link it from the relevant guide.
 - Do not change approved requirements silently to fit an implementation.
 
-There are no approved technology-stack decisions in this documentation pack.
-The next prerequisite for implementation is the applicable architecture decision
-gate, not an assumed framework installation.
+The user authorized this interim documentation update on 2026-10-21. Individual
+stack, repository and behavior choices are recorded, but contracts/toolchain
+pins, deployment capacity/workflows and other gates remain open. Overall final
+design approval remains required; this is not coding authorization or a final
+specification. Do not install an assumed toolchain.

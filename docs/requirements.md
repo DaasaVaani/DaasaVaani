@@ -8,6 +8,8 @@
 - Download-first Android and thumbnail-free offline revisions approved: 2026-10-20, after interactive choices and final confirmation
 - Coherence, Latin-variant, and reading-layout revisions approved after individual choices and combined confirmation
 - Further functionality/usability revisions approved after individual choices and combined confirmation
+- Questionnaire revisions recorded: 2026-10-21, on explicit request to document
+  all approved individual choices; consolidated design still awaits final approval
 - Scope: Initial release of the Android app, responsive website/PWA, and content automation
 
 ## 1. Purpose
@@ -25,6 +27,8 @@ support repeated use without accounts or tracking.
 This document defines product behavior, content ownership boundaries, automation,
 and acceptance criteria. It does not select frameworks or implement the product.
 Requirement IDs are stable references for implementation and testing.
+The [design decision record](design-decisions.md) distinguishes selected
+technical directions from unresolved contracts and unverified implementation.
 
 ## 2. Definitions and scope decisions
 
@@ -37,7 +41,7 @@ Requirement IDs are stable references for implementation and testing.
 | Ingestion | Discovering new videos and proposing source content, thumbnails, and settings changes in a PR. |
 | Publication generation | Building consumable content and indexes from reviewed repository files after merge. |
 | Offline snapshot | A complete, validated version of the downloadable reading library and its assets/indexes. |
-| Filter registry | A dedicated settings file defining available classification/filter tags. |
+| Filter registry | Reviewed settings defining structured classification values; flat searchable tags are not filter values. |
 | Recitation list | A locally stored, named, user-ordered collection of library references and intentional text placeholders, not a video playback queue. |
 | Placeholder | A user-created entry with single-line plain text and no required library item/video ID; always distinguished from downloadable lyrics. |
 | List snapshot | An independent copy of a list at sharing/export time; later sender edits do not update it. |
@@ -50,7 +54,7 @@ The following refinements supersede the original brief:
   subfolders. Asset layout remains a technical-design decision.
 - Offline support includes **lyrics, metadata, script variants, indexes, and
   required reading assets, not thumbnails or videos**, in both Android and the
-  PWA. Use system fonts first with necessary tested offline fallback coverage.
+  PWA. Use system fonts only (no bundled fallback fonts).
 - Generate non-Kannada lyric variants from Kannada. Suitable supplied Latin may
   additionally appear as an explicitly labeled Source Latin option; it never
   replaces canonical Kannada or silently mixes with generated lines.
@@ -61,8 +65,9 @@ The following refinements supersede the original brief:
   recitation, verse navigation/resume, optional two-script reading, list offline
   readiness, and optional discovery. These supersede the earlier exclusions of
   favorites/playlists and the blanket exclusion of cross-script search support.
-- Approval is for product scope and documentation, not a technology stack,
-  deployment, or a claim that any feature is implemented.
+- These scope approvals did not select a technology stack or authorize
+  deployment. Later individual technology choices are recorded separately;
+  neither is a claim that any feature is implemented.
 - Round 2 adds reading themes, device-only recently opened lyrics, optional
   learning labels, skippable first-use setup, current-session browsing continuity,
   and verse bookmarks on both Android and the website/PWA. Find within an open
@@ -96,6 +101,13 @@ The following refinements supersede the original brief:
   duplicate-name warnings that allow confirmed reuse. Unresolved references keep
   generic unavailable messaging without a special version-aware update action.
   Performance review and local persistence mechanisms remain architectural work.
+- Later questionnaire choices supersede tag/upload-year filters, PR-generated
+  variants and per-item generated-text overrides. They add separate Bengali and
+  Assamese renderings, the narrowly public unsuitable-Source-Latin exception,
+  AND substring/bounded-typo search, explicit online search-index loading and
+  the revised 550 ms search target. See the relevant sections below and the
+  [selected design](design-decisions.md). Individual approvals do not constitute
+  overall final design approval or permission to code/deploy.
 
 ## 3. Platforms and distribution
 
@@ -106,7 +118,7 @@ The following refinements supersede the original brief:
 | PLAT-03 | Support Android 8.0/API 26 and newer. |
 | PLAT-04 | Support the current and previous major versions of Chrome, Edge, Firefox, and Safari, including Android Chrome and iOS Safari. Record exact tested versions for each release. |
 | PLAT-05 | Support layouts from 320 CSS pixels upward without forced horizontal page scrolling. |
-| PLAT-06 | Host the static website/PWA on GitHub Pages, including correct operation under a project-site base path. |
+| PLAT-06 | Host the static website/PWA on organization-root GitHub Pages at `https://daasavaani.github.io/`, deployment base `/`, keeping the canonical base configurable. Publish generated Library content independently from the Library repository at `https://daasavaani.github.io/library/`; Website and Library deployments/bases are separate. Verify root deployment and direct routes; do not assume old project-site URLs redirect. |
 | PLAT-07 | Distribute signed Android APKs through GitHub Releases. Google Play distribution is deferred. |
 | PLAT-08 | Use a configurable canonical website base URL for item links and sharing. |
 | PLAT-09 | Keep the website/PWA fully static on GitHub Pages. Do not require a runtime application backend, server database, hosted list/short-link service, or server-side user storage. Clients may fetch static published artifacts, use local device storage, and offer explicit YouTube playback. Maintainer-side discovery/generation/publication workflows are outside client runtime and remain allowed. |
@@ -125,12 +137,13 @@ Source channel:
 | ID | Requirement |
 | --- | --- |
 | DATA-01 | Create one item per source video, keyed by the YouTube video ID. Repeated performances remain separate entries. |
-| DATA-02 | Store item Markdown files flat in `library/`. Put all item metadata in YAML front matter at the top of the file so it is easy to parse and inspect on GitHub. |
+| DATA-02 | Store one flat source Markdown per video in `library/`, with YAML metadata/provenance, fenced canonical Kannada with stable line IDs and any supplied Source Latin. No generated variants or companion source file. Follow the approved filename/identity direction in the design record; exact grammar remains gated. |
 | DATA-03 | Preserve Kannada lyric line breaks, verse boundaries, and spacing needed for reading. |
 | DATA-04 | Store the source identity, metadata, and provenance needed to trace an item back to its video. Do not present inferred classifications as known facts. |
 | DATA-05 | Support optional reviewer-maintained classification. Missing optional values remain unclassified and appear as Unknown where applicable. |
 | DATA-06 | Make content and settings schemas extensible so new metadata and filter fields can be added without rewriting existing items. |
 | DATA-07 | Separate draft and publishable states. Draft items must not appear in public content, search indexes, groups, or offline packages. |
+| DATA-08 | Persist opaque UUID line/verse identities assigned once by authoring tools. Retain identity for corrections/moves of the same logical content; conservatively allocate new IDs for ambiguous splits/merges. Missing saved locations become explicitly unresolved, without redirects, heuristic reanchoring or automatic personal-record rewriting initially. Never invent verse divisions. |
 
 ### 4.2. Field inventory
 
@@ -140,23 +153,28 @@ will be selected in technical design. The following logical information is requi
 | Information | Policy |
 | --- | --- |
 | Video ID and source URL | Required; video ID is the stable item identity. |
-| Video title | Required for publishable items. |
+| Public title | One reviewed title required for publication, not forced to the first lyric line. Original video title remains internal provenance; alternatives belong in tags. |
 | Channel identity | Required source metadata. |
-| Upload date | Required source metadata; supports the upload-year filter. |
+| Upload date | Required source metadata, not an upload-year filter. |
 | Source description/provenance | Retain the description used for extraction so reviewers can inspect the source. |
 | Content/review status | Distinguishes unpublished drafts from publishable content. |
 | Thumbnail information | Record the local asset reference and relevant source information when available. |
 | Kannada lyrics | Required for publication; source of truth for transliteration. |
-| Script variants | Generated from Kannada, including six Latin profiles, and included in normal content review/publication. Suitable complete supplied Source Latin is an additional optional variant; retain raw source separately as provenance. |
-| Composer/Haridasa | Optional, reviewer-editable classification. |
-| Deity | Optional, reviewer-editable classification. |
-| Category | Optional, reviewer-editable classification. |
-| Tags | Optional, reviewer-editable classification values. |
+| Script variants | Generated from Kannada only after approved merge, including six Latin profiles and distinct Bengali/Assamese renderings. Supplied Source Latin/status is also public even when unsuitable, but reading/search eligibility remains restricted by LANG-11. |
+| Composer/Haridasa and ankita | Separate optional, registry-backed, evidence-based multi-value fields; reviewed 1:1 library relationship, conflict validation and one combined filter. No automatic attribution from a signature. |
+| Deity | Optional multiple reviewed flat-registry values/aliases; no hierarchy expansion. |
+| Composition form | Optional multiple reviewed values, separate from category. |
+| Broad category | Optional multiple reviewed values, not inferred from form. |
+| Narrative context | Optional reviewed labels and a concise plain-text description, not occasion/festival metadata or translated meanings. Labels are filterable; description is searchable only. |
+| Tags | Flat searchable strings, including alternative titles/miscellaneous metadata, not typed or filterable. |
 | Library-added date | Publication-maintained date when an item first becomes publicly available in DaasaVaani; distinct from video upload date and retained on later edits. |
 
 New optional fields must not invalidate older items solely because those fields
 are absent. New filters must have a clear path through settings, generation, and
 client presentation; schema extensibility does not imply automatic arbitrary UI.
+Registry IDs are readable stable ASCII tokens separate from labels/aliases.
+Missing classifications remain unclassified; multiple values mean genuinely
+applicable values, not uncertain alternatives. Structured raga/tala is deferred.
 
 ### 4.3. Thumbnail assets
 
@@ -180,9 +198,10 @@ The initial script choices are:
 5. Tamil.
 6. Malayalam.
 7. Gujarati.
-8. Bengali/Assamese.
-9. Gurmukhi.
-10. Odia.
+8. Bengali.
+9. Assamese, as a distinct named rendering.
+10. Gurmukhi.
+11. Odia.
 
 These are script choices, not claims that the lyrics have been translated into
 the languages that use those scripts.
@@ -191,15 +210,15 @@ the languages that use those scripts.
 | --- | --- |
 | LANG-01 | Never translate lyrics. Preserve the original words through transliteration only. |
 | LANG-02 | Generate non-Kannada variants from canonical Kannada during content processing, not from supplied Latin. Retain raw supplied Latin as provenance; an additional selectable Source Latin variant is governed by LANG-11 rather than replacing generated variants. |
-| LANG-03 | Generate and structurally validate variants during content processing and include them in the normal content PR. Do not require separate human sign-off for every script or Latin scheme. Genuine processing/structural-validation failures prevent the affected item from publication; successful generation is not proof of linguistic accuracy. Preserve manual corrections on subsequent processing. |
+| LANG-03 | Generate actual item variants only after approved merge, with no committed generated variants or PR variant previews. PRs review source Kannada, supplied Source Latin, metadata and flags, and validate sources/applicable deterministic tooling fixtures. Full post-merge generation/validation failure blocks deployment and preserves the previous publication. Correct generated output only through reviewed global mapping/rule revisions, not per-item/per-line overrides or disguised video-specific exceptions. Preserve reviewed source corrections without changing correct Kannada to force output. No separate per-item/per-script human sign-off; structural success is not linguistic proof. |
 | LANG-04 | Include approved script variants in published data and offline snapshots; do not require a runtime transliteration service. |
 | LANG-05 | Default the lyric script to Kannada and remember the user's selected script locally in Android and the browser. |
 | LANG-06 | Treat UI language and lyric script as independent preferences. Changing one must not implicitly translate lyrics or overwrite the other. |
 | LANG-07 | Support multiple reviewed Latin transliteration/spelling variants for search, derived from the canonical lyric words. Keep search alternatives distinct from approved display text; they must not overwrite lyrics or manual corrections. |
 | LANG-08 | Offer single-script reading or an optional Kannada/Latin helper beneath corresponding lines of the selected primary script. Remember the user's choice locally, preserve line/verse alignment, and make the published variants available offline. Use stacked lines on narrow screens; a helper is not a translation or a guarantee of pronunciation accuracy. Enable alignment-dependent features only with reliable correspondence, including for Source Latin; explain unavailable alignment rather than pairing unrelated lines. |
-| LANG-09 | Prefer system fonts and validate readable glyph coverage/shaping for all supported scripts across the device/browser matrix. Include only necessary tested fallback font coverage in required offline reading assets; do not depend on an online font service. Missing system-font coverage must not silently reduce the supported scripts or produce falsely ready offline reading. |
+| LANG-09 | Use system fonts only; do not bundle, download or depend on an online font service (`font-strategy`). Validate readable glyph coverage/shaping for all supported scripts on the tested platforms, and state in release evidence which devices were not tested. Missing system-font coverage must not silently reduce the supported scripts or produce falsely ready offline reading. |
 | LANG-10 | Provide six generated Latin display variants: ISO 15919:2001, IAST with defined Kannada conventions, Hunterian with pinned Kannada rules, Baraha Kannada, ITRANS Kannada, and Harvard-Kyoto with Kannada extensions. Include generated variants in published/offline reading and search. Before implementation, pin versions, mappings, canonical output choices and limitations under D3; naming a scheme is not evidence of complete Kannada coverage. |
-| LANG-11 | Offer supplied Source Latin only when validated as suitable, complete and corresponding to the canonical lyric. Preserve raw source text even when unsuitable for display. Source Latin is optional: its absence does not block Kannada/generated publication. Never fill missing source lines with generated text under the Source Latin label. Explain an unavailable selected source variant and offer an explicit generated choice; do not silently switch. |
+| LANG-11 | Publish supplied Source Latin with explicit suitability information even when unsuitable; distinguish absence, completeness and reliable alignment. Offer it for reading only when suitable, complete and corresponding. Unsuitable text is not selectable for reading/helper use or indexed as a published reading variant. Rights checks no longer apply as a gate (`rights-attribution-gate`); this does not expose other internal provenance. Absence does not block Kannada/generated publication. Never fill it with generated text or silently switch an unavailable selection; offer an explicit generated choice. |
 | LANG-12 | Let users choose and locally remember their Latin variant independently of UI language, including when Latin is used as a helper. Keep Kannada as the initial overall script. Decide any Latin recommendation after user review of side-by-side permitted sample previews; no generated scheme is yet approved as the default or recommendation. |
 
 Not every script can represent every Kannada sound exactly. The transliteration
@@ -208,6 +227,10 @@ in technical design. Generated output is not automatically linguistically correc
 Source Latin is an optional additional variant, not a seventh generated scheme.
 The six selected schemes require reproducible Kannada-specific profiles; input
 aliases must not be mistaken for agreed canonical generated output.
+Tamil consonants use superscript distinction markers. For missing target-script
+distinctions, reviewed native-script approximations are the baseline; marked
+exceptions require explicit approval. This does not approve every upstream
+mapping, silent omissions or unreviewed foreign-script fallbacks.
 
 ### 5.2. Interface localization
 
@@ -218,15 +241,19 @@ aliases must not be mistaken for agreed canonical generated output.
 | I18N-03 | Allow an explicit override and remember it locally per installation/browser. |
 | I18N-04 | Structure interface localization so additional languages can be added later without changing the lyric-transliteration policy. |
 
+Ship manually authored or AI-assisted, human-reviewed UI translations, not
+automatic runtime translation. Shared YAML catalogs generate bundled web and
+native Android resources. Exact message/plural/escaping contracts remain open.
+
 ## 6. Ingestion and review workflow
 
 | ID | Requirement |
 | --- | --- |
-| ING-01 | Use the official YouTube Data API for discovery and metadata retrieval. Store API credentials in GitHub Actions secrets. |
-| ING-02 | Provide a manually triggered historical backfill for all existing public channel videos, divided into manageable review PRs. |
-| ING-03 | Run incremental ingestion weekly on Sundays at 00:00 UTC / 05:30 IST, and support a manual trigger. Scheduled GitHub Actions execution is best effort, not an exact-time service guarantee. |
+| ING-01 | Use the official YouTube Data API for discovery and metadata retrieval. Run ingestion locally on the maintainer's machine; keep the API credential in an untracked local environment variable or file, never in repository files, logs, PRs or CI (`ingestion-credentials`). |
+| ING-02 | Provide a manually run historical backfill for all existing public channel videos, divided into manageable review PRs. |
+| ING-03 | Run incremental ingestion manually on the maintainer's machine; no scheduled or CI-run ingestion exists because no ingestion secret is stored in GitHub. A local run with new videos opens the review PR from a branch and never commits to `main`. |
 | ING-04 | Incremental ingestion imports only newly discovered videos. Existing entries are updated manually, not automatically refreshed from changed source descriptions or titles. |
-| ING-05 | Propose Markdown, generated transliterations, downloaded/optimized thumbnails, and newly encountered missing filter tags in the same PR. |
+| ING-05 | Propose source Markdown, downloaded/optimized thumbnails and newly encountered missing reviewed classification-registry values in the same PR. Do not generate actual item variants/previews in PRs; publication follows LANG-03. |
 | ING-06 | Append missing filter values to a dedicated settings file; preserve existing values and manual corrections. |
 | ING-07 | Open one incremental review PR per run when changes exist. A run with no new changes creates no PR. Historical backfill may use separate batches. |
 | ING-08 | Make retries idempotent across existing items and pending review work, avoiding duplicate items and duplicate open PRs. |
@@ -248,13 +275,14 @@ confirmed ingestion scope. Playback must still handle unavailability at use time
 
 | ID | Requirement |
 | --- | --- |
-| SET-01 | Use reviewed files in `settings/` to control app/site identity and branding, available UI languages/default rules, enabled lyric scripts, filter registries, channel/import configuration, and generation options. |
+| SET-01 | Use reviewed files in `settings/` to control app/site identity and branding, available UI languages/default rules, enabled lyric scripts, which registries are filters (classification entries live in `registries/`), channel/import configuration, and generation options. |
 | SET-02 | Apply repository settings during generation/builds. Keep shared content settings distinct from platform-specific settings where needed. |
 | SET-03 | Keep credentials and signing secrets outside repository settings and committed content. |
 | SET-04 | Store personal UI-language, lyric-script/helper-script and Latin-variant choices, font-size, reading density, theme, first-use setup state, offline-download state, favorites, recitation lists, most-recent-list recitation position, practice position, learning labels, verse bookmarks, and enabled recently opened history locally, not in repository settings. No account or automatic cross-device synchronization is required. |
 
-Exact settings filenames and formats are deferred except that there must be a
-dedicated settings file for filter-tag additions reviewed with ingestion PRs.
+Exact settings filenames and schemas are deferred except that classification
+registry additions must be reviewed with ingestion PRs. Search-only flat tags
+are not a filter registry.
 
 ### 7.2. Publication generation
 
@@ -277,8 +305,8 @@ may share implementation helpers without collapsing these review boundaries.
 | --- | --- |
 | SEARCH-01 | Provide interactive browsing of generated groups, search results, and individual items on both platforms. |
 | SEARCH-02 | Search all user-facing item data and full lyrics in every supported script. Internal workflow/provenance fields are not required search-result content. |
-| SEARCH-03 | Rank metadata matches above full-lyrics-only matches. Exact weighting and tie-breaking are technical-design decisions that must satisfy ranking tests. |
-| SEARCH-04 | Provide filters for composer/Haridasa, deity, category, tags, and upload year using generated indexes and reviewed settings. |
+| SEARCH-03 | Rank metadata matches above full-lyrics-only matches, with differentiated weights for metadata fields and lyrics. Field priorities, numerical weights, match-quality boosts, duplicate handling and tie-breaking remain deferred and require ranking tests. |
+| SEARCH-04 | Provide generated filters for combined Composer/Haridasa-Ankita, deity, composition form, broad category and narrative-context labels. Flat tags and context descriptions are searchable only; upload year is not a filter. |
 | SEARCH-05 | Combine multiple selected values within one field with OR, and selections across different fields with AND. Apply text search together with selected filters. |
 | SEARCH-06 | Offer the same generated groups, search, ranking, and filters offline after a complete content download. |
 | SEARCH-07 | Provide explicit loading, no-results, and error states. An index failure must not masquerade as an empty successful search. |
@@ -286,6 +314,10 @@ may share implementation helpers without collapsing these review boundaries.
 | SEARCH-09 | Show a matching lyric line or short excerpt in the selected script for lyric matches. Highlight words only where a reliable correspondence exists. A Latin spelling-variant match must resolve to the corresponding lyric line, not produce misleading character-level highlighting. For metadata-only matches, show that context rather than implying a lyric match. |
 | SEARCH-10 | Allow opening a lyric result at its matching verse within the full lyric, with surrounding verses still accessible. Preserve this behavior offline and within PERF-01, including excerpt rendering. |
 | SEARCH-11 | Keep active search filters clearly visible, allow individual removal, and offer Clear filters while retaining the typed search text. When no results match and filters are active, explain the active constraints and offer Clear filters. Do not clear or rewrite the query as a side effect, and do not substitute a no-results state for a loading/index error. Apply the same behavior online and offline. |
+| SEARCH-12 | Require all query terms across eligible metadata fields/lyric lines, independent of term order. Support within-word literal substrings: `vadiraja krishna` must match `dir sh`. No automatic OR fallback, phrase mode or quote operators initially. |
+| SEARCH-13 | Automatically include bounded approximate fragments using Unicode code-point optimal string alignment (restricted Damerau-Levenshtein). Per normalized query term: lengths 1-3 allow no fuzzy expansion, 4-8 allow at most one edit, 9+ at most two. Insertion/deletion/substitution/adjacent swap cost one under OSA restrictions. Short terms remain eligible literally. Do not substitute generic fuzzy scores, UTF-16 units or unrestricted edits. Exact normalization remains gated. |
+| SEARCH-14 | For an unprepared online PWA, require explicit Load search with download size before fetching a missing/new global index. Opening the site/Search or typing does not authorize transfer. Fetch discovery/manifest information to establish size/compatibility; reuse matching valid cache. Loading an index does not download all lyrics or activate an offline snapshot. Prepared clients retain active-snapshot search. |
+| SEARCH-15 | Use 250 ms trailing debounce after committed text edits; Enter flushes pending search and filters run immediately. Keep input responsive, wait for IME composition completion, cooperatively cancel superseded work and reject stale results. Count debounce in PERF-01. |
 
 Searching all scripts means users can search stored text in any supported
 variant. Selected-script and reviewed Latin-variant matching are additionally
@@ -305,7 +337,7 @@ recognition of every spelling or typing mistake.
 | UX-04 | Play YouTube videos inline only when online. Load the player only after an explicit Play action, not on initial item rendering. |
 | UX-05 | When offline, explain that video playback requires a connection without blocking downloaded lyrics. |
 | UX-06 | For unavailable/restricted/failed playback, show an explicit message and an Open in YouTube option. The fallback does not guarantee the external video will be playable. |
-| UX-07 | Provide a stable website URL for each video-ID-based item and support opening it directly, including under the GitHub Pages base path. Unresolved direct item links use generic unavailable messaging consistent with LIB-09. |
+| UX-07 | Provide a stable website URL for each video-ID-based item and support opening it directly under the configured canonical Pages base using the selected hash routing. Unresolved direct item links use generic unavailable messaging consistent with LIB-09. |
 | UX-08 | Provide separate Share item link and Share YouTube link actions through the available platform share mechanism, with copy-link fallback. |
 | UX-09 | Use website HTTPS links compatible with verified Android App Links for item/list navigation. Prefer opening the installed Android app when verification and user/platform settings permit; otherwise keep the website usable. Provide an explicit Open in app option on the website without trapping users in forced redirects or claiming installation guarantees app routing. Google Play distribution is not required for this association. |
 | UX-10 | Draw usability inspiration from established reading, lyrics, and personal-library apps without copying their designs. Keep Search, My Library, and lyric reading central; Explore is optional and must not displace fast access to known lyrics. |
@@ -341,7 +373,9 @@ recognition of every spelling or typing mistake.
 | XFER-05 | Snapshot link/file formats must interoperate between Android and the PWA. Opening/importing a list does not itself download lyrics or establish offline readiness. List management and file transfer work offline; a first-ever browser visit still requires fetching the static site, whereas an installed app/available PWA shell can decode links locally. If Android lacks a complete library, allow the supplied-text/identifier preview and explicit list save, but gate lyric browsing/reading on OFF-10. Preserve the pending item/list destination through preparation and continue without silently saving a list. No account, automatic sync, or lyric redistribution package is included. |
 | XFER-06 | Carry the snapshot in the shared HTTPS link and decode it entirely on the client; do not upload lists or use a backend, hosted short-link service, or redirect service. Opening previews the snapshot before explicit Save to My Library. Sender edits do not update prior links. Anyone receiving a link can read/forward its contents; warn against sensitive text and do not promise privacy, revocation, or remote deletion. |
 | XFER-07 | Enable verified Android App Links for shared lists with usable browser fallback when the app is absent, routing is disabled, or a source browser does not hand off. Publish the static verification association at the website host root and test signed APK/domain association. A project-subpath-only file is insufficient; select a controllable root/domain before claiming automatic app opening. Respect user/platform choices and keep explicit Open in app available. |
-| XFER-08 | Establish and test a supported link-size limit across target sharing/browser/app surfaces. If a snapshot exceeds it, explain the limit and offer file export without truncating text or dropping entries. Reject malformed, unsupported, or oversized incoming payloads explicitly without partial mutation. Exact encoding/compression/limits remain technical decisions. |
+| XFER-08 | Establish and test a supported link-size limit across target sharing/browser/app surfaces. If a snapshot exceeds it, explain the limit and offer file export without truncating text or dropping entries. Reject malformed, unsupported, or oversized incoming payloads explicitly without partial mutation. The payload is versioned JSON, raw deflate and base64url in the hash fragment (`list-payload-encoding`); the length limit remains to be measured. |
+| XFER-09 | Provide an in-app full personal-data export and import on Android and the website/PWA (`personal-backup-policy`). The file is versioned, validated as untrusted input with bounded size, and previewed before restore; a file from a newer schema version is refused; import never changes data on failure or cancellation. Android may also use Auto Backup for the personal database only, never for content snapshots. |
+| XFER-10 | Disclose in the privacy information that Android Auto Backup copies personal data to the user's Google account and that exported files contain personal lists and notes. |
 
 ### 9.4. Recitation and learning
 
@@ -360,7 +394,7 @@ recognition of every spelling or typing mistake.
 
 | ID | Requirement |
 | --- | --- |
-| EXP-01 | Offer an optional Explore section with browsing by reviewed Haridasa/composer, deity, and theme/category/tag classifications. Reuse generated groups; do not infer missing classifications or label browsing as personalized recommendations. |
+| EXP-01 | Offer an optional Explore section with browsing by reviewed Haridasa/composer, deity, and category classifications (tags remain searchable only, not browse groups). Reuse generated groups; do not infer missing classifications or label browsing as personalized recommendations. |
 | EXP-02 | Provide a Show another lyric action using the active downloaded version online/offline after full preparation under OFF-12, or available published static data before PWA preparation. Show an honest empty/unavailable state when no candidate is available. |
 | EXP-03 | Show newly added items using their first library-publication date, not YouTube upload date. Preserve that date on later edits; establish a consistent initial-backfill policy during contract design. Offline discovery reflects the downloaded snapshot, not unseen server updates. |
 | EXP-04 | Provide Favorite, Add to list, and Practice entry points from discovered items. Do not add push notifications, streak pressure, popularity claims, tracking, or a personalized recommendation service. |
@@ -400,7 +434,7 @@ is local check state, not a change to the published snapshot's dates.
 
 | ID | Requirement |
 | --- | --- |
-| QUAL-01 | Meet WCAG 2.2 AA for app/site-controlled UI. Include keyboard operation, visible focus, screen-reader labels, sufficient contrast, readable text scaling, and touch-friendly controls. |
+| QUAL-01 | Provide best-effort accessibility for app/site-controlled UI with no formal conformance target and no WCAG claim (`accessibility-baseline`). Include keyboard operation, visible focus, screen-reader labels, sufficient contrast, readable text scaling, and touch-friendly controls; the requirements and scenarios here are the pass/fail bar. |
 | QUAL-02 | Keep lyrics readable and navigable independently of the external video player. External YouTube UI remains subject to the provider's implementation. |
 | QUAL-03 | Include no ads, analytics, tracking, accounts, or cross-device sync in the initial release. |
 | QUAL-04 | Disclose that playing an embedded video connects to YouTube and is subject to its privacy and availability restrictions. No YouTube player is loaded before the user chooses Play. |
@@ -414,7 +448,7 @@ of the current repository.
 
 | ID | Target | Measurement conditions |
 | --- | --- | --- |
-| PERF-01 | Search results update within 300 ms at the 95th percentile. | Generated index already loaded; 10,000-item test corpus; documented representative mid-range Android device and desktop browser; test online and offline. |
+| PERF-01 | Search results update within 550 ms at the 95th percentile. | Generated index already loaded; 10,000-item representative all-script corpus; mid-range Android device and desktop browser; online and offline. Measure input through visible excerpts/highlights, including the selected 250 ms debounce, scheduling, matching, filtering/ranking and rendering. |
 | PERF-02 | Largest Contentful Paint (LCP) <= 2.5 seconds. | Key website pages under documented device/network/test conditions. |
 | PERF-03 | Interaction to Next Paint (INP) <= 200 ms. | Key website interactions under documented conditions. |
 | PERF-04 | Cumulative Layout Shift (CLS) <= 0.1. | Key website pages under documented conditions. |
@@ -423,14 +457,17 @@ Search timing must include the user-visible result update, not just a narrow
 index lookup. Record corpus characteristics, query mix, test devices, browser
 versions, sampling method, and results. Do not count deferred YouTube playback
 loading as initial lyrics-page loading.
+The 550 ms target explicitly supersedes the earlier 300 ms target. Cold index
+download/loading and memory need separate evidence; PERF-02 to PERF-04 have not
+changed. There are no measured performance results yet.
 
 ## 13. Validation and release automation
 
 | ID | Requirement |
 | --- | --- |
-| CI-01 | On PRs, validate Markdown/YAML structure, publishable required fields, unique video IDs, transliteration artifacts, settings/filter references, asset references, and generated indexes. |
+| CI-01 | On PRs, validate source Markdown/YAML structure, publishable required fields versus drafts, unique video/line/verse IDs, settings/registry and asset references, and applicable deterministic tooling fixtures. Do not require actual item variant generation/previews in PRs. Full public-artifact/index/package generation and validation happen after merge under LANG-03/CI-03. |
 | CI-02 | Distinguish legitimate drafts from invalid publishable items. Drafts may be reviewed without being included in generated public artifacts. |
-| CI-03 | After an approved PR merges to `main`, automatically generate and deploy the website and content. Do not deploy invalid or partially generated artifacts. |
+| CI-03 | After an approved PR merges to `main`, automatically validate, generate and deploy that repository's public output: the Website root PWA from the Website repository and the Library publication to `/library/` from the Library repository. Never deploy invalid or partially generated artifacts; a failure leaves the live site unchanged. |
 | CI-04 | Make signed APK release a separate manually triggered/version-tagged workflow. Keep signing material in protected secret storage. |
 | CI-05 | Validate that installed Android clients can consume compatible new content independently of APK releases. Preserve user-requested offline-refresh behavior. |
 | CI-06 | Record actual APK size, complete-library download size/version/item count, installed storage and update peak storage for the expected approximately 2,500-song library before release approval. Verify Android's no-library first-launch gate, required explicit download, post-download offline operation, removal/re-preparation, and failed-update preservation. Verify thumbnail exclusion and system-first/necessary-fallback font coverage. Song-count estimates are not measurements, size limits, or permission to omit approved scripts/assets. |
@@ -443,12 +480,12 @@ deployment access, and release credentials needed to enforce this workflow.
 ### 14.1. Content acquisition
 
 ```text
-Manual backfill OR weekly/manual incremental discovery
+Manual backfill OR manual local incremental discovery
     -> official YouTube Data API
     -> proposed flat Markdown + YAML metadata
-    -> Kannada extraction and generated transliterations
+    -> canonical Kannada extraction, supplied Source Latin and draft flags
     -> downloaded/optimized thumbnail assets
-    -> missing filter-tag additions in settings
+    -> missing reviewed classification-registry additions in settings
     -> one reviewable change set / PR
     -> validation + human review/corrections
     -> approved merge
@@ -461,8 +498,9 @@ correction. Existing reviewed entries are not automatically refreshed from YouTu
 
 ```text
 Reviewed library + reviewed settings + reviewed assets
-    -> publication generation and validation
-    -> content + groups + filter indexes + weighted search index
+    -> post-merge transliteration and full publication validation
+    -> per-video JSON/gzip + groups/filter data + prebuilt global JSON/gzip index
+    -> common SHA-256 manifest and shared ZIP STORE transport bundles
     -> GitHub Pages website/PWA and downloadable content artifacts
     -> Android/PWA generated-index queries and item display
 ```
@@ -499,14 +537,17 @@ The implementation must demonstrate at least the following outcomes.
 | No new content | A successful incremental scan reports no changes and opens no PR. | ING-07, ING-11 |
 | Missing or uncertain lyrics | Source text is retained in a flagged draft; the item never appears in public indexes or downloads until corrected and approved. | DATA-07, ING-09, CI-02 |
 | API/quota failure | The workflow reports failure clearly and does not publish partial content or report a successful empty scan. | ING-11, QUAL-06 |
-| Review corrections | Manual Kannada, transliteration, and taxonomy corrections survive subsequent processing. | LANG-03, ING-06 |
+| Review corrections | Reviewed Kannada/source metadata/taxonomy corrections survive processing. Generated output is fixed through global profile/rule revisions, never per-item overrides or changes to correct Kannada merely to force conversion. | LANG-03, ING-06 |
 | Thumbnail ingestion | An available thumbnail is committed in the item PR, optimized where practical and resolves for online display after publication. It is excluded from offline packages; offline icons/metadata do not block lyrics or readiness. | IMG-01 to IMG-04, OFF-02 |
 | Existing source change | A source-description edit does not automatically overwrite an already imported item. | ING-04 |
 | Localization | A supported device language is used initially; an unsupported language falls back to English; a remembered override survives restart. | I18N-01 to I18N-04 |
 | Script independence | Choosing a UI language does not translate lyrics or change an explicit script preference; all approved script variants work offline. | LANG-01 to LANG-06 |
-| Latin display variants | All six generated profiles pass pinned Kannada mapping/structural fixtures, publish through the normal content PR without separate per-script sign-offs, preserve corrections and work in offline reading/search. Actual processing failures block the affected item. Users select and remember a variant; any recommendation follows side-by-side permitted sample review, not an assumed ISO default. | LANG-02 to LANG-04, LANG-10, LANG-12 |
-| Source Latin | Complete suitable source text is selectable and labeled; raw unsuitable text remains provenance only. Absent source text does not block generated publication. A missing selected source variant offers an explicit generated choice without silent mixing; alignment-dependent helpers/search navigation require reliable correspondence. | LANG-08, LANG-11, LANG-12, SEARCH-09, SEARCH-10 |
+| Latin display variants | All six profiles pass pinned Kannada mapping/structural fixtures and generate only after approved merge, without PR previews or per-item/script sign-offs. Global fixes have regressions; full generation failure blocks deployment. Users remember a variant; recommendations follow permitted sample review, not an assumed ISO default. | LANG-02 to LANG-04, LANG-10, LANG-12 |
+| Source Latin | Suitable complete corresponding text is selectable/labeled. Unsuitable supplied text is public with explicit status, but not selectable or indexed as a reading variant; other internal provenance stays private to source processing. Absence does not block generation. Unavailable selections offer an explicit generated choice; helpers/search navigation require reliable correspondence. | LANG-08, LANG-11, LANG-12, SEARCH-09, SEARCH-10 |
 | Search coverage and ranking | Test queries match each supported script and metadata; controlled examples rank metadata matches above lyrics-only matches. | SEARCH-02, SEARCH-03 |
+| Substring and bounded typo search | `dir sh` matches `vadiraja krishna`; all terms are required across fields/lines, without OR fallback. OSA code-point fixtures test fragments, swaps, 1-3/4-8/9+ length boundaries and 0/1/2 edit limits; ordinary short literals are not excluded. | SEARCH-12, SEARCH-13 |
+| Explicit online search loading | An unprepared PWA shows index size and requires Load search before a missing/new index transfer. Opening Search/typing does not download it; valid cache is reused. No full-library/offline-ready claim follows index loading. | SEARCH-14, OFF-10, OFF-12 |
+| Search scheduling | Committed edits debounce 250 ms, Enter/filters run immediately, IME composition is preserved and obsolete work/results cannot overwrite current results. Full timing includes debounce and visible excerpts/highlights within 550 ms p95. | SEARCH-15, PERF-01 |
 | Latin spelling alternatives | Reviewed alternative Latin spellings and selected-script queries find the same intended item; UI language remains independent, approved display text is unchanged, and online/offline results agree. | LANG-07, SEARCH-06, SEARCH-08 |
 | Search recognition and navigation | Selected-script excerpts identify the matching line; reliable highlights and metadata-only context are honest; opening a result reaches its corresponding verse with full-text access. Include alternative spellings and excerpt rendering in timing checks. | SEARCH-09, SEARCH-10, PERF-01 |
 | Combined filters | Multiple values in one field use OR; selections in different fields use AND; search applies to the filtered set. | SEARCH-04, SEARCH-05 |
@@ -536,13 +577,14 @@ The implementation must demonstrate at least the following outcomes.
 | Static runtime | Search, local personal state, link decoding, and import work without an application backend or server-side list storage. Fetch only static content/required assets plus explicitly requested video; maintainer ingestion remains separate. | PLAT-09, QUAL-04, QUAL-05 |
 | App/browser list links | Test signed installed/absent Android app, verified/unverified host, user-disabled handling, source-browser non-handoff, and explicit Open in app/browser fallback. Without a library, Android previews supplied text/IDs and retains the intended destination through explicit download without auto-saving. Host-root verification is required; do not override user choices or force redirect loops. | UX-09, XFER-05, XFER-07, OFF-10 |
 | Link limits and privacy | Supported-boundary links round-trip without loss; oversized outgoing lists offer file export. Malformed/oversized/unsupported input leaves existing lists unchanged. Shared payload stays out of host requests/logs; previews warn that received links can be forwarded and cannot be revoked. | XFER-03, XFER-06, XFER-08, QUAL-05 |
+| Personal export and import | Export then import on a clean install restores personal data exactly; malformed, oversized, newer-version or cancelled imports change nothing; Auto Backup excludes content snapshots; the privacy disclosure names Auto Backup. | XFER-09, XFER-10, QUAL-05 |
 | Intentional placeholders | Create/edit/reorder/remove single-line placeholders without IDs, retain text plus unavailable message during offline recitation, and replace manually with a library reference at the same position. Unresolved IDs with optional user labels remain distinct; no auto-match or clickable external-URL field. | LIB-08, LIB-09, REC-03 |
 | Import failures and unresolved items | Invalid/unsupported files and cancellation leave existing data unchanged. Missing IDs remain visible without fabricated titles or replacements; import alone does not mark a list offline-ready. | LIB-05, XFER-03 to XFER-05, OFF-09 |
 | Generic unavailable references | Shared-list references and direct item links retain generic unavailable messaging without a special version-aware update-check action. Preserve identifiers/fallback text, order and repetitions; intentional placeholders remain distinct and ordinary update controls still work. Before preparation, do not claim absence from an undownloaded library. | LIB-09, LIB-10, XFER-04, UX-07 |
 | Offline list readiness | Check actual local library entries/assets and separate placeholder counts/warnings. Unprepared libraries, missing downloads, unresolved IDs, missing required fallback fonts/assets, eviction and placeholder-only lists never receive misleading complete-lyrics claims; absent thumbnails are permitted. Snapshot changes preserve personal state/placeholder text. | OFF-09, LIB-05, LIB-08, LIB-09 |
 | Download-first Android | First launch without network shows preparation required, not lyrics. Skip preferences but retain the lyric-access gate; cancel/interrupt/fail storage or validation and remain unprepared with recovery/list controls. After explicit complete download, verify offline search/reading/assets and record actual size/storage evidence. | OFF-01, OFF-03, OFF-10, CI-06 |
 | Offline removal and recovery | Remove the active library with confirmation; personal state/placeholders survive, no bundled content appears and no automatic re-download occurs. Android gates lyrics until complete preparation again; PWA online reading remains available with not-ready-offline status. | OFF-11, LIB-05 |
-| System-first fonts | Validate primary/helper scripts and shaping on the supported matrix; necessary fallback coverage works offline without a font service. All ten scripts remain supported rather than silently dropped; thumbnail assets are not packaged as reading dependencies. | LANG-09, LANG-08, OFF-02, IMG-03 |
+| System fonts | Validate primary/helper scripts and shaping on the tested platforms, including separate Bengali/Assamese renderings and Tamil superscripts; no fallback fonts are bundled. No approved rendering is silently dropped; untested devices are named in release evidence; thumbnails are not reading dependencies. | LANG-09, LANG-08, OFF-02, IMG-03 |
 | Recitation | Enter/exit focused reading, restore controls, navigate a list offline, handle unavailable/boundary entries, and activate/release screen-awake where supported with honest unsupported/failure states. | REC-01 to REC-03 |
 | Continue recitation | Recite one list, switch to another, restart offline and explicitly continue only the most recent list's saved occurrence, including consecutive repeated songs. Do not auto-enter Recite mode, restore exact lyric scroll, alter practice progress or export resume state. Explain removed lists/occurrences and offer user choice rather than an unrelated jump. Snapshot refresh/removal preserves the saved personal position, with lyric access gated when preparation is required. | REC-04, LIB-05, XFER-01, OFF-10 |
 | Learning resume | Navigate reviewed verses, restart/resume offline, change scripts without losing the verse, and handle a changed/missing saved position explicitly. No hide/reveal or audio scoring is implied. | LEARN-01 to LEARN-03 |
@@ -556,10 +598,11 @@ The implementation must demonstrate at least the following outcomes.
 
 ## 16. Dependencies and risks
 
-- **Source rights and provider terms:** Maintainers must ensure they have the
-  necessary rights to reproduce lyrics and thumbnails and must comply with
-  applicable YouTube API, embedding, and attribution requirements. Channel
-  availability alone does not establish redistribution permission.
+- **Source rights and provider terms:** The project has no rights/attribution
+  publication gate and no per-item rights contract (`rights-attribution-gate`).
+  Maintainers remain responsible for complying with applicable law and YouTube
+  API and embedding terms; the provider-terms check for stored metadata is still
+  pending before first ingestion.
 - **YouTube access and quota:** Discovery depends on valid credentials, available
   quota, API access, and the channel's public content. Failures require visible
   reporting and retry, not silent omission.
@@ -569,9 +612,10 @@ The implementation must demonstrate at least the following outcomes.
   Latin profiles need pinned Kannada rules and tests, correction preservation
   and side-by-side samples before a recommendation. Supplied Source Latin may be
   unsuitable or unaligned; its absence must not hold up generated content.
-- **Repository size:** Downloaded thumbnails and generated variants increase
-  repository/build/package size. Image optimization and a sustainable asset
-  layout must be evaluated without removing the approved PR/offline behavior.
+- **Repository/build size:** Source/thumbnail assets increase repository size;
+  post-merge generated variants/indexes increase public build/package size.
+  Image optimization and a sustainable asset layout must be evaluated without
+  committing generated variants or removing approved offline behavior.
   Six generated Latin variants increase content/index size; measure the real
   corpus rather than reusing earlier illustrative download estimates.
 - **Offline storage:** Device capacity and browser eviction limit persistence.
@@ -601,11 +645,15 @@ The implementation must demonstrate at least the following outcomes.
   song-count estimates; no bundled fallback exists after content removal.
 - **System font coverage:** Device fonts may lack readable glyphs/shaping for
   some scripts. Test coverage and package necessary fallback assets for offline
-  reading without silently weakening the ten-script requirement.
+  reading without silently dropping an approved rendering.
 - **Aligned reading/search:** Latin alternatives, helper lines, matching-verse
   navigation, practice resume, and verse bookmarks need stable line/verse
   correspondence across approved variants and a clear policy when reviewed text
   changes.
+- **Global search index:** Whole-index transfer on relevant changes, JSON
+  parse/materialization peaks and per-tab worker memory remain unmeasured.
+  Bounded fuzzy fragments need candidate-complete matching, not an approximation
+  that silently omits results. The 550 ms target includes 250 ms debounce.
 - **Screen-awake support:** Browser/device support and operating-system policy
   vary. Recitation must remain usable when screen-awake requests are unavailable.
 - **Operations:** Schedules can be delayed; maintainers must provide review
@@ -644,70 +692,51 @@ The implementation must demonstrate at least the following outcomes.
   recitation list/entry, not general navigation, per-list positions or exact lyric
   scroll restoration.
 
-## 18. Deferred technical decisions
+## 18. Selected design and remaining decisions
 
-The following require a separate technical design; they are not approved stack
-choices or omissions from the confirmed functional scope:
+The [design record](design-decisions.md) documents all approved individual
+questionnaire selections, their alternatives/trade-offs and coverage IDs.
+Native Kotlin/Compose and React/TypeScript/Vite are selected, not open framework
+questions. Source/parser/identity direction, global post-merge corrections,
+common JSON/gzip/ZIP/SHA-256 publication, platform storage/network/navigation/UI
+libraries, localization, global prebuilt search, worker execution and normal
+shell-update lifecycle also have selected directions.
 
-- Website framework, Android native versus shared web-based implementation, and
-  shared-code strategy.
-- Transliteration library and exact versions/options/canonical mappings for the
-  six approved Latin schemes, including Kannada extensions, script-specific
-  limitations, correction representation, reviewed Latin search alternatives and
-  Source Latin suitability/alignment checks. Review permitted side-by-side
-  examples before choosing a Latin recommendation/default. System-font coverage
-  and minimal necessary offline fallback font selection remain open.
-- Exact YAML field names, lyric-section structure, source/provenance storage,
-  schema versioning, and validation implementation.
-- Settings filenames/formats, registry structure, and how configured schedules
-  are reconciled with GitHub Actions workflow configuration.
-- Asset directories, thumbnail formats/dimensions, and optimization thresholds.
-- Search/index format, weighting/tie-breaking, loading strategy, and a test
-  corpus/device matrix satisfying the performance contract with spelling
-  alternatives, selected-script excerpts, and matching-verse navigation.
-- Stable line/verse correspondence for helper scripts, search locations, and
-  practice resume/bookmarks; handling reviewed text changes and unstructured
-  lyrics.
-- Local favorites/list/progress storage, identifier/version migration, list-file
-  serialization, typed placeholder/reference entries, single-line text validation
-  and length limits, independent occurrence identity and supported legacy-format
-  handling, new-list naming and cross-platform file sharing/save fallbacks.
-  New-list-only import behavior is settled, not an open merge/replace decision.
-  Duplicate names are allowed after warning/confirmation; name-comparison rules
-  and UI details remain technical design, not a uniqueness-policy decision.
-  The revised logical payload inventory is approved; ordinary library
-  titles/lyrics remain excluded.
-- Self-contained link encoding/compression and tested size limits; local decoding
-  that keeps payloads out of host requests/logs; browser/Open in app routing and a
-  controllable Pages host-root verification arrangement for signed Android links.
-- Library-added date representation and initial-backfill policy; discovery
-  ordering and available-candidate selection without tracking.
-- Recite layout, accessible list/verse navigation, and platform screen-awake
-  support/lifecycle, informed by established-app usability patterns; most-recent
-  recitation list/occurrence persistence and removed-location handling.
-- Light/Dark/Warm theme tokens and device-preference behavior; first-use setup
-  layout/defaults and missing-preview handling; exact Compact/Normal/Relaxed
-  spacing and responsive reading-column dimensions; clear My Library organization for
-  recents, learning labels, and verse bookmarks.
-- Local recent-history retention/size and disable/clear behavior, optional
-  learning-label storage, bookmark location migration, and separation from the
-  approved revised snapshot payload.
-- Current-session query/filter/position restoration and browser/Android navigation
-  integration, including changed or unavailable originating content.
-- Snapshot manifest/versioning, integrity validation, atomic activation, content
-  compatibility, storage budgets, validated same-version resume/repair mechanics
-  and degraded-capability verification; authoritative generation/recommended-date
-  representation and local 3-day reminder suppression; Android
-  required-download gating and pending shared-link destination continuation;
-  no-active-library recovery and content compatibility across APK upgrades.
-  Guided incompatible-client recovery must preserve compatible downloaded use;
-  exact client/version discovery and safe upgrade mechanisms remain open.
-  Measure actual APK/download/installed/update peak sizes and approve release
-  evidence without silently shrinking scope. Website online loading remains
-  per selected lyric plus required generated data, not selective offline saves.
-- GitHub Pages direct-link routing, service-worker updates, and static deployment
-  packaging.
-- Backfill batch size, pending-PR reuse/reconciliation, permissions, and release
-  workflow implementation.
+**Overall final design approval remains pending.** This interim documentation
+does not authorize implementation or claim that a complete coding-ready
+specification or any acceptance evidence exists. Outstanding work includes:
 
-These decisions must preserve the requirements and acceptance outcomes above.
+- Compatible pinned toolchain/dependencies, package manager/workspace/locks and
+  actual bootstrap/build/test commands.
+- Exact source/settings/public/item/manifest/index schemas, JSON Schema dialect,
+  type generation, compatibility and unknown-field rules.
+- Source template, markers/UUID serialization, filename slug rules and profile;
+  metadata coverage audit, vocabularies and aliases (UUID, markers, filenames and
+  drafts are decided in design-decisions section 10A; no rights fields).
+- Six exact Kannada Latin profiles, an authoritative Hunterian reference,
+  target-script approximation rules, independent fixtures and permitted samples
+  before a Latin recommendation/default. Exact Source Latin eligibility/alignment
+  contracts remain open.
+- Translation catalog schema, plural/placeholder/escaping generation, React Aria
+  Kannada announcements and real-device rendering of every script with system fonts.
+- Global index data structures, normalization/tokenization, candidate completeness,
+  bounds, ranking weights/ties, excerpt loading and memory/performance evidence.
+- Planner byte/request budgets, bundle sizes, changed-at ledger/no-op handling,
+  published-version retention, activation journals/locks/reader leases/GC,
+  multi-tab coordination and same-version resume/repair/audit protocols.
+- Personal schemas/migrations, occurrence IDs, recents retention, backup,
+  most-recent recitation position and pending-destination/navigation details.
+  New-list-only import and confirmed duplicate names are already settled.
+- List file/link serialization/compression, safe bounded decoding/size limits,
+  text rules, legacy support and sharing/file fallbacks.
+- Library-added dates/backfill policy, discovery ordering, API pagination/quota,
+  batch/pending-PR reconciliation, thumbnail paths/optimization and schedule wiring.
+- Exact themes/density/columns, accessible navigation/reordering, player,
+  screen-awake and file/sharing libraries and failure handling.
+- Signed application ID/certificate association, root-site route/deployment
+  verification, permissions, safe code/content compatibility, release/rollback
+  procedures and actual APK/download/installed/update peak-storage evidence.
+
+Resolve the applicable [architecture gates](architecture.md), review the
+consolidated design and obtain overall final approval before implementation.
+These remaining decisions must preserve the requirements above.

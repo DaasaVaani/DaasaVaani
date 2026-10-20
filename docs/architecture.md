@@ -1,21 +1,27 @@
 # Architecture boundaries and decision gates
 
-Status: Required logical boundaries, not an approved technology design.
+Status: Individually approved technical directions are recorded in
+[design decisions](design-decisions.md); consolidated design approval and
+complete implementation contracts remain pending. No implementation is claimed.
 See [requirements](requirements.md), especially sections 7, 14, and 18.
 
 ## Component responsibilities
 
 | Component | Owns | Must not do |
 | --- | --- | --- |
-| Ingestion | New-video discovery, source extraction, draft creation, transliteration proposals, thumbnail acquisition/optimization, filter-registry additions, review PRs. | Publish unreviewed content, overwrite existing reviewed entries, or fabricate classifications. |
-| Repository sources | Flat item Markdown/YAML, reviewed assets, settings, manual corrections. | Store secrets or personal user preferences. |
-| Validation | Draft-aware structural checks, identity/reference consistency, generated-artifact checks. | Treat an invalid published item as an acceptable draft silently. |
-| Publication generator | Approved content packaging, all six generated Latin profiles and suitable optional Source Latin, groups, filters, search artifacts/line correspondence, stable library-added dates, snapshot generation/recommended dates, thumbnail-free snapshots and separate online images. | Include drafts, silently mix source/generated Latin, or require clients to derive taxonomy from source Markdown. |
+| Ingestion (Library) | New-video discovery, source extraction, draft creation, thumbnail acquisition/optimization, classification-registry additions, source review PRs. | Generate actual item variants/previews in PRs, publish unreviewed content, overwrite reviewed entries, or fabricate classifications. |
+| Library repository sources | Flat item Markdown/YAML, registries, catalog-specific settings, reviewed assets and manual corrections. `library/` is absent and `settings/` is empty here. Legacy-looking Markdown has been reported in a separate sibling path but is unreviewed; source assessment/migration remains pending and unauthorized. | Store secrets or personal user preferences. |
+| Validation | Library owns source/publication checks; Shared owns portable specs/fixtures; platforms own fixture runners and implementation tests. | Treat an invalid published item as an acceptable draft silently. |
+| Publication generator (Library) | Post-merge variants/packaging, six Latin profiles, separate Bengali/Assamese, supplied Source Latin/status with restricted reading eligibility, groups/filters/global search index, stable anchors/dates, thumbnail-free snapshots and separate online images. | Include drafts/internal provenance beyond the approved Source Latin exception, silently mix variants, use per-item generated-text overrides, or require clients to derive taxonomy. |
 | Website/PWA and Android | Generated queries/excerpts, script/Latin/density preferences, recitation/practice, local personal state, repeated list occurrences, new-list-only snapshot imports, explicit offline lifecycle/readiness, soft update reminders, online video/sharing; Android preparation gate and PWA online reading. | Parse repository Markdown, translate lyrics, upload lists, append/merge/replace imported lists, silently refresh active content, or bypass initial Android preparation through a link/onboarding flag. |
-| CI/release | PR validation, publication after approved merge, independent signed APK release. | Deploy partially generated output or expose credentials to clients. |
+| CI/release | Each repository owns checks; Library publishes validated content, Website deploys root PWA, Android releases APKs independently. Future test choices are not evidence app CI exists. | Deploy partially generated output or expose credentials to clients. |
 
-Logical components may share code. They do not prescribe packages, directories,
-languages, or a monorepo framework. Client runtime is fully static: no application
+Four public repositories divide ownership: [Website](https://github.com/DaasaVaani/DaasaVaani.github.io), [Android](https://github.com/DaasaVaani/AndroidApp), [Shared](https://github.com/DaasaVaani/shared), and [Library](https://github.com/DaasaVaani/library). Shared holds contracts/specs/fixtures and canonical UI catalogs plus generated UI resources, not lyric content or application runtime.
+
+Dependency direction: Shared -> Website, Shared -> Android, and Shared -> Library. Shared must not depend on consumers. Each consumer pins Shared independently. Website and Android consume validated published Library artifacts only, not Library source. Website publishes at https://daasavaani.github.io/; Library has its own planned generated publication at https://daasavaani.github.io/library/. Capacity, service-worker scope, compatibility and deployment remain open.
+
+The new repositories have hygiene workflows, security policies, issue/PR templates and Dependabot for GitHub Actions, not app/content-pipeline CI. Website Shared wiring is staged but uncommitted. `library/` is absent and `settings/` is empty here; no Library sources are present. Reported legacy-looking Markdown in a sibling path remains unreviewed, and no assessment/migration is authorized or performed. Exact internal layouts and Android pins remain open; Node/npm pins are decided in design-decisions section 10A.
+Client runtime is fully static: no application
 backend, server-side database, server-side personal storage, hosted snapshot/short-link
 service, or redirect service. Static artifact requests, local storage and explicit
 YouTube playback remain permitted. Maintainer-side API/import/publication work
@@ -25,9 +31,9 @@ does not run in the user's browser/app.
 
 ```text
 YouTube API
-  -> ingestion -> proposed Markdown + variants + assets + settings
-  -> PR validation and human review -> approved repository sources
-  -> publication validation/generation
+  -> Library ingestion -> proposed Library source Markdown + assets + settings
+  -> Library PR validation and human review -> approved Library sources
+  -> Library post-merge variant/index/package generation and full validation
   -> static version-consistent content + indexes + reading assets
   -> website/PWA and Android
   -> explicit download/refresh -> validated active offline snapshot
@@ -67,12 +73,14 @@ empty searches. Same-version repair or explained complete replacement restores
 readiness; deliberate removal/total loss re-gates Android. Browser closure does
 not guarantee ongoing background downloads.
 
-Generate and structurally check variants during content processing for the
-normal content PR, without separate human sign-offs for each script. Kannada
-remains canonical. Source Latin is an optional suitable complete supplied
-variant, not authority for generated text. Retain raw provenance but publish it
-as a reading variant only when suitable; require reliable alignment for helpers
-and verse-linked features. Never silently mix or switch selected variants.
+PRs validate sources and applicable tooling fixtures, without real item variant
+generation or previews. Generate/validate actual variants only after approved
+merge; failure blocks deployment and preserves the previous publication.
+Correct generated output only through reviewed global rules, never per-item
+overrides. Kannada remains canonical. Supplied Source Latin is public with
+suitability information even when unsuitable, but only suitable complete
+corresponding text is selectable; reliable alignment gates helpers/verse-linked
+features. Other internal provenance remains excluded. Never silently mix/switch.
 
 Manual edits to existing items re-enter through review and validation. They do
 not require automatic rescanning of existing YouTube videos.
@@ -120,20 +128,40 @@ Verified Android routing requires the signed app association at
 subpath. Select a controllable host-root arrangement; preserve browser and explicit
 Open in app fallback without overriding user/platform choices.
 
-## Decisions requiring approval
+## Selected foundation and incomplete gates
 
-All gates below are OPEN. Discussion or an example is not approval.
-Resolve a gate before implementing the work that depends on it; unrelated
-approved work need not wait for every gate.
+The [decision record](design-decisions.md) owns the complete library choices,
+alternatives and unresolved details. Storage uses Android private gzip objects,
+Room/DataStore and web Dexie with separate personal data. Both consume identical
+manifest/SHA-256-addressed gzip artifacts and ZIP STORE transport bundles.
+One active snapshot plus one resumable target is selected, not a permanent
+previous local snapshot or automatic rollback.
+
+Search uses one prebuilt global compact JSON/gzip index and independent
+Kotlin/TypeScript matching. Browser computation uses a dedicated Web Worker,
+not the shell service worker. Online unprepared PWA index transfer requires
+Load search with size. AND substrings and bounded code-point OSA fragments,
+250 ms debounce and 550 ms end-to-end p95 are selected; normalization/weights,
+exact structures and measured feasibility remain open.
+
+React Router hash navigation and the root Pages target are selected.
+`vite-plugin-pwa`/Workbox GenerateSW owns shell precaching; content remains with
+the coordinator/IndexedDB. Notify about ready code, then normal worker
+activation after old controlled windows close; no forced activation/reload.
+
+Individual choices do not close whole gate packages. No gate below is declared
+fully closed, and overall final design approval remains pending. Retain selected
+directions while resolving the remaining details/evidence below; do not reopen
+framework choices merely because versions/contracts are incomplete.
 
 | Gate | Decision package | Required evidence |
 | --- | --- | --- |
-| D1: Toolchain and clients | Languages/frameworks, native versus shared-web Android approach, versions, dependency managers, package boundaries, local commands. | Alternatives against API 26, browser support, no-backend static runtime, small APK/required library setup, PWA online reading, accessible journeys, themes, link/file handling, native/browser navigation, screen-awake support, maintenance and testing. |
+| D1: Toolchain and clients | Client/library families selected; compatible versions, dependency managers, package boundaries and local commands remain open. | Prove API 26/browser compatibility, supported libraries, accessible native/static journeys, small APK, reproducible bootstrap/checks and toolchain compatibility. |
 | D2: Source contracts | Exact YAML/settings schemas, lyric/verse representation, status rules, extensibility, correction storage, asset paths, library-added date/backfill policy. | Valid/draft/invalid examples; old-item compatibility; field/reference validation; stable dates on edits. |
-| D3: Language processing | Library and pinned versions/options/mappings for ISO 15919:2001, IAST, Hunterian, Baraha, ITRANS and Harvard-Kyoto with explicit Kannada conventions/extensions and canonical output; Source Latin suitability/alignment; Unicode/search alternatives, fonts and corrections. | Permitted side-by-side samples before user selects any Latin recommendation/default; all-script and six-profile fixtures including case/diacritic semantics, loss/collisions, corrections and source/generated separation; offline glyph/shaping coverage and reliable line/verse alignment. No separate per-script human sign-off gate. |
+| D3: Language processing | Node Sanscript/common_maps selected; exact pinned profiles/options, authoritative Hunterian Kannada reference, native approximations/Tamil superscripts, Source Latin checks, Unicode/search alternatives, catalogs/fonts remain open. Global-only correction policy is settled. | Permitted side-by-side samples before a Latin recommendation/default; independent all-rendering/six-profile and global-rule fixtures, case/diacritic/loss/source boundaries, translation escaping/plurals and offline font/alignment evidence. No actual variant generation in PRs or per-item/script sign-off gate. |
 | D4: Generated contracts/search | Publication/version compatibility and discovery, filter/search/excerpt data, online images, typed reference/placeholder payload with repeated occurrences, occurrence identity, duplicate-name comparison/warning UI, self-contained link encoding/limits and file validation. | Round trips preserve every occurrence/order/text; new-list-only save, confirmed duplicate names without existing-list mutation; no ordinary titles/lyrics/resume state; bounded local decode and payload privacy; stable saved locations; visible removable filters preserve query; performance includes six Latin variants/excerpts. |
 | D5: Offline and local lifecycle | Manifest/integrity/storage, downloaded-version precedence, generator dates/local 3-day suppression, same-version resume/repair, degraded verification, Android gate/pending destinations, optional PWA setup, atomic activation/removal, separate local state including one most-recent recitation occurrence, density/readiness/navigation/screen-awake. | Initial failure leaves no active library; update failure preserves old data; no mixed versions; isolated damage retains verified capabilities with degraded UI; total loss/removal re-gates Android; >=7-day soft date independent of APK/download; truthful update status and compatible offline use despite newer incompatible content; explicit latest-list resume with removed-location recovery, no per-list/scroll restoration; actual sizes, fonts and accessibility tests. |
-| D6: Import operations | Canonical channel resolution, pagination/quota strategy, backfill batches, pending-PR reconciliation, thumbnail optimization. | Idempotency and failure cases; correction preservation; configured Sunday/manual execution. |
+| D6: Import operations | Canonical channel resolution, pagination/quota strategy, backfill batches, pending-PR reconciliation, thumbnail optimization. | Idempotency and failure cases; correction preservation; configured manual local execution. |
 | D7: Publishing/releases | Static Pages routing/base path, controllable App Links host root, publish directory, CI permissions, version policy, signing, release and safe client-update guidance. | Signed APK/domain verification/fallbacks, direct links, draft/provenance exclusion, rollback, no lyric bundle, actual size evidence and independent content/APK compatibility; manual Android/safe website upgrade preserves personal data and compatible reading, with published-compatible or update-required initial-preparation paths. |
 
 D2 precedes source validators; D2/D3 precede ingestion text processing; D4
@@ -162,8 +190,4 @@ explicitly if they would weaken a confirmed requirement.
 
 ## Existing deployment transition
 
-The current workflow uploads the repository root. Before real content is
-published, replace that input with a validated public output directory so draft
-files and internal source descriptions are not exposed as static assets.
-Do not modify the deployment workflow as part of a documentation-only task.
-Define rollback and compatibility behavior before relying on automatic releases.
+The current Website workflow stages only the placeholder `index.html`; it does not publish Library content. Library Pages and Website-side publication integration are not implemented. When built, Website deploys its root PWA and Library independently deploys fully validated generated public output, never source roots; drafts/internal descriptions remain excluded except the explicit public Source Latin text/status boundary. Define rollback and compatibility behavior before automatic releases. Do not modify workflows in this documentation-only task.

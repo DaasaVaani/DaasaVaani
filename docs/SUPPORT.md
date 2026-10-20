@@ -22,6 +22,6 @@ There is no guaranteed response time, delivery date, or commercial support.
 
 - Vulnerabilities and leaked secrets: [security policy](SECURITY.md).
 - Abuse and harassment: [Code of Conduct](CODE_OF_CONDUCT.md).
-- Ownership/permission concerns: [content rights](content-rights.md).
+- Ownership/permission concerns: [content rights](https://github.com/DaasaVaani/library/blob/main/docs/content-rights.md).
 
 Do not put credentials, personal data, or confidential evidence in public issues.

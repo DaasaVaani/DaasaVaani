@@ -11,17 +11,19 @@ Participation is subject to the [Code of Conduct](CODE_OF_CONDUCT.md).
    acceptance criteria, and proposed approach.
 4. Obtain maintainer agreement before selecting a framework, schema, library, or
    other open [architecture decision](architecture.md).
+   Preserve the [approved individual choices](design-decisions.md); overall
+   final design approval is still pending.
 
 Small corrections do not require a separate design discussion. Do not report
 security issues publicly; use the [security policy](SECURITY.md).
 
 ## Working on a change
 
-- Fork the repository if needed, create a focused branch, and keep the PR scoped.
-- Preserve unrelated changes and existing reviewed content.
-- Update directly related documentation and tests with the behavior change.
-- Use the [testing guide](testing-and-release.md). No application toolchain or
-  test runner exists yet; do not claim checks passed when they are unavailable.
+- Work in the owning repository: [Website](https://github.com/DaasaVaani/DaasaVaani.github.io), [Android](https://github.com/DaasaVaani/AndroidApp), [Shared](https://github.com/DaasaVaani/shared), or [Library](https://github.com/DaasaVaani/library).
+- Source PRs belong in Library; contracts/specs/fixtures/UI catalogs belong in Shared. Consumers update their own Shared pins separately; no lockstep is required.
+- Fork the owning repo if needed, create a focused branch, and keep the PR scoped.
+- Preserve unrelated changes and reviewed content; update related docs and tests.
+- Use the [testing guide](testing-and-release.md). Selected environments are future choices; no application build/test runner is implemented in Website. Do not claim unavailable checks passed.
 - For documentation, check relative links and run `git --no-pager diff --check`.
 - Never commit secrets, signing keys, private data, or live credentials in fixtures.
 - Treat downloaded descriptions and Markdown as untrusted input.
@@ -29,19 +31,25 @@ security issues publicly; use the [security policy](SECURITY.md).
 ## Content and language changes
 
 - Kannada is canonical; lyrics are transliterated, never translated.
-- Preserve verse structure and manual corrections. Explain source changes.
+- Preserve verse structure, stable UUIDs and reviewed source corrections.
+  Explain source changes; missing saved anchors are not heuristically remapped.
+- Source PRs contain canonical Kannada, supplied Source Latin and metadata, not
+  generated variants/previews or companion source files. Generate actual variants
+  only after merge; generated-text fixes are global rule/profile changes, never
+  item/line overrides or edits to correct Kannada solely to force conversion.
 - Flag uncertain/missing lyrics as drafts rather than fabricate them.
-- Include required thumbnail assets and reviewed filter-setting changes with the
-  corresponding content PR.
-- Follow the [content-rights policy](content-rights.md); public availability is
+- Include required thumbnail assets and catalog-setting changes with the Library
+  source PR. `library/` is absent and `settings/` is empty in Website. Legacy-looking Markdown
+  reported in a sibling path has not been reviewed; no migration is authorized.
+- Follow the [content-rights policy](https://github.com/DaasaVaani/library/blob/main/docs/content-rights.md); public availability is
   not permission to redistribute.
 - Identify the script reviewed and any linguistic uncertainty. Automated output
   alone does not establish accuracy.
 
 ## Pull request expectations
 
-Use the PR template to explain the change, requirement IDs or issue, tests run,
-results, and remaining gaps. Include screenshots for relevant UI changes and
+Use the owning repository's PR template to explain the change, requirement IDs
+or issue, tests run, results, and remaining gaps. Include screenshots for relevant UI changes and
 device/browser details where behavior differs. Remove sensitive data from logs.
 
 Reviewers may request smaller changes, additional tests, content-rights evidence,

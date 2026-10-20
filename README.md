@@ -3,13 +3,15 @@
 An open-source project to make Hari Dasa Sahitya easy to discover and read through
 an Android app and an accessible, mobile-first website.
 
-**Status: planning / pre-implementation.** The repository currently contains a
-placeholder web page, a Pages deployment workflow, and project documentation.
-The app, content pipeline, search, and offline features below are planned, not
-available product capabilities. Technology choices remain open.
+**Status: planning / pre-implementation.** This Website repo has a placeholder,
+its Pages workflow, documentation and source files awaiting migration. The four
+public repositories are bootstrapped, but app/content tools, Library Pages and
+Website publication integration are not implemented. Product capabilities below
+remain planned. Individual choices are recorded; final approval/contracts remain pending.
 
 [Documentation](docs/README.md) |
 [Requirements](docs/requirements.md) |
+[Design decisions](docs/design-decisions.md) |
 [Roadmap](docs/implementation-roadmap.md) |
 [Contribute](docs/CONTRIBUTING.md) |
 [Security](docs/SECURITY.md)
@@ -19,7 +21,7 @@ available product capabilities. Technology choices remain open.
 - A responsive, installable website/PWA and Android app for phones, tablets,
   touch laptops, and desktops.
 - Canonical Kannada lyrics with reviewed transliterations into Latin/English,
-  Devanagari, Telugu, Tamil, Malayalam, Gujarati, Bengali/Assamese, Gurmukhi,
+  Devanagari, Telugu, Tamil, Malayalam, Gujarati, separate Bengali and Assamese, Gurmukhi,
   and Odia scripts. **Lyrics are never translated.**
 - Six selectable generated Latin variants: ISO 15919:2001, IAST, Hunterian,
   Baraha, ITRANS and Harvard-Kyoto, with exact Kannada profiles still to be pinned
@@ -31,11 +33,19 @@ available product capabilities. Technology choices remain open.
   themes, follow-device light/dark selection, and skippable preference setup.
   Choose Compact, Normal or Relaxed reading density during setup or later, with
   comfortable tablet/desktop reading columns and preserved lyric structure.
-- Fast search across metadata and lyrics, with metadata-ranked results and
-  composer/Haridasa, deity, category, tag, and upload-year filters. Match selected
+- Search across metadata and lyrics, with differentiated metadata/lyric weights
+  and filters for combined Composer/Ankita, deity, composition form, broad
+  category and narrative context. Tags are searchable only; no upload-year
+  filter. Require all query terms, including within-word substrings and bounded
+  code-point typo matches: `dir sh` matches `vadiraja krishna`. Match selected
   scripts and reviewed alternative Latin spellings, preview matching lines, and
   open at the matching verse. Keep active filters visible, remove them
   individually, or clear filters without losing the typed query.
+  A prebuilt global JSON/gzip index is downloaded, not built on clients.
+  Unprepared online website search requires Load search with size before a
+  missing/new index transfer; individual online lyric reading remains available.
+  Search uses 250 ms debounce and a 550 ms p95 input-to-visible-results target,
+  including excerpts/highlights after index loading; this is not measured yet.
 - Local favorites and multiple named, ordered recitation lists with rename,
   duplicate, editing, and share/export/import actions. Ordered entries may be
   library references or user-written single-line placeholders with an unavailable
@@ -88,13 +98,42 @@ available product capabilities. Technology choices remain open.
   complete library when available, otherwise explains the client-update need.
   Removing offline content preserves personal state, but Android must prepare its
   library again; there is no bundled fallback.
-- A review-first content pipeline: initial historical import, then weekly
-  new-video discovery with content, thumbnails, and settings proposed in PRs.
+- A review-first content pipeline: initial historical import, then manually run
+  local new-video discovery with content, thumbnails, and settings proposed in PRs.
+  Actual generated variants/indexes/packages are produced only after merge, with
+  no PR previews or per-item generated-text overrides. Global conversion fixes
+  preserve canonical Kannada. Supplied Source Latin/status is public even when
+  unsuitable, but unsuitable text is not a selectable/searchable reading variant.
+
+## Repository organization
+
+- [Website/PWA](https://github.com/DaasaVaani/DaasaVaani.github.io) publishes at
+  [daasavaani.github.io](https://daasavaani.github.io/) and consumes published
+  Library artifacts only.
+- [Android](https://github.com/DaasaVaani/AndroidApp) owns the native app and core.
+- [Shared](https://github.com/DaasaVaani/shared) owns contracts, specs, portable
+  fixtures, canonical UI catalogs, generator and generated UI resources.
+- [Library](https://github.com/DaasaVaani/library) owns reviewed content, ingestion,
+  validation and publication; its planned site is
+  [daasavaani.github.io/library/](https://daasavaani.github.io/library/).
+
+Each consumer pins Shared independently. `library/` is absent from this Website checkout and `settings/` exists but is
+empty; neither contains the Library sources. Legacy-looking Markdown has been
+reported in the separate sibling `WebsiteLibrary\dasasahitya` path, but it has
+not been reviewed or established as authoritative. Any source assessment or
+migration remains pending and unauthorized; this documentation update does not
+inspect or change sibling repositories. Website submodule wiring is staged locally but uncommitted.
+Library Pages and Website-side publication integration are not implemented.
+
+See [approved individual decisions and trade-offs](docs/design-decisions.md) for
+layouts, build/test choices, lifecycle and remaining gates. Overall final approval
+remains pending; bootstrap does not authorize app implementation, dependencies,
+release or deployment.
 
 The source channel is
 [bhajane-dasarahadugalu- on YouTube](https://www.youtube.com/@bhajane-dasarahadugalu-).
-Each video is a separate library item. Source availability does not establish
-permission to redistribute lyrics or images; see [content rights](docs/content-rights.md).
+Each video is a separate library item. The project has no rights/attribution
+publication gate; see [content rights](https://github.com/DaasaVaani/library/blob/main/docs/content-rights.md) for the policy.
 
 ## Availability and compatibility
 
@@ -108,24 +147,29 @@ Google Play distribution is deferred.
 
 Verified Android App Links require a signed app association at a controllable
 website host-root location; a GitHub Pages project subpath alone is insufficient.
+The selected root-site target is `https://daasavaani.github.io/`, base `/`.
+The repository already resolves to `DaasaVaani/DaasaVaani.github.io`; root-site
+application deployment and signed association still require implementation and
+validation. No old Pages URL redirect is assumed.
 Automatic routing remains subject to user/platform settings. Actual APK, complete
 download, installed and update peak-storage sizes must be measured before release;
 the expected approximately 2,500 songs do not establish package size.
 
 Targets include Android 8.0/API 26+, current and previous major versions of
-Chrome, Edge, Firefox, and Safari, responsive layouts from 320 CSS pixels, and
-WCAG 2.2 AA for app/site-controlled UI. These targets still require validation.
-PWA installation/storage behavior varies by browser.
+Chrome, Edge, Firefox, and Safari, and responsive layouts from 320 CSS pixels.
+Accessibility is best effort with no WCAG claim. The initial release test matrix
+covers only the latest Chromium and the latest Android emulator; other targets are
+unverified until tested. PWA installation/storage behavior varies by browser.
 
 ## Explore the repository
 
 | Location | Purpose |
 | --- | --- |
 | [docs/](docs/README.md) | Requirements, architecture gates, data-contract guidance, roadmap, testing, and community policies. |
-| `library/` | Intended home for flat item Markdown files with YAML metadata; not yet populated with an implemented schema. |
-| `settings/` | Intended reviewed app/site/content configuration and filter registries; contracts remain to be designed. |
-| [index.html](index.html) | Current placeholder website. |
-| [.github/workflows/deploy.yml](.github/workflows/deploy.yml) | Current root-directory Pages deployment; not the planned validated content pipeline. |
+| `library/` | Absent from this Website checkout. Reported legacy-looking sources are in a separate sibling path and remain unreviewed; ownership/migration is unresolved. |
+| `settings/` | Directory exists but is empty. Library is the approved target for catalog-specific settings; no source files/contracts are present here. |
+| [index.html](index.html) | Website placeholder; Library publishing and Website integration are not implemented. |
+| [.github/workflows/deploy.yml](.github/workflows/deploy.yml) | Stages/deploys only the Website placeholder, not Library sources or validated content. |
 | [.github/copilot-instructions.md](.github/copilot-instructions.md) | Concise AI coding guidance linked to the shared docs. |
 
 Generated groups and search/filter indexes will be built from reviewed content
@@ -202,5 +246,5 @@ the project.
 
 Lyrics, descriptions, thumbnails, videos, and other third-party material may
 carry separate rights. The repository's software license does not grant rights
-that contributors do not hold. Consult the [content-rights policy](docs/content-rights.md)
-before importing or redistributing source material.
+that contributors do not hold. See the [content-rights policy](https://github.com/DaasaVaani/library/blob/main/docs/content-rights.md)
+for the project's current dno-gate) stance.
