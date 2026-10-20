@@ -13,8 +13,8 @@ v1.7.12. CI verifies the downloaded Linux archive against a pinned SHA-256 befor
 execution. With that actionlint version installed locally, run `actionlint`
 from the repository root; shell analysis additionally requires ShellCheck on
 the local PATH. These checks do not validate product behavior, rendered HTML,
-or content contracts. Require the check in branch rules only after its first
-successful PR run.
+or content contracts. The `Workflow lint` check is required by the `main`
+ruleset after its first successful GitHub-hosted PR run on 2026-10-21.
 
 For documentation changes, check relative links and Markdown structure and use:
 

@@ -10,7 +10,9 @@ and releases.
   organization owners were listed with repository administration access.
 - An active `main` ruleset requires a PR, one approval, stale-review dismissal,
   approval after the latest reviewable push, and resolved review conversations.
-  Force pushes and branch deletion are blocked; no bypass actors are configured.
+  The GitHub Actions `Workflow lint` check is required, with the branch up to
+  date before merging. Force pushes and branch deletion are blocked; no bypass
+  actors are configured.
 - Secret scanning, push protection, private vulnerability reporting, Dependabot
   alerts, and Dependabot security updates are enabled.
 - Actions default to read-only tokens and cannot approve PR reviews. Only
@@ -32,8 +34,7 @@ Remaining owner tasks:
 - Organization Actions policies and PAT/OAuth approval and expiration controls
   could not be fully verified with the available token permissions.
 - After the pinned workflows merge, enable repository SHA-pin enforcement.
-  After `Workflow lint` has run successfully on a PR, require that status check
-  in the `main` ruleset. Enabling either prematurely can block existing work.
+  Enabling it prematurely would block the existing tag-based deploy workflow.
 
 ## Before inviting broader contributions
 

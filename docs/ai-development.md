@@ -27,7 +27,7 @@ layers, mock production success, or expand scope to unrelated cleanup.
 
 ## Repository baseline
 
-Observed on 2026-10-20; recheck these facts before implementation:
+Observed on 2026-10-21; recheck these facts before implementation:
 
 | Surface | Current state |
 | --- | --- |
