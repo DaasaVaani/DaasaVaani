@@ -1,6 +1,11 @@
 formatVersion: 1
 base: /
 descriptorUrl: /demo/latest.json
+canonicalBaseUrl: https://daasavaani.github.io/
+listLinkPath: open/
+listFileName: list.dvlist.json.gz
+transferChunkBytes: 65536
+listCompressionLevel: 6
 demoPort: 5173
 databaseName: DaasaVaani-personal
 fontFamily: system-ui, "Nirmala UI", sans-serif

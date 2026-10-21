@@ -1,13 +1,14 @@
 import { defineConfig } from "vitest/config";
 import react from "@vitejs/plugin-react";
 import { readFileSync } from "node:fs";
-import { readFile } from "node:fs/promises";
+import { readFile, mkdir, copyFile, appendFile } from "node:fs/promises";
 import { resolve, relative, isAbsolute } from "node:path";
 import { fileURLToPath } from "node:url";
 import type { IncomingMessage, ServerResponse } from "node:http";
 import { strictYaml } from "./shared/tools/generate-catalog.mjs";
 import Ajv2020 from "ajv/dist/2020";
 import schema from "./settings/web.schema.json" with { type: "json" };
+import personalSchema from "./shared/schemas/personal-transfer-settings.schema.json" with { type: "json" };
 
 const config = strictYaml(readFileSync(new URL("./settings/web.yml", import.meta.url), "utf8"));
 const bounds = strictYaml(readFileSync(new URL("./shared/settings/publication-policy.yml", import.meta.url), "utf8"));
@@ -22,8 +23,10 @@ if (!defaults || typeof defaults !== "object" || !("uiLanguage" in defaults) ||
     !Array.isArray(defaults.supportedThemes) || defaults.supportedThemes.some(theme => !["light", "dark"].includes(theme)) ||
     !defaults.supportedThemes.includes(defaults.theme)) throw new Error("Invalid portable defaults");
 const personal = strictYaml(readFileSync(new URL("./shared/settings/personal-transfer.yml", import.meta.url), "utf8"));
-if (!personal || typeof personal !== "object" || !("maxFavorites" in personal) ||
-    typeof personal.maxFavorites !== "number" || !Number.isSafeInteger(personal.maxFavorites) || personal.maxFavorites <= 0) throw new Error("Invalid portable personal limits");
+const validatePersonal = new Ajv2020({ strict: true }).compile<typeof __TRANSFER_LIMITS__ & { maxFavorites: number }>(personalSchema);
+if (!validatePersonal(personal)) throw new Error("Invalid portable personal limits: " + JSON.stringify(validatePersonal.errors));
+const canonical = new URL(config.canonicalBaseUrl);
+if (canonical.protocol !== "https:" || canonical.username || canonical.password || canonical.search || canonical.hash) throw new Error("Invalid canonical Website URL");
 if (!bounds || typeof bounds !== "object" || !("supportedRequiredCapabilities" in bounds) ||
   !Array.isArray(bounds.supportedRequiredCapabilities) || bounds.supportedRequiredCapabilities.some(value => typeof value !== "string") ||
   Object.entries(bounds).some(([key, value]) =>
@@ -54,7 +57,17 @@ export default defineConfig({
     configurePreviewServer(server) {
       server.middlewares.use(fixtureArtifacts(resolve(server.config.root, server.config.build.outDir)));
     },
-  }], base: config.base,
+    async writeBundle(options) {
+      if (!options.dir) throw new Error("Missing build output directory");
+      const folder = resolve(options.dir, config.listLinkPath);
+      await mkdir(folder, { recursive: true });
+      await copyFile(resolve(options.dir, "index.html"), resolve(folder, "index.html"));
+      // Vite's main-bundle notice does not include dependencies used only by workers.
+      await copyFile(fileURLToPath(new URL("./node_modules/pako/LICENSE", import.meta.url)), resolve(options.dir, "pako-license.txt"));
+      await appendFile(resolve(options.dir, "third-party-licenses.md"),
+        "\n## pako worker dependency\n\nSee [the complete MIT/Zlib notice](pako-license.txt).\n");
+    },
+  }], base: config.base, build: { license: { fileName: "third-party-licenses.md" } },
   server: { port: config.demoPort, watch: { ignored: path => {
     // Publishing immutable fixtures must not silently reload an active reader.
     const within = relative(fixtureDirectory, path);
@@ -62,6 +75,8 @@ export default defineConfig({
   } } },
   define: { __WEB_CONFIG__: JSON.stringify({ ...config, defaultUiLanguage: defaults.uiLanguage,
     defaultTheme: defaults.theme, uiLanguages: defaults.supportedUiLanguages, uiThemes: defaults.supportedThemes,
-    maxFavorites: personal.maxFavorites }), __BOUNDS__: JSON.stringify(bounds) },
+    maxFavorites: personal.maxFavorites }), __BOUNDS__: JSON.stringify(bounds),
+    __TRANSFER_LIMITS__: JSON.stringify({ maxListEncodedBytes: personal.maxListEncodedBytes,
+      maxListDecodedBytes: personal.maxListDecodedBytes, maxSharedUrlAscii: personal.maxSharedUrlAscii }) },
   test: { include: ["src/**/*.test.ts"], environment: "node" },
 });

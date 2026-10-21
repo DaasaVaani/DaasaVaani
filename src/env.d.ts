@@ -1,5 +1,6 @@
 interface WebConfig {
   formatVersion: 1; base: string; descriptorUrl: string; demoPort: number;
+  canonicalBaseUrl: string; listLinkPath: string; listFileName: string; transferChunkBytes: number; listCompressionLevel: number;
   defaultUiLanguage: "en" | "kn"; defaultTheme: "light" | "dark";
   databaseName: string; maxFavorites: number; fontFamily: string;
   readerFontSize: number; space: number; contentWidth: number; readerWidth: number;
@@ -9,6 +10,7 @@ interface WebConfig {
   themes: Record<"light" | "dark", Record<string, string>>;
 }
 declare const __WEB_CONFIG__: WebConfig;
+declare const __TRANSFER_LIMITS__: { maxListEncodedBytes: number; maxListDecodedBytes: number; maxSharedUrlAscii: number };
 declare const __BOUNDS__: {
   maxDescriptorBytes: number; maxManifestEncodedBytes: number; maxManifestDecodedBytes: number;
   maxItemEncodedBytes: number; maxItemDecodedBytes: number; maxPolicyEncodedBytes: number;

@@ -6,6 +6,7 @@ import { Publication, loadPublication } from "./artifacts";
 import { readPersonal, updatePersonal, type Personal } from "./personal";
 import type { Hit } from "./search";
 import { NavigationContinuity } from "./navigation";
+import { ListPreview } from "./ListPreview";
 import styles from "./App.module.css";
 
 type Labels = typeof messages.en;
@@ -159,6 +160,7 @@ function Library({ publication, labels, personal, favoritesOnly }: {
 
 export default function App() {
   const [publication, setPublication] = useState<Publication>();
+  const [personalReady, setPersonalReady] = useState(false);
   const [personal, setPersonal] = useState<Personal>({ id: "personal", favorites: [],
     language: __WEB_CONFIG__.defaultUiLanguage, theme: __WEB_CONFIG__.defaultTheme });
   const [error, setError] = useState("");
@@ -167,9 +169,16 @@ export default function App() {
   useEffect(() => {
     const controller = new AbortController();
     setError("");
-    Promise.all([loadPublication(controller.signal), readPersonal()]).then(([library, state]) => {
-      setPublication(library); setPersonal(state);
-    }).catch(reason => { if (!controller.signal.aborted) setError(errorText(reason)); });
+    setPersonalReady(false);
+    const failed = (reason: unknown) => {
+      if (!controller.signal.aborted) setError(current => [current, errorText(reason)].filter(Boolean).join("\n"));
+    };
+    loadPublication(controller.signal).then(library => {
+      if (!controller.signal.aborted) setPublication(library);
+    }).catch(failed);
+    readPersonal().then(state => {
+      if (!controller.signal.aborted) { setPersonal(state); setPersonalReady(true); }
+    }).catch(failed);
     return () => controller.abort();
   }, [attempt]);
   useEffect(() => {
@@ -203,15 +212,18 @@ export default function App() {
       <aside className={styles.notice}>{labels.fixtureNotice}</aside>
       {error && <section className={styles.error} role="alert"><h2>{labels.error}</h2><p>{error}</p>
         <button onClick={() => setAttempt(value => value + 1)}>{labels.retry}</button></section>}
-      {!publication && !error && <p role="status">{labels.loading}</p>}
-      {publication && <>
+      {(!publication || !personalReady) && !error && <p role="status">{labels.loading}</p>}
+      {publication && personalReady && <>
         <BrowsingSession key={`all-${attempt}`} publication={publication} labels={labels} personal={personal} favoritesOnly={false} />
         <BrowsingSession key={`favorites-${attempt}`} publication={publication} labels={labels} personal={personal} favoritesOnly />
+      </>}
         <Routes>
         <Route path="/" element={null} />
         <Route path="/favorites" element={null} />
-        <Route path="/item/:id" element={<Reader publication={publication} labels={labels} personal={personal} toggle={toggle} />} />
+        <Route path="/item/:id" element={publication && personalReady
+          ? <Reader publication={publication} labels={labels} personal={personal} toggle={toggle} /> : null} />
         <Route path="/settings" element={<section className={styles.reader}><h1>{labels.settings}</h1>
+          {personalReady && <>
           <fieldset><legend>{labels.language}</legend>
             {__WEB_CONFIG__.uiLanguages.map(language => <button key={language} className={styles.secondary}
               aria-pressed={personal.language === language} onClick={() => void change(state => ({ ...state, language }))}>
@@ -221,9 +233,14 @@ export default function App() {
             {__WEB_CONFIG__.uiThemes.map(theme => <button key={theme} className={styles.secondary}
               aria-pressed={personal.theme === theme} onClick={() => void change(state => ({ ...state, theme }))}>{labels[theme]}</button>)}
           </fieldset>
+          </>}
+          <ListPreview labels={labels} />
+        </section>} />
+        <Route path="/list/:payload" element={<section className={styles.reader}>
+          <ListPreview labels={labels} initialLink={new URL(__WEB_CONFIG__.listLinkPath, __WEB_CONFIG__.canonicalBaseUrl).href + window.location.hash} />
         </section>} />
         <Route path="*" element={<p role="alert">{labels.unknownRoute} <Link to="/">{labels.back}</Link></p>} />
-      </Routes></>}
+      </Routes>
       <footer className={styles.footer}>{labels.unavailableFeatures}</footer>
     </main>
   </HashRouter>;

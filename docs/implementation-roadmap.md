@@ -16,7 +16,7 @@ gates must close before their owning slices; no phase is globally complete.
 | P2 | Two-locale UI generation with committed web/Android resources | Reviewed five-Latin/nine-non-Latin tables, transliteration, technical grammar, plurals/escaping conformance |
 | P4 | Fixture gzip/hash/canonicalization/index producer; sampled independent OSA/candidate parity | Durable ledger/receipts, semantic dates, ZIP/planner, complete language/profile index and proof/capacity evidence |
 | P5 | Responsive online fixture reading/search, explicit consent, errors, direct routes, locale/themes and Library/Favorites session Back/Forward continuity | Full filters/discovery/script/helper/video/accessibility/platform journeys |
-| P5a | Transactional web favorites/preferences in one Dexie database | Lists/recents/bookmarks/learning/recitation, transfers, full backups and migrations |
+| P5a | Transactional web favorites/preferences; bounded worker list-file/link preview and lossless re-export using Shared v1 schema | List persistence/management and confirmed import, recents/bookmarks/learning/recitation, native transfer parity, full backups and migrations |
 | P6 | No persistent offline snapshot implementation | Journals/atomic activation/resume/repair/reader-safe GC and service worker lifecycle |
 | P7 | Native fixture-only full preparation in memory, reading/search, core tests and connected reading test | Room personal state, durable preparation/recovery, typed navigation/DI, parity and device matrix |
 | P3/P8/P9 | Dependency-ordered Shared/fixture-publisher pins; full web fixture CI/Pages and native build/core/lint CI | Live-provider clarification, production ingestion/publication/signing, device CI and release readiness |
@@ -33,6 +33,14 @@ Back/Forward and the reader return link restore the originating context and
 available scroll/focus; removed favorites fall back to the current valid results.
 Reloading discards browsing state and requires search consent again. This is not
 persistent search history, list/Explore continuity or Android/offline parity.
+
+XFER-01/02/03/05/06/08 receive partial web evidence: strict settings-derived
+schema, bounded single-member gzip/raw-deflate/base64url codecs, local plain-text
+preview, explicit cancellation and a static configured `/open/` hash entry.
+Settings/preview remain available when the Library endpoint fails. No list is
+saved, no lyric is fetched by transfer, and no offline readiness or signed native
+App Links is claimed. Preview re-export does not substitute for list management
+or confirmed new-list-only import.
 
 ## Delivery sequence
 

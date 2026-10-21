@@ -82,7 +82,12 @@ silent truncation, false success or weaker validation.
   and policy binding exist. Tests cover LF/CRLF identity, strict parsing, repeated
   grams and byte/hash reproducibility. The production semantic ledger, receipts,
   sequence reconciliation and deploy protocol remain unimplemented.
-- ALG-05/06/08-15: complete algorithms are not implemented. Basic verified online
+- ALG-14: the web worker implements bounded single-member gzip and raw-deflate/
+  base64url list codecs, schema/UTF8/duplicate-key validation, exact byte/link
+  limits and lossless preview re-export. Independent Node zlib round trips and
+  browser worker/cancellation/no-personal-write cases exist. Confirmed list import,
+  native codec interoperability and signed-link sharing remain incomplete.
+- ALG-05/06/08-13/15: complete algorithms are not implemented. Basic verified online
   reading and process-local Android preparation are not aligned transliteration,
   a ZIP planner, persistent activation/GC, ingestion or recoverable personal backup.
 

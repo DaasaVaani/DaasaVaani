@@ -1,5 +1,51 @@
 # Documentation history
 
+## 2026-10-21: bounded list codecs and preview
+
+- The owner requested continuing batches without waiting for further instructions,
+  with full validation and direct-main publication until implementation work ends.
+  Existing admin PR exemptions remain temporary; no protection is removed and
+  required checks precede main publication on the exact commit.
+- Adopted published/CI-validated Shared minimal-list schema/settings and then its
+  matching bilingual preview/privacy/error catalogs. Other consumers remain on
+  their independent pins. Shared catalog revision
+  `1975533eef2d6f00b9bcc5904a4a9efa6ab1157c` passed preflight39607617488 before
+  publication/adoption; no local-only gitlink was used.
+- Native gzip stream probing accepted concatenated members and trailing garbage.
+  Added exact pako3.0.2 (MIT/Zlib, bundled TypeScript declarations) to use documented
+  low-level stream boundaries, CRC/length validation and bounded output. Existing
+  package lookup found no reusable compression dependency; install followed the
+  dependency-manifest edit. npm reported a locked optional Android binding cleanup
+  warning but installed successfully; no new toolchain was installed.
+- Added worker-only codecs, cancellation/error propagation, strict local preview
+  and lossless gzip-file/hash-link re-export with privacy and preview-only notices.
+  No list/database write, guessed metadata/readiness, native feature, actual lyric,
+  provider access or full-backup implementation was introduced.
+- Separated personal loading/validation from Library availability so list preview
+  can work with an unavailable endpoint without exposing personal controls under
+  an invalid personal record. Added a configured static open-path build alias.
+- VS Code unit-test discovery found no tests; the existing Vitest CLI ran the
+  focused codec suite successfully. The initial full browser command stopped at
+  a test-only TypeScript unknown-settings assignment; replaced it with explicit
+  guards rather than casts. Subsequent full validation covered actual built output.
+- `npm run check`: passed11 unit tests, TypeScript/Vite build and all33 browser
+  journeys over desktop, Pixel7 and320px. Actual9MiB encoded/8MiB decoded/2,048
+  character link boundaries and boundary+1 were exercised; the valid decoded
+  limit case remained acceptable at a high compression ratio. No performance
+  benchmark, native round trip or complete supported-platform claim was made.
+- Workflow lint with pinned actionlint1.7.12/ShellCheck0.11.0 and strict Node YAML
+  parsing passed. Documentation audit covered8 changed Markdown files, local
+  links/anchors/fences/UTF8/whitespace and all153 unchanged requirement identities.
+  Shared main39607946210 passed after its exact preflight. Generated dependency
+  license notices are included in the Website distribution.
+- A distribution check exposed that Vite's main-bundle license output omitted
+  the worker-only pako dependency. That check failed3 browser cases; preserved it
+  and added the installed package's complete notice plus a generated index link,
+  rather than weakening the test or bundling the codec into the main UI. The final
+  `npm run check` then passed all11 unit and33 browser tests, including retrieval
+  of the complete worker notice. Python YAML parsing was unavailable; used the
+  existing Node YAML dependency instead, without installing another parser.
+
 ## 2026-10-21: website browsing-continuity slice
 
 - The owner subsequently authorized pushing this slice and continuing the next

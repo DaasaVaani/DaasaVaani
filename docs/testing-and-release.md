@@ -68,6 +68,19 @@ contracts; check generated resources remain unchanged. Library: `npm ci` then
 `npm run check` runs TypeScript and all publisher tests; `npm run publish:demo`
 generates only explicitly synthetic fixtures. No real source-PR variants.
 
+Web transfer unit tests compare the pinned streaming codec with independent Node
+zlib, including exact/limit+1 encoded/decoded/link ceilings, BOM accounting, malformed
+UTF8/JSON/schema/duplicate keys, every truncated fixture, CRC/length damage,
+concatenated members and trailing bytes. Browser journeys exercise the actual
+worker and built open-path entry, plain-text/repeated-entry preservation, file/
+link re-export, unavailable Library and unchanged personal records. A controlled
+nonresponding worker tests cancellation/termination deterministically; it is not a
+compression-speed benchmark. List save/import, native interoperability and complete
+offline-shell/platform behavior remain unimplemented.
+Tests include actual 9MiB encoded, 8MiB decoded and 2,048-character complete-link
+boundaries, not only reduced test limits. Highly compressible valid data is not
+rejected by an invented ratio cap. The build emits third-party license notices.
+
 Android requires Node, JDK21, the configured SDK36/build tools and an API36 emulator
 for current connected evidence. Set JAVA_HOME/ANDROID_HOME and select the intended
 device with ANDROID_SERIAL; do not target another user's device. From Android:
@@ -134,6 +147,7 @@ IDs or a release acceptance declaration.
 | I18N-01, SET-04 | Matching two-locale generated UI resources; web locale/theme persistence without changing canonical text | Browser/device first-use selection, complete script/personal preferences and native preference parity pending |
 | LIB-01/04 | Web favorite toggle/reload persistence and explicit corrupt-personal-record error without overwriting stored data | Lists/offline/future migrations and Android Room personal state absent |
 | UX-13 | In-session Library/Favorites query/results/index retention, Back/Forward and reader return with measured scroll/focus restoration; removed-result/direct-reader/reload coverage | No persistent search history; filters, list/Explore, offline and Android continuity pending |
+| XFER-01/02/03/05/06/08 | Bounded worker codecs, strict local preview/re-export, static open-path links, cancellation/errors and unchanged IndexedDB | No saved/imported lists, share adapters, native round trips, verified App Links or full backups |
 | SET-01/02 | Owned settings/schema guards, Shared policy binding and immutable clean fixture-tool pin | Complete production settings inventory, language/protocol/backup contracts and all compatibility fixtures pending |
 | QUAL-01/02/03 | Semantic browser controls, keyboard focus entrypoint, standalone canonical reading and no video/tracking dependencies | Full keyboard/screen-reader/contrast/scaling/platform journeys remain unverified; no formal conformance claim |
 

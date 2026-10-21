@@ -64,6 +64,35 @@ reloads. Actual deployed hosting still requires byte/hash and browser validation
   journals. Typed identities, repeats/unresolved refs, no guessed reanchoring.
   Portable minimal lists are new-list-only; full logical backups same-platform
   replacement with revision/epoch/locale recovery and exact capacity.
+- Web list-transfer work runs in a dedicated cancellable worker with no database
+  or network adapter. Pinned pako exposes stream-end/remaining-input checks that
+  native gzip streams do not reliably enforce. The decoder accepts exactly one
+  gzip member or raw-deflate stream, verifies checksum/length, bounds output as
+  it is produced, rejects trailing input, decodes fatal UTF8 and validates the
+  pinned Shared schema. Duplicate JSON keys are rejected without payload logs.
+  Optional BOM counts toward the byte ceiling; user text/order is never normalized
+  or truncated. URL input is bounded ASCII, canonical base64url, configured HTTPS
+  origin and root/open path; no payload request is sent.
+- Settings and list previews do not depend on a successful Library download.
+  Personal controls/readers require successful personal-record validation.
+  Previews show references/user text, not guessed catalog resolution/readiness,
+  and have no save action. Re-export is local; long links require file fallback.
+  A static build alias serves the configured open path with the same root assets.
+  The production build includes generated third-party dependency license notices.
+
+List transport configuration is build-time, not taken from the incoming payload:
+
+| Setting owner/key | Type/unit | Compatibility/application |
+| --- | --- | --- |
+| Website `canonicalBaseUrl` | HTTPS base URL | Canonical share origin/base; changing it requires old-link compatibility review |
+| Website `listLinkPath` | Safe relative directory | Static open entry; changed paths require handler/hosting compatibility |
+| Website `listFileName` | Safe list-file download name | Export filename hint, never input validation |
+| Website `transferChunkBytes` | Positive bounded byte count | Codec output allocation quantum; schema owns permitted bounds |
+| Website `listCompressionLevel` | Integer compression level | Output encoding cost/size; decoding accepts all valid stream encodings |
+| Shared personal-transfer limits | Encoded/decoded bytes and whole-URL ASCII characters | Independent caps; versioned schema supplies text/collection limits |
+
+Actual defaults and numeric bounds live only in the owning settings/schema files.
+Personal values never enter repository settings; payloads cannot override limits.
 - UI locale, lyric/helper profile, theme/font/density remain independent local
   preferences. System fonts only with explicit rendering limitations/alternatives.
   Preserve literal lines/verses and accessible non-drag controls.
