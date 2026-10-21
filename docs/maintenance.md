@@ -21,7 +21,9 @@ Force/delete guards have no bypass. Website's configured approval parameters nee
 review against the intended no-mandatory-second-reviewer release policy.
 For owner-authorized direct-main implementation publication, `validation/**`
 branches run the Website/Shared required checks before the same exact commit is
-pushed to main. Main alone deploys the website. Delete a temporary validation
+pushed to main. If a Website validation push does not schedule a run, dispatch
+the Repository checks workflow at that exact branch explicitly; manual validation
+never deploys Pages. Main alone deploys the website. Delete a temporary validation
 branch only after main contains it and main checks pass; never treat the admin
 exception as permission to omit a check or as release authorization.
 

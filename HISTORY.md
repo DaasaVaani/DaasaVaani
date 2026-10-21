@@ -45,6 +45,9 @@
   `npm run check` then passed all11 unit and33 browser tests, including retrieval
   of the complete worker notice. Python YAML parsing was unavailable; used the
   existing Node YAML dependency instead, without installing another parser.
+- GitHub accepted the validation branch but registered no push-triggered run or
+  checks for its commit. Added explicit manual dispatch as a repeatable preflight
+  fallback while preserving push-to-main-only Pages deployment.
 
 ## 2026-10-21: website browsing-continuity slice
 
