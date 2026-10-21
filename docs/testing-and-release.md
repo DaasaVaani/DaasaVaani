@@ -1,263 +1,154 @@
-# Testing and release guide
+# Testing, finalization and release
+
+## Mandatory completion and push gate
+
+- Incremental work may run focused relevant tests.
+- A request to finalize or confirm completion requires the **full applicable
+  build and all configured test/check suites**, not only targeted tests.
+- Before every authorized push, validate the final change set with complete
+  applicable builds/tests in each affected repository. Include dependent consumer
+  conformance checks needed by the compatibility claim. Rerun invalidated checks
+  after further edits; do not reuse evidence for a different tree.
+- Required failures, skipped/cancelled suites, unavailable tooling/devices or
+  incomplete checks are blockers, not passes. Fix or explicitly request guidance/
+  an exemption; never silently weaken scope, quarantine failures or claim success.
+- Validation is separate from authorization to commit/push and from GitHub rules.
+  Record exact commands/results, tested revisions/conditions and limitations only
+  in each repository's HISTORY.md. Current guides list commands/policy, not past runs.
+
+### Documentation-only exception
+
+While application tooling is absent, documentation-only work may finalize/push
+after **all available documentation/bootstrap checks** pass. Explicitly report
+that app builds/tests do not exist, not that they passed. Do not implement/install
+an assumed toolchain just to fill this gap. This exception never covers code,
+publisher/source validation or behavior changes needing actual checks.
+
+Once application tooling exists, documentation-only changes do not automatically
+exempt the repository from full build/test finalization; an explicit approved
+waiver is needed. Include documentation tests when configured. Update this registry
+alongside tooling changes.
 
 ## Current executable checks
 
-The Website repository has no application test runner, dependency manifest,
-Android build, or content validator. Its Pages workflow deploys only placeholder
-`index.html`; it is not application validation. Android, Shared and Library are
-separate public repositories. Their bootstrap hygiene workflows/policies are not
-application or content-pipeline checks. No app build/test matrix described below
-is implemented or currently claimed.
+There are no application manifests, builds, publisher/source/schema validators
+or app test runners. Website has placeholder Pages deployment and workflow lint;
+the other repositories have bootstrap hygiene, not application CI.
 
-The `Repository checks` workflow runs on pull requests and pushes to `main`.
-Its `Workflow lint` job checks whitespace with `git diff --check HEAD^ HEAD`
-and validates workflow syntax, expressions, and shell commands with actionlint
-v1.7.12. CI verifies the downloaded Linux archive against a pinned SHA-256 before
-execution. With that actionlint version installed locally, run `actionlint`
-from the repository root; shell analysis additionally requires ShellCheck on
-the local PATH. These checks do not validate product behavior, rendered HTML,
-or content contracts. The `Workflow lint` check is required by the `main`
-ruleset after its first successful GitHub-hosted PR run on 2026-10-21.
-
-For documentation changes, check relative links and Markdown structure and use:
+From Website:
 
 ```powershell
 git --no-pager diff --check
-git --no-pager status --short
+git --no-pager diff --cached --check
 ```
 
-These commands do not validate product behavior. Once tooling is approved and
-implemented, replace the missing command entries below with verified commands.
-Do not guess commands or install a new runner merely to fill this table.
+Also validate all changed/new Markdown for UTF8/newline/whitespace, relative file
+links, current local anchors and balanced fences. Preserve all153 unique requirement
+IDs and ensure current guidance agrees with the Shared specification. Include new
+files explicitly; do not stage unrelated changes merely to run validation.
 
-| Check | Current command |
+Website workflow validation uses actionlint v1.7.12 with a pinned download checksum.
+With the existing binary installed, `actionlint` runs from this root; shell
+analysis also needs ShellCheck. Workflow changes require the documented workflow
+checks. No application validation is implied. Do not invent commands if absent.
+
+From Shared, AndroidApp and Library, respectively:
+
+```powershell
+python tools\check_repository.py
+git --no-pager diff --check
+git --no-pager diff --cached --check
+```
+
+Their CI also parses all .github YAML files. With existing Ruby, the workflow
+command is `ruby -e 'require "yaml"; Dir.glob(".github/**/*.{yml,yaml}").each { |path| YAML.load_file(path); puts "Parsed #{path}" }'`.
+An already-available YAML parser can check syntax locally; disclose the actual
+method rather than claiming the Ruby command ran. The hygiene checker enumerates
+tracked paths: include new documentation deliberately and preserve unrelated staging.
+
+| Full application check | Current command |
 | --- | --- |
-| Dependency restore/bootstrap | Not available; requires D1 implementation. |
-| Source/settings validation | Not available; requires P1 implementation. |
-| Unit and contract tests | Not available; add with each implemented component. |
-| Web build and browser tests | Not available; requires website tooling. |
-| Android build/device tests | Not available; requires Android tooling. |
-| Performance harness | Not available; requires P4 and client integration. |
+| Dependency/bootstrap | Unavailable; manifests/toolchain implementation required |
+| Type/lint/build | Unavailable; application implementation required |
+| Source/settings/generated-schema checks | Unavailable; contracts/validators required |
+| Unit/contract/integration/browser/device suites | Unavailable; runners/implementations required |
+| Performance/capacity harness | Unavailable; implemented clients/corpus required |
 
-## Approved risk-based process (implementation pending)
+## Required implementation test matrix
 
-Use the [Shared approved-pass traceability matrix](https://github.com/DaasaVaani/shared/blob/main/docs/implementation-specification.md#14-requirement-and-verification-traceability)
-and its explicit remaining gates. This update documents earlier approvals before
-another audit; no application or conformance tests are claimed.
+Use [requirements acceptance scenarios](requirements.md) and
+[Shared traceability](https://github.com/DaasaVaani/shared/blob/main/docs/implementation-specification.md#14-requirement-and-verification-traceability).
+The [algorithm inventory](algorithm-analysis-tasks.md) defines proof/fixture work.
+Selected libraries are not conformance evidence.
 
-The selected process is a risk-based test pyramid, not evidence that checks exist.
-Fast deterministic unit/contract tests are intended on each owning-repository PR.
-Shared portable fixtures are the cross-implementation oracle; each consumer runs
-applicable fixtures against its own implementation. Consumer CI additionally runs
-the previously supported pinned Shared revision only when claiming compatibility.
-
-- **Library:** Source PRs run source and tooling-fixture checks only; no actual
-  generated variants/previews. Full generation, validation and consistency checks
-  run post-merge before publishing. Failure preserves the prior publication.
-- **Website:** PR typecheck, lint, Vitest, build and critical Playwright flows on
-  the latest stable Chromium only (`release-test-matrix`). Firefox, WebKit/Safari
-  and PWA install/storage on other browsers are unverified. Playwright
-  service-worker automation is Chromium-only.
-- **Android:** PR JVM/lint/instrumented smoke; release evidence covers API26,
-  current and API33/34 transfer boundaries plus physical devices and script
-  rendering. Latest-emulator smoke alone does not establish broad support.
-- **Release evidence:** state every platform, browser, API level and device that
-  was not tested; never claim support beyond what was run, including the API 26
-  minimum, App Links on devices and low-end performance.
-- **Performance:** The 550 ms p95 target includes 250 ms debounce and selected-
-  script item I/O, with the index already loaded. Measure cold load/memory
-  separately on representative devices, not a flaky per-PR gate. Unit tests or
-  emulation are not physical-device evidence.
-- Required checks are branch-protection gates. Quarantine flaky tests only with
-  a tracked owner and expiry. Release evidence records exact commands/results,
-  pinned Shared and Library revisions, and unverified acceptance criteria.
-
-Vitest is selected for Website, Shared build tooling and Library TypeScript unit
-tests; type-checking stays separate. Use Node for tooling/pure algorithms and
-jsdom with React Testing Library/user-event for isolated React interactions. Use
-Playwright for real workers, IndexedDB, service-worker/offline, multi-window,
-layout and focus behavior. Android uses local JVM tests and instrumentation for
-platform, Compose, Room, lifecycle and background work; Robolectric is not an
-initial default. Versions, exact matrices, runners and cadence remain open. None
-of these application checks is currently implemented here.
-
-## Test layers and evidence
-
-Use [requirements acceptance scenarios](requirements.md) as the release contract,
-not just the summary below. Run the smallest relevant checks during development;
-run the complete applicable matrix before release.
-The [interim design record](design-decisions.md) is not implementation evidence:
-selected-library conformance, exact contracts and overall final approval remain
-pending. No application/linguistic/performance tests were run to select defaults.
-
-| Layer | Required coverage |
+| Surface | Full applicable coverage once implemented |
 | --- | --- |
-| Source/unit | Strict YAML 1.2/remark restricted grammar, closed fences, draft rules, persisted UUIDs and references, optional fields, source correction preservation, hex-ID/ASCII-slug filename behavior, stable registry IDs and append behavior. |
-| Ingestion integration | API pagination/quota/error fixtures, new-only imports, duplicate committed/pending work, no-change runs, review PR contents including assets/settings. |
-| Generated contracts | Strict2020-12 producers/compatible consumers, no drafts/held/private data, all renderings/five profiles, snapshot-policy binding, ledger/no-op dates, deterministic hashes, thumbnail-free ZIPs up to100/32MiB and individually fetched oversized objects. |
-| Language processing | Five pinned profiles with independent expectations, Hunterian deferred, approved IAST/Tamil conventions/native losses and global-only post-merge generation. Raw Source Latin/status retained; suitable complete unaligned whole reading versus reviewed alignment required for indexing/helpers/anchors; no filling/silent switching. |
-| Search | Kannada/Latin descriptive fields, global common/compact aliases, metadata-first additive weights, complete candidate/OSA scan parity, no ID/date search. Bounded item I/O supplies selected-script excerpts inside550ms including250ms debounce; consent/IME/cancellation/errors/filter preservation remain required. |
-| UI/browser | Locale fallback/override, independent primary/helper-script preference, font persistence, aligned lines, Light/Dark/Warm and device/manual overrides, skippable preferences with unchanged defaults, PWA immediate online reading versus Android required preparation, no automatic download, unavailable previews, current-session query/filter/list/Explore-position restoration, focused recitation, screen-awake activation/release, direct URLs/base path, lazy player and playback errors. |
-| Personal library/transfer | Favorites; create/rename/duplicate/import warns about another list's name but allows confirmed reuse, no forced uniqueness/suffix or name-based overwrite/merge; reorder/confirmed deletion and independent repeated occurrences; persistence, recents/bookmarks; plain text/fallback labels; exact snapshot fields exclude lyrics/recitation resume/other personal state; round trips preserve order/repeats/text; preview and new-list-only save, no append/merge/replace; failed/cancelled operations preserve prior state; generic unresolved list/direct-link messages retain IDs/text without a special version-aware update action. |
-| Recitation continuity | Only the most recently recited list and exact occurrence resumes across restart/offline, including consecutive repeated songs. Continue is explicit, no automatic Recite entry, per-list positions or exact lyric scroll. Switching lists replaces the single position; practice progress is independent, transfer excludes resume state, snapshot changes preserve it. Removed list/entry explains unavailable exact resume and offers user choice; normal lyric availability/preparation gates remain. |
-| Static links and routing | No backend/server-database/hosted short-link dependency; local bounded decode; supported link-size boundary and file fallback without truncation; invalid/oversized/unsupported input cannot mutate lists; sender edits do not change prior snapshots; signed App Links host-root verification; installed/absent app, unverified/disabled handling, source-browser non-handoff and usable explicit app/browser fallbacks; first browser visit needs static shell. |
-| Learning/discovery | Verse navigation and local resume across scripts/restarts; changed/missing saved positions; optional learning labels with change/clear/filter/Practice actions; no automatic ability assessment; reviewed discovery groups and available candidates; newly added uses library date rather than upload date; favorite/add/practice entry points; no implied hide/reveal exercises. |
-| Offline | Complete thumbnail-free reading/search/policy/scripts/assets; system fonts only with explicit unsupported rendering/alternate choice, never fallback font downloads. Initial failures preserve no-active state, update failures retain active data; locks/fencing/readers/GC and degraded recovery verified. Personal state independent; placeholders never establish lyric readiness. |
-| Library lifecycle | Both clients retain the active downloaded version online/offline despite newer publication; pre-download PWA online requests stay compatible. Due dates never block downloaded use; late download does not extend them. Successful no-newer-compatible checks show truthful compatibility/publication status and suppress reminders for 3 days without date changes; failed checks do neither. Explicit resume revalidates same-version progress; corrupt/unavailable data explains restart, never partial/mixed activation or promised closed-browser downloading. Isolated item/index/font damage keeps verified capabilities usable with degraded readiness and same-version repair or explained replacement; no corrupt text/false empty search; total loss re-gates Android. |
-| Client compatibility | No newer publication versus newer incompatible content produces distinct honest status; latest-published is never claimed merely because no newer compatible version exists. Manual Android GitHub Releases or safe website-version guidance preserves existing compatible offline reading/personal data without forced upgrade, silent APK install or content replacement. Initial preparation offers a published compatible full snapshot if available, otherwise explains the client-update prerequisite. |
-| Android | API 26 and representative newer devices; no bundled lyric library; first-launch offline/download-cancel/storage/validation failure keeps lyric browsing/search/reading/practice gated but setup/settings/retry/list management accessible; preference skip or old onboarding flag cannot bypass gate; pending shared destinations survive required preparation without auto-saving; successful full download enables offline use; removal requires re-preparation with no bundled fallback; screen-awake/local-state/Back parity and independent content updates. |
-| Accessibility | Best effort with no WCAG claim (`accessibility-baseline`): automated checks where available plus keyboard/focus, text scaling and touch checks against the accessibility requirements. Compact/Normal/Relaxed selection during skippable setup and later, local persistence across restart/offline and primary/helper text in normal/Recite/Practice views; preserve lines/verse separation, no narrow overflow, comfortable bounded tablet/desktop columns. |
-| Privacy/release | No player before Play or remote personal-state collection; explicit snapshot sharing discloses only approved fields and warns about forwarding/non-revocability; payload absent from host requests/logs and unintended third parties; no backend/analytics/tracking; history disable/clear controls; no permanent search history implied; secrets/source/drafts excluded; signed installation with actual APK/download/installed/update peak-storage evidence. |
+| Shared | Contract/settings/catalog validation, independent accepted/rejected fixtures, canonical serialization, generated Android/web resource equality and compatible consumer checks |
+| Library | Type/lint/build/unit/integration/source fixtures; strict producer/reference/draft/hold rules; deterministic publisher/index/ledger/package/host checks at appropriate post-merge stage |
+| Website | Typecheck/lint/build, Vitest pure/React tests, critical Playwright browser/worker/storage/offline/multi-window/accessibility flows |
+| Android | Complete configured build/lint/JVM/instrumentation suites; Room/lifecycle/Compose/background transfer/App Links/signature checks |
+| Release/platform | API26/current/33-34 transfer boundaries, physical devices, supported browser current/previous majors, orientation/input/scaling/system-font rendering and manual accessibility evidence |
 
-Network fixtures must not hide production failures behind successful empty data.
-Keep live API checks opt-in with approved credentials and permitted content.
-Linguistic review is distinct from automated transliteration tests.
-The normal content PR remains the human review boundary, not a separate mandatory
-approval for every generated script. Do not present structural fixture passes as
-verified linguistic accuracy or select a Latin recommendation before sample review.
-PRs review sources and applicable deterministic tooling fixtures, not actual
-item-generated variants or previews. Full publication validation runs post-merge.
+Source PRs validate sources/tooling fixtures but never generate actual item variants/
+previews. Actual full generation/validation is post-merge before deploy; full-check
+policy does not waive that boundary. First live API ingestion remains blocked
+pending provider clarification; deterministic offline fixtures can be tested.
 
-### Selected-design regression fixtures
+Vitest is selected for TypeScript tooling/pure algorithms, jsdom/Testing Library
+for isolated React, Playwright for real browser/platform behavior. Android uses
+JVM and instrumentation, not Robolectric by default. Exact runners/matrices/pins
+remain design gates. State untested devices/browsers; latest Chromium/emulator
+alone never proves broad platform support.
 
-- Exact `vadiraja krishna` / `dir sh` AND substring recognition across fields,
-  plus negative cases where one required term has no permitted match.
-- OSA versus full Damerau/Levenshtein and Unicode code-point versus UTF-16
-  counting; length boundaries 3/4 and 8/9, zero/one/two edits, swaps and fuzzy
-  fragments rather than whole-word-only approximations. Synthetic `abcd` versus
-  `acbd` must not be lost by a naive bigram-overlap candidate filter.
-- Candidate-generator results versus the straightforward scan oracle under the
-  agreed normalization. Test completeness as well as false-positive verification.
-  Bound handling must not silently masquerade as a complete search.
-- Missing/new online index never downloads just from site entry, Search entry
-  or typing. Size/compatibility failures remain explicit; valid cache reuse and
-  worker restart do not imply complete preparation.
-- Source-only filename renames do not change item bytes. UUID moves/corrections
-  preserve references; ambiguous splits/merges/removals do not guess replacements.
-- Changed ZIP membership never forces unchanged verified items to download.
-  Mapping changes may change outputs without source mtime changes. Check
-  descriptor/manifest cache rules, corrupt local objects, interrupted targets and
-  safe active/staged/reader reachability; no permanent previous local snapshot.
-- Shared translation source produces correct Android/i18next text, placeholders,
-  plurals and escaping; locale recreation preserves state. Verify React Aria
-  Kannada announcements separately from app catalog completeness.
-- Shell updates notify and wait for normal activation, including other
-  root-controlled windows; no forced reload/skipWaiting or library replacement.
+## Critical correctness and recovery evidence
 
-## Performance protocol
+- Exact code-point OSA fragments versus exhaustive oracle,3/4 and8/9 thresholds,
+  adjacent swaps/overlap restrictions, supplementary characters and candidate
+  completeness; abcd/acbd cannot be lost by an unsafe bigram filter.
+- All-term metadata/lyric matching, ranking/signature/alias/case/marker/joiner/
+  digit fixtures, no silent truncation and invalid-index errors not empty results.
+- Selected-script excerpts/highlights/navigation, complete Source Latin mapping,
+  grapheme safety and honest preview/unavailable states.
+- Strict draft/hold/invalid sources, stable UUIDs, literal layout, grouped YAML,
+  LF/CRLF offsets, filename-only rename/no-op hashes and public whitelist.
+- Canonical JSON/gzip/SHA256/capability/version boundaries, ledger sequence/receipts,
+  current-only mixed/stale/missing responses and reproducible byte accounting.
+- Explicit Load search/size consent, IME/debounce/Enter/filter cancellation and
+  stale results; independent UI locale/script, catalog/plurals/third-party strings.
+- Full activation/cancel/crash/low-space, reader pins/locks/deadlock/GC, corruption/
+  degraded repair, verified resume, no partial/mixed snapshot/false readiness.
+- Repeated occurrences/placeholders/unresolved refs, duplicate-name confirmation,
+  stable exact recitation/practice/bookmark identity and no guessed reanchoring.
+- Minimal lists cross-platform/new-list-only, lossless size fallback; same-platform
+  full backup/replace/revision/epoch and truthful postcommit locale failure.
+  Exact capacity accounting, newer-format refusal and content/readiness exclusions.
+- Routes/root scope/App Links/pending destinations, normal worker activation,
+  offline lazy chunks, player only after Play, screen-awake lifecycle/failure.
 
-For PERF-01, use a 10,000-item corpus with representative text lengths,
-classification distributions, and all required scripts. After index loading,
-measure input through visible result rendering, not just lookup duration.
-Include the actual 250 ms debounce, timer jitter, worker scheduling/messaging,
-candidate lookup/OSA, filters/ranking and UI work. Enter/filter changes execute
-immediately; include them and rapid typing, IME completion and cancellation in
-the fixture mix. A stale response must never count as the current query's update.
-Include reviewed Latin spelling alternatives, selected-script matching-line
-excerpts, and reliable highlight rendering in the query mix and measured update.
-Include bounded item-artifact reads for those excerpts: active local objects
-after preparation, online requests before PWA preparation. Do not stop timing
-at index results or show the wrong script to claim the target.
-Verify result navigation reaches the corresponding verse separately; do not
-present an index-only timing as proof that the full results UI meets the target.
-Record warmup, sample count, query/filter mix, device/OS/browser, online/offline
-conditions, and p95. Test a representative mid-range Android device and desktop
-browser; both must meet 550 ms p95. This explicitly supersedes 300 ms; the
-nominal post-debounce remainder is about 300 ms, not a separate excluded budget.
-Record cold transfer/decompression/loading and parse/worker peak memory
-separately. A prebuilt global index does not remove those costs; no benchmark
-pass is currently established.
+## Best-effort performance
 
-For key website pages, record the method and device/network conditions for
-LCP <= 2.5 s, INP <= 200 ms, and CLS <= 0.1. Do not substitute a proxy score for
-the specified metric or present a lab estimate as field evidence.
-Use only test measurements; the no-user-analytics scope remains unchanged.
+Advisory goals: search550ms p95, LCP2.5s, INP200ms, CLS0.1. A numeric miss alone
+is not a hard implementation/release gate; report meaningful regressions.
+Correctness, responsive cancellation, accessibility, integrity and safety limits
+remain mandatory.
 
-## CI and deployment safeguards
+Measure input through selected-script excerpts/highlights including250ms debounce,
+worker scheduling/ranking/render and item I/O, index already loaded. Representative
+10,000-item all-rendering corpus, physical mid-range Android and desktop;
+document network/device/browser/query mix/sample/warmup/cache conditions and
+viewport/page completion. No mandatory20/50Mbps baseline. Cold loading/memory
+separate; no prewarming/proxy scores/fake field analytics. No-user-analytics scope stays.
 
-1. PR validation must check source Markdown/YAML, references, draft/publishable
-   fields and applicable deterministic tooling fixtures. No actual item variant
-   generation/previews in PRs; full public generation/index/package checks run
-   post-merge and fail deployment rather than publishing partial output.
-2. Human review approves content and settings together before merge.
-3. Publication after approved merge to `main` must upload validated public
-   output, not the repository root. This replaces the current placeholder
-   workflow behavior during implementation.
-4. Verify the selected root base `/`, hash direct links and root association in
-   built output. Keep canonical base configurable; no assumed old-URL redirects.
-   Root service-worker routing must exclude unrelated projects/data requests,
-   and code updates must not force activation/reload or replace active content.
-5. Keep ingestion API credentials local and signing keys outside CI. Build
-   unsigned in CI, verify/sign locally, then use a protected signed-APK
-   verification/publication workflow. Untrusted PRs receive no release secrets.
-6. Publish compatible content independently from APKs. Use a separate manual or
-   version-tagged workflow for signed APKs through GitHub Releases.
-7. Define and test deployment rollback, snapshot compatibility, and release
-   recovery before production use. A rollback must not force an incompatible
-   content snapshot onto existing clients.
+## Deployment and release
 
-## Release evidence checklist
+Only fully validated public output deploys, never repository sources. Normal main
+protection requires PR/named checks, no admin exemption/mandatory second reviewer,
+no force/deletion. Remove the temporary admin exception before release.
+See [maintenance](maintenance.md) for current operational controls.
 
-- Covered requirement IDs and exact tested commit/artifact version.
-- Commands/results for validation, builds, unit/contract/browser/device tests.
-- Browser versions, Android versions/devices, orientation/input checks.
-- Manual accessibility and linguistic-review evidence.
-- Performance results and reproducible measurement conditions.
-- Offline refresh failure/recovery results and content/APK compatibility results.
-- No-newer versus newer-incompatible status, manual Android/safe website guidance,
-  preserved compatible offline reading/personal data, no silent client/content
-  install and initial setup with/without a published compatible complete library.
-- Cross-platform snapshot link/file interoperability with ordered repeated
-  references/placeholders/fallback labels; independent occurrence operations and
-  recitation; new-list-only user-named saves, matching-name and failed/cancelled
-  import preservation, no append/merge/replace; tested size limits
-  and lossless file fallback; signed host-root App Links and app/browser fallback
-  evidence; personal-state preservation and placeholder-aware readiness.
-- Duplicate-name warning and confirmed reuse on create/rename/duplicate/import,
-  cancelled-operation preservation and no forced unique name/numbered suffix.
-- Generic unavailable list/direct-link references preserve IDs/text without a
-  special version-aware update action; ordinary update controls stay usable.
-- Visible active filters, individual removal and Clear filters preserving typed
-  query on filtered empty results online/offline; loading/index errors remain
-  distinct.
-- Primary/helper alignment, matching-verse navigation, learning resume, discovery
-  date semantics, and supported/unsupported screen-awake lifecycle evidence.
-- Explicit most-recent-list/occurrence resume across restart/offline, consecutive
-  repeats and switching lists; no per-list/scroll restoration, automatic Recite
-  entry, practice-state mutation or exported resume data. Removed-location
-  handling and snapshot-change preservation with preparation gates verified.
-- Theme contrast/manual overrides, setup skip/completion and explicit-download
-  evidence, local history clear/disable, learning labels, verse bookmarks, and
-  current-session website/Android navigation-restoration results.
-- Compact/Normal/Relaxed onboarding/later controls and persistence across scripts,
-  themes and reading modes offline; preserved lines/verse separation and tested
-  narrow/wide reading columns under text scaling.
-- Five pinned Kannada Latin-profile fixtures (Hunterian deferred), suitable/absent Source Latin,
-  public unsuitable Source Latin/status with restricted eligibility, global-only
-  generated fixes, source correction preservation, explicit unavailable behavior, helper/search
-  correspondence and user-reviewed samples before a Latin recommendation/default.
-- Distinct minimal-list/full-personal-backup round trips, one personal transaction,
-  failed/cancelled precommit preservation, postcommit locale-failure retry and
-  non-destructive newer-version refusal. Disclose Android personal-DB Auto Backup;
-  neither a missing backup nor a content snapshot protects personal-data loss.
-- No-library Android first launch, required explicit preparation, failure/cancel/
-  removal gates, post-download offline reading and pending-link continuation;
-  PWA on-demand online reading without required full download.
-- Downloaded-version precedence online/offline; generated >=7-day soft dates,
-  already-due downloads, successful no-newer-compatible 3-day suppression and
-  failed-check behavior at exact boundaries; no expired-content lockout.
-- Validated same-version resume and unavailable/corrupt-progress restart cases;
-  isolated damage with verified unaffected use/degraded readiness, damaged-index
-  error instead of empty results, same-version repair/full replacement and total
-  loss recovery. No mixed versions or partial first activation.
-- Thumbnail-free reading ZIP transfers/manifests and tested system-font coverage
-  with explicit unsupported-rendering handling. Record actual APK/download/installed/update
-  peak-storage sizes; estimates and approximately 2,500 songs are not size proof.
-  Include all five generated Latin profiles and eligible optional Source Latin in
-  the measured corpus; earlier illustrative estimates do not cover measured size.
-- Protected signing configuration and installable signed APK evidence, without
-  exposing keys or credentials.
-- Restore/verify normal no-admin-bypass main protection in all four repositories;
-  current temporary admin direct-push permission is not a release configuration.
-- Remaining gaps, their impact, and explicit approval before calling a release
-  ready. Failed, skipped, unavailable, and passed checks are distinct states.
+CI produces unsigned Android candidates; maintainer verifies/signs locally,
+protected workflow verifies package/version/certificate/source association and
+publishes signed APK. No signing/API key in CI/logs. Keep secure key backups.
+Verify direct routes/association, independent content/client compatibility, actual
+APK/download/installed/update peak sizes, update/rollback recovery and provider hold.
+Archive release check records in HISTORY; publish only accurate supported versions.

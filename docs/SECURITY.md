@@ -17,8 +17,8 @@ in public issues, discussions, or PRs.
 
 Use GitHub's
 [Report a vulnerability](https://github.com/DaasaVaani/DaasaVaani.github.io/security/advisories/new)
-route. Private vulnerability reporting was enabled and verified through GitHub's
-API on 2026-10-21. You can also find it under the repository's Security tab.
+route, also available under the repository's Security tab. Maintainers should
+verify availability when handling a report; dated verification belongs in HISTORY.
 
 If that private route is unavailable, open only a neutral issue titled
 "Private security contact requested", containing no vulnerability details, logs,

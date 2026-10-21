@@ -25,6 +25,12 @@ security issues publicly; use the [security policy](SECURITY.md).
 - Preserve unrelated changes and reviewed content; update related docs and tests.
 - Use the [testing guide](testing-and-release.md). Selected environments are future choices; no application build/test runner is implemented in Website. Do not claim unavailable checks passed.
 - For documentation, check relative links and run `git --no-pager diff --check`.
+- Focused tests are incremental only. Finalization/confirmation and every push
+  require complete applicable builds and all tests under the testing guide.
+  Documentation-only work has the all-available-checks exception only while app
+  tooling is absent; missing/failing required code checks are blockers, not passes.
+- Keep current guides synchronized with changes. Move superseded decisions,
+  chronology and dated validation records only to [HISTORY.md](../HISTORY.md).
 - Never commit secrets, signing keys, private data, or live credentials in fixtures.
 - Treat downloaded descriptions and Markdown as untrusted input.
 
@@ -59,7 +65,7 @@ acceptance or a response deadline.
 
 ## AI-assisted contributions
 
-Use the [AI development guide](ai-development.md). Contributors remain responsible
+Use [AGENTS.md](../AGENTS.md) and the [AI development guide](ai-development.md). Contributors remain responsible
 for correctness, permission, security, and validation of all submitted material.
 Explain material AI assistance and review performed in the PR when relevant.
 Do not submit fabricated tests, citations, lyrics, or approval claims.

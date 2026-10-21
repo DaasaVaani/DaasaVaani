@@ -35,3 +35,6 @@ Thumbs.db
 # Packaged binaries are released elsewhere, not committed
 *.apk
 *.aab
+
+# workspace files
+*.code-workspace
