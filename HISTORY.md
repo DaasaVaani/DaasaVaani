@@ -1,5 +1,35 @@
 # Documentation history
 
+## 2026-10-21: catalog-aware personal lists and reader integration
+
+- Continued authorized Website slices while the owner separately requested
+  parallel Android implementation. Android's bounded personal foundation is
+  independent; no native completion or pin update is inferred here.
+- Shared catalog-only UI prerequisites53bdb9b9907c3d2711b7118c7dc13484c37f41f1
+  passed13 tests/deterministic generation,40-file hygiene,5-file strict YAML,
+  drift/whitespace, preflight39642082787 and main39642180022 before adoption.
+- Resolved known catalog IDs without fetching lyrics, kept unknown/pending/
+  placeholder states distinct, retained user fallback labels and never copied
+  catalog titles into records or exports. Only explicit saved-entry Read fetches
+  a lyric. Added explicit revision-bound reader-to-list occurrence creation.
+- Preserved list selection, draft name and exact occurrence focus/scroll while
+  visiting a list-origin reader; retained direct/new-tab Library fallback.
+- Initial full validation passed24 unit tests and111 of114 browser cases.
+  Three recovery cases used the nonexistent English button name "Retry";
+  corrected the selector to the generated "Try again" rather than changing UI
+  wording or weakening the no-write recovery assertion. The focused three-
+  viewport recovery check then passed.
+- Final `npm run check` passed24 unit tests, strict TypeScript/Vite build and
+  all114 browser cases across desktop, Pixel7 and320px, including real
+  no-prefetch catalog resolution, retry, repeated reader additions, stale-choice
+  refusal and measured list-reader scroll/focus restoration. Existing workflow
+  lint and Git whitespace checks passed; the main-chunk advisory remains visible.
+- Archived the preceding roadmap/coverage limitation "catalog resolution" was
+  pending and "Lists do not yet resolve catalog details". Older architecture
+  "No catalog details/lyrics are fetched" meant the preceding identifier-only
+  slice: current details use already-validated in-memory summaries, not lyric
+  fetches. Native parity, recitation, offline snapshots and full backups remain open.
+
 ## 2026-10-21: verified personal-list and first-use publication
 
 - Final behavior revisionc1dbc8361095dad95d7b8dcbd06957d80b376606 passed

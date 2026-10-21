@@ -257,6 +257,132 @@ test("same-document open-path export navigation decodes the current route, not a
   await expect(page.getByRole("alert")).toContainText("Invalid or unsupported");
   expect(await records(page)).toEqual(before);
 });
+test("available catalog resolves only exact known references without lyric requests or personal writes", async ({ page }) => {
+  const requests: string[] = [];
+  page.on("request", request => { if (request.url().endsWith(".json.gz")) requests.push(request.url()); });
+  const value: ListSnapshot = { ...snapshot, name: "Synthetic catalog details", entries: [
+    { kind: "item", videoId: "fixture-one", fallback: "  User label, not a title  " },
+    { kind: "item", videoId: "unknown_fixture", fallback: "<b>Still unknown</b>" },
+    { kind: "placeholder", text: "fixture-one" }, { kind: "item", videoId: "fixture-one" },
+  ] };
+  await upload(page, value);
+  const preview = page.getByRole("region", { name: "List snapshot preview", exact: true });
+  await expect(preview.getByText("In the available catalog. Offline readiness is not established.", { exact: true })).toHaveCount(2);
+  await expect(preview.getByText("ಕನ್ನಡ ಓದು — ಪರೀಕ್ಷೆ ೧", { exact: true })).toHaveCount(2);
+  await expect(preview.getByText("Lyrics unavailable in DaasaVaani.", { exact: true })).toHaveCount(2);
+  await expect(preview.getByRole("link", { name: "Read", exact: true })).toHaveCount(0);
+  await expect(page.locator("main b")).toHaveCount(0);
+  const before = await records(page); expect(requests).toHaveLength(1);
+  await page.getByRole("button", { name: "Create snapshot link", exact: true }).click();
+  await expect(page.locator("input[readonly]")).toBeVisible();
+  expect(await records(page)).toEqual(before); expect(requests).toHaveLength(1);
+  await page.getByRole("button", { name: "Save to My Library", exact: true }).click();
+  await page.getByRole("link", { name: "View saved lists", exact: true }).click();
+  await page.getByRole("list", { name: "Lists", exact: true }).getByRole("button", { name: value.name, exact: true }).click();
+  const rows = page.locator("main ol > li");
+  await expect(rows).toHaveCount(4); await expect(rows.nth(1).getByRole("link")).toHaveCount(0);
+  await expect(rows.nth(2).getByRole("link")).toHaveCount(0);
+  expect(requests).toHaveLength(1);
+  await rows.first().getByRole("link", { name: "Read", exact: true }).click();
+  await expect(page.getByText("ರಾಮ ಕೃಷ್ಣ", { exact: true })).toBeVisible();
+  expect(requests).toHaveLength(2);
+  const saved = await records(page);
+  expect(saved.values.lists).toMatchObject([{ entries: value.entries }]);
+  expect(JSON.stringify(saved.values.lists)).not.toContain("ಕನ್ನಡ ಓದು");
+  expect(saved.values.personal).toEqual(before.values.personal);
+});
+test("unavailable catalog reports pending resolution until explicit retry without rewriting the supplied list", async ({ page }) => {
+  await page.route("**/demo/latest.json", route => route.abort());
+  const value: ListSnapshot = { ...snapshot, name: "Synthetic pending details", entries: [
+    { kind: "item", videoId: "fixture-one" }, { kind: "item", videoId: "unknown_fixture" },
+    { kind: "placeholder", text: "<b>Unchanged</b>" },
+  ] };
+  await upload(page, value);
+  const preview = page.getByRole("region", { name: "List snapshot preview", exact: true });
+  await expect(preview.getByText("Library details are not yet resolved.", { exact: false })).toHaveCount(2);
+  await expect(preview.getByText("Lyrics unavailable in DaasaVaani.", { exact: true })).toHaveCount(1);
+  const before = await records(page);
+  await page.unroute("**/demo/latest.json");
+  await page.getByRole("button", { name: "Try again", exact: true }).click();
+  await expect(preview.getByText("In the available catalog.", { exact: false })).toHaveCount(1);
+  await expect(preview.getByText("Library details are not yet resolved.", { exact: false })).toHaveCount(0);
+  await expect(preview.getByText("Lyrics unavailable in DaasaVaani.", { exact: true })).toHaveCount(2);
+  expect(await records(page)).toEqual(before);
+  await expect(page.locator("main b")).toHaveCount(0);
+});
+test("list-origin reading and return retain chosen list, unsaved editor name, scroll and exact occurrence focus", async ({ page }) => {
+  await page.setViewportSize({ width: page.viewportSize()!.width, height: 400 });
+  const value: ListSnapshot = { ...snapshot, name: "Synthetic reading context", entries: [
+    ...Array.from({ length: 12 }, (_, index) => ({ kind: "placeholder" as const, text: `Synthetic pause ${index}` })),
+    { kind: "item", videoId: "fixture-one" },
+  ] };
+  await upload(page, value); await page.getByRole("button", { name: "Save to My Library", exact: true }).click();
+  await page.getByRole("link", { name: "View saved lists", exact: true }).click();
+  await page.getByRole("list", { name: "Lists", exact: true }).getByRole("button", { name: value.name, exact: true }).click();
+  const rename = page.getByRole("form", { name: "Rename list", exact: true }).getByLabel("List name", { exact: true });
+  await rename.fill("Unsaved list name");
+  const read = page.locator("main ol > li").last().getByRole("link", { name: "Read", exact: true });
+  await read.focus();
+  await expect.poll(() => page.evaluate(() => scrollY)).toBeGreaterThan(0);
+  const position = await page.evaluate(() => scrollY), before = await records(page);
+  await read.press("Enter");
+  await expect(page.getByText("ರಾಮ ಕೃಷ್ಣ", { exact: true })).toBeVisible();
+  await page.getByRole("link", { name: "Back to list", exact: false }).click();
+  await expect(rename).toHaveValue("Unsaved list name"); await expect(read).toBeFocused();
+  await expect.poll(() => page.evaluate(() => scrollY)).toBeCloseTo(position, 0);
+  expect(await records(page)).toEqual(before);
+  await page.goForward();
+  await expect(page.getByText("ರಾಮ ಕೃಷ್ಣ", { exact: true })).toBeVisible();
+  await page.goBack();
+  await expect(rename).toHaveValue("Unsaved list name"); await expect(read).toBeFocused();
+  expect(await records(page)).toEqual(before);
+});
+test("reader adds repeated independent references only after explicit list selection and never copies catalog titles", async ({ page }) => {
+  await page.goto("/#/lists"); await create(page, "Reader target");
+  await expect(page.getByRole("list", { name: "Lists", exact: true }).getByRole("button", { name: "Reader target", exact: true })).toBeVisible();
+  await page.goto("/#/item/fixture-one");
+  await expect(page.getByText("ರಾಮ ಕೃಷ್ಣ", { exact: true })).toBeVisible();
+  const form = page.getByRole("form", { name: "Add to a saved list", exact: true });
+  const choice = form.getByLabel("Choose a saved list", { exact: true });
+  const option = await choice.getByRole("option", { name: /^Reader target · / }).getAttribute("value");
+  if (!option) throw new Error("Missing chosen saved-list identity");
+  const before = await records(page);
+  await expect(form.getByRole("button", { name: "Add this occurrence", exact: true })).toBeDisabled();
+  await choice.selectOption(option); expect(await records(page)).toEqual(before);
+  await form.getByRole("button", { name: "Add this occurrence", exact: true }).click();
+  await expect(page.getByRole("status")).toHaveText("A new independent occurrence was added to the selected list.");
+  await choice.selectOption(option);
+  await form.getByRole("button", { name: "Add this occurrence", exact: true }).click();
+  await expect(page.getByRole("status")).toHaveText("A new independent occurrence was added to the selected list.");
+  const saved = await records(page);
+  expect(saved.values.lists).toMatchObject([{ entries: [{ kind: "item", videoId: "fixture-one" }, { kind: "item", videoId: "fixture-one" }] }]);
+  const ids = listIdentities(saved.values.lists); expect(ids).toHaveLength(3); expect(new Set(ids).size).toBe(3);
+  expect(JSON.stringify(saved.values.lists)).not.toContain("ಕನ್ನಡ ಓದು");
+  expect(saved.values.personal).toEqual(before.values.personal);
+  expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(true);
+});
+test("reader list selection is revision-bound and an intervening tab mutation requires a new selection", async ({ page, context }) => {
+  await page.goto("/#/lists"); await create(page, "Stale reader target");
+  await expect(page.getByRole("list", { name: "Lists", exact: true }).getByRole("button", { name: "Stale reader target", exact: true })).toBeVisible();
+  await page.goto("/#/item/fixture-one");
+  await expect(page.getByText("ರಾಮ ಕೃಷ್ಣ", { exact: true })).toBeVisible();
+  const form = page.getByRole("form", { name: "Add to a saved list", exact: true });
+  const choice = form.getByLabel("Choose a saved list", { exact: true });
+  const option = await choice.getByRole("option", { name: /^Stale reader target · / }).getAttribute("value");
+  if (!option) throw new Error("Missing selected list");
+  await choice.selectOption(option);
+  const other = await context.newPage(); await other.goto("/#/lists"); await create(other, "Concurrent mutation");
+  await expect(other.getByRole("list", { name: "Lists", exact: true }).getByRole("button", { name: "Concurrent mutation", exact: true })).toBeVisible();
+  const before = await records(page);
+  await form.getByRole("button", { name: "Add this occurrence", exact: true }).click();
+  await expect(page.getByRole("alert")).toContainText("Personal data changed.");
+  expect(await records(page)).toEqual(before);
+  await expect(choice).toHaveValue("");
+  await expect(choice).toBeFocused();
+  await choice.selectOption(option);
+  await form.getByRole("button", { name: "Add this occurrence", exact: true }).click();
+  await expect(page.getByText("A new independent occurrence was added to the selected list.", { exact: true })).toBeVisible();
+});
 test("an export changed during encoding is refused until a fresh list selection", async ({ page, context }) => {
   await upload(page); await page.getByRole("button", { name: "Save to My Library", exact: true }).click();
   await page.getByRole("link", { name: "View saved lists", exact: true }).click();

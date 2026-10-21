@@ -21,7 +21,7 @@ does not waive any validation gate.
 | P2 | Two-locale UI generation with committed web/Android resources | Reviewed five-Latin/nine-non-Latin tables, transliteration, technical grammar, plurals/escaping conformance |
 | P4 | Fixture gzip/hash/canonicalization/index producer; sampled independent OSA/candidate parity | Durable ledger/receipts, semantic dates, ZIP/planner, complete language/profile index and proof/capacity evidence |
 | P5 | Responsive online fixture reading/search, explicit consent, errors, direct routes, first-use browser locale/explicit override/themes and Library/Favorites session Back/Forward continuity | Full filters/discovery/script/helper/video/accessibility/platform journeys |
-| P5a | Transactional web favorites/preferences/lists, bounded worker preview/saved-list file/link export, confirmed new-list-only import, duplicate-name warning, creation/rename/duplication/deletion, independent occurrence add/edit/reorder/remove/manual replacement and fixture v1 migration | Recents/bookmarks/learning/recitation, catalog resolution, platform share adapters, native transfer parity, full backups and production migrations |
+| P5a | Transactional web favorites/preferences/lists, bounded worker preview/saved-list file/link export, confirmed import/basic management/independent occurrence editing, catalog-only reference details/explicit reading, reader-to-list addition and fixture v1 migration | Recents/bookmarks/learning/recitation, platform share adapters, native personal/transfer parity, full backups and production migrations |
 | P6 | No persistent offline snapshot implementation | Journals/atomic activation/resume/repair/reader-safe GC and service worker lifecycle |
 | P7 | Native fixture-only full preparation in memory, reading/search, core tests and connected reading test | Room personal state, durable preparation/recovery, typed navigation/DI, parity and device matrix |
 | P3/P8/P9 | Dependency-ordered Shared/fixture-publisher pins; full web fixture CI/Pages and native build/core/lint CI | Live-provider clarification, production ingestion/publication/signing, device CI and release readiness |
@@ -37,7 +37,9 @@ indexes and result sets in memory while reading or visiting Settings. Browser
 Back/Forward and the reader return link restore the originating context and
 available scroll/focus; removed favorites fall back to the current valid results.
 Reloading discards browsing state and requires search consent again. This is not
-persistent search history, list/Explore continuity or Android/offline parity.
+persistent search history, Explore continuity or Android/offline parity.
+List-origin reading retains the selected list, unsaved editor state and available
+focus/scroll through return/Back/Forward in the same session; reload resets selection.
 
 XFER-01/02/03/04/05/06/08 receive partial web evidence: strict settings-derived
 schema, bounded single-member gzip/raw-deflate/base64url codecs, local plain-text
@@ -58,7 +60,12 @@ placeholder/reference entry forms, optional user fallback labels, independent
 ordered occurrence identities, explicit replacement and no-write invalid/stale/
 cancel paths. Replacement preserves position and identity; the form initially
 offers the user's placeholder text as an editable fallback, never a guessed
-catalog title. Lists do not yet resolve catalog details or offer recitation.
+catalog title. List previews and saved lists resolve titles only from the currently
+available verified catalog, distinguishing unresolved-before-catalog references
+from generic unavailable references/placeholders without guessing matches.
+Only explicit Read requests a known lyric. Readers add fresh independent occurrences
+to an explicitly chosen list using the captured revision; no catalog title is
+stored as a fallback or exported. Recitation remains incomplete.
 
 ## Delivery sequence
 

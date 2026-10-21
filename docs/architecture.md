@@ -107,6 +107,12 @@ Personal values never enter repository settings; payloads cannot override limits
   back to the main content and a valid clamped scroll position. Reader return
   follows its internal origin; directly opened readers return to Library.
   No query/history is written to personal storage or URLs; reload resets it.
+- A list-origin reader keeps its existing Lists view mounted but hidden, retaining
+  selected snapshot, unsaved edit, occurrence focus and scroll for return. Other
+  routes may unmount Lists; a reload does not persist that UI state. Reader return
+  recognizes only the explicit Library/Favorites/Lists origins; direct/new-tab
+  readers use Library fallback. A hidden list's captured revision is not silently
+  advanced by concurrent personal writes.
 - Workbox shell resources separate from content. Normal worker activation,
   notify/no forced reload or skipWaiting; preserve active reading/personal state.
 - Root /open/ hash links, narrow signed Android association and browser fallback;
@@ -192,8 +198,24 @@ unsaved editor fields, and does not increment revisions or allocate identities.
 Preview and saved-list export share one worker-based UI with explicit cancellation,
 object-URL cleanup, lossless oversized-link file fallback and privacy warnings.
 Starting export cancels any pending save confirmation; decoding, saving and
-encoding controls cannot concurrently commit a pending confirmation. No catalog
-details/lyrics are fetched and no readiness state is inferred.
+encoding controls cannot concurrently commit a pending confirmation. Export
+fetches no catalog details/lyrics and infers no readiness state.
+Catalog resolution uses a per-Publication map of the validated catalog's existing
+summary references: O(catalog size) construction, O(1) exact-ID lookup per list
+occurrence, no network/lyric reads. No publication means details are not yet
+resolved, not definitely absent; an unknown reference in the available catalog
+keeps its ID and user label with generic unavailable wording. Intentional
+placeholders remain distinct even when their text equals a known identifier.
+Known titles render separately from user fallback text and never enter personal
+records/minimal exports. A saved known reference offers explicit on-demand Read;
+previewing/saving/exporting never fetches lyrics or establishes offline readiness.
+
+Reader-to-list addition requires an explicit list choice and submit. The choice
+captures the list and revision/epoch; append allocates a fresh occurrence UUID
+through the same validated transaction, with no automatic fallback/title.
+Cancellation/no selection changes nothing; an intervening write invalidates the
+choice and requires reselection. Duplicate list names are distinguished by local
+list UUID in the chooser, without renaming, merging or selecting a target by name.
 The hash-link preview derives its complete hash from the router's current
 location, including route query/hash text so unsupported suffixes are rejected.
 It must not capture `window.location.hash` in the parent outside router updates:

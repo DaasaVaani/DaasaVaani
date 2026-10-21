@@ -8,25 +8,26 @@ import type { Hit } from "./search";
 import { NavigationContinuity } from "./navigation";
 import { ListPreview } from "./ListPreview";
 import { Lists } from "./Lists";
+import { AddToList } from "./AddToList";
 import styles from "./App.module.css";
 
 type Labels = typeof messages.en;
-function ListRoute({ labels, personal }: { labels: Labels; personal?: PersonalStore }) {
+function ListRoute({ labels, personal, publication }: { labels: Labels; personal?: PersonalStore; publication?: Publication }) {
   const location = useLocation();
   const link = new URL(__WEB_CONFIG__.listLinkPath, __WEB_CONFIG__.canonicalBaseUrl).href +
     "#" + location.pathname + location.search + location.hash;
-  return <section className={styles.reader}><ListPreview labels={labels} personal={personal} initialLink={link} /></section>;
+  return <section className={styles.reader}><ListPreview labels={labels} personal={personal} publication={publication} initialLink={link} /></section>;
 }
 const errorText = (error: unknown) => error instanceof Error ? error.message : String(error);
-interface ReaderProps { publication: Publication; labels: Labels; personal: Personal; toggle: (id: string) => void }
+interface ReaderProps { publication: Publication; labels: Labels; personal: Personal; store: PersonalStore; toggle: (id: string) => void }
 
-function Reader({ publication, labels, personal, toggle }: ReaderProps) {
+function Reader({ publication, labels, personal, store, toggle }: ReaderProps) {
   const { id } = useParams();
   const location = useLocation();
   const navigate = useNavigate();
   const state: unknown = location.state;
   const origin = state && typeof state === "object" && "browseFrom" in state ? state.browseFrom : undefined;
-  const fromBrowsing = origin === "/" || origin === "/favorites";
+  const fromBrowsing = origin === "/" || origin === "/favorites" || origin === "/lists";
   const [params] = useSearchParams();
   const [item, setItem] = useState<FixtureItem>();
   const [error, setError] = useState("");
@@ -52,10 +53,10 @@ function Reader({ publication, labels, personal, toggle }: ReaderProps) {
           event.preventDefault();
           navigate(-1);
         }
-      }}>← {fromBrowsing && origin === "/favorites" ? labels.favorites : labels.back}</Link>
+      }}>← {origin === "/lists" ? labels.backToList : origin === "/favorites" ? labels.favorites : labels.back}</Link>
     {error && <p role="alert" className={styles.error}>{error}</p>}
     {!item && !error && <p role="status">{labels.loading}</p>}
-    {item && <>
+    {item && item.videoId === id && <>
       <header className={styles.readerHeader}>
         <div><p className={styles.eyebrow}>{labels.canonical}</p><h1 lang="kn">{item.title}</h1></div>
         <button className={styles.secondary} aria-pressed={personal.favorites.includes(item.videoId)}
@@ -67,10 +68,18 @@ function Reader({ publication, labels, personal, toggle }: ReaderProps) {
         {item.lines.map(line => <p id={line.id} key={line.id} data-selected={line.id === lineId}>{line.text || "\u00a0"}</p>)}
       </div>
       <p className={styles.muted}>{item.description}</p>
+      <AddToList key={item.videoId} labels={labels} personal={store} videoId={item.videoId} />
     </>}
   </section>;
 }
 
+function ListsSession({ labels, personal, publication }: { labels: Labels; personal: PersonalStore; publication?: Publication }) {
+  const location = useLocation();
+  const state: unknown = location.state;
+  const fromLists = state && typeof state === "object" && "browseFrom" in state && state.browseFrom === "/lists";
+  if (location.pathname !== "/lists" && !(location.pathname.startsWith("/item/") && fromLists)) return null;
+  return <div hidden={location.pathname !== "/lists"}><Lists labels={labels} personal={personal} publication={publication} /></div>;
+}
 function BrowsingSession(props: {
   publication: Publication; labels: Labels; personal: Personal; favoritesOnly: boolean;
 }) {
@@ -230,12 +239,13 @@ export default function App() {
         <BrowsingSession key={`all-${attempt}`} publication={publication} labels={labels} personal={personal} favoritesOnly={false} />
         <BrowsingSession key={`favorites-${attempt}`} publication={publication} labels={labels} personal={personal} favoritesOnly />
       </>}
+      {store && <ListsSession key={attempt} labels={labels} personal={store} publication={publication} />}
         <Routes>
         <Route path="/" element={null} />
         <Route path="/favorites" element={null} />
-        <Route path="/lists" element={store ? <Lists labels={labels} personal={store} /> : null} />
-        <Route path="/item/:id" element={publication && personalReady
-          ? <Reader publication={publication} labels={labels} personal={personal} toggle={toggle} /> : null} />
+        <Route path="/lists" element={null} />
+        <Route path="/item/:id" element={publication && personalReady && store
+          ? <Reader publication={publication} labels={labels} personal={personal} store={store} toggle={toggle} /> : null} />
         <Route path="/settings" element={<section className={styles.reader}><h1>{labels.settings}</h1>
           {personalReady && <>
           <fieldset><legend>{labels.language}</legend>
@@ -248,9 +258,9 @@ export default function App() {
               aria-pressed={personal.theme === theme} onClick={() => void change(state => ({ ...state, theme }))}>{labels[theme]}</button>)}
           </fieldset>
           </>}
-          <ListPreview labels={labels} personal={store} />
+          <ListPreview labels={labels} personal={store} publication={publication} />
         </section>} />
-        <Route path="/list/:payload" element={<ListRoute labels={labels} personal={store} />} />
+        <Route path="/list/:payload" element={<ListRoute labels={labels} personal={store} publication={publication} />} />
         <Route path="*" element={<p role="alert">{labels.unknownRoute} <Link to="/">{labels.back}</Link></p>} />
       </Routes>
       <footer className={styles.footer}>{labels.unavailableFeatures}</footer>

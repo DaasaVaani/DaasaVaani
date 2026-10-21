@@ -17,7 +17,9 @@ duplication and confirmed deletion, with repeated occurrences and duplicate-name
 confirmation. Occurrences can be added, edited, moved, removed and explicitly
 replaced without changing their independent identities or other repetitions.
 Saved lists export independent minimal gzip files/links with stable-read revision
-checks. Native transfer and recitation remain incomplete.
+checks. Available verified catalog titles resolve list references without fetching
+lyrics; explicit Read opens known entries, and readers can add independent
+occurrences to chosen lists. Native transfer and recitation remain incomplete.
 Shared generates the English/Kannada UI resources; Android has a native preparation/
 reading fixture demo. Production contracts, reviewed transliteration, persistent
 offline snapshots and the remaining product journeys are incomplete.

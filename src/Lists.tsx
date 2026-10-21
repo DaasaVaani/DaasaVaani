@@ -5,10 +5,12 @@ import { editEntry, listSnapshot, moveEntry, newList, removeEntry, type ListEntr
 import { listNameHint, personalMessage, useListSave } from "./ListSave";
 import styles from "./App.module.css";
 import { ListExport, type ExportSource } from "./ListExport";
+import type { Publication } from "./artifacts";
+import { ListEntryView } from "./ListEntryView";
 
 interface EntryDraft { id?: string; kind: "item" | "placeholder"; videoId: string; text: string; fallback: string }
 
-export function Lists({ labels, personal }: { labels: typeof messages.en; personal: PersonalStore }) {
+export function Lists({ labels, personal, publication }: { labels: typeof messages.en; personal: PersonalStore; publication?: Publication }) {
   const id = useId();
   const [name, setName] = useState("");
   const [newName, setNewName] = useState("");
@@ -88,12 +90,10 @@ export function Lists({ labels, personal }: { labels: typeof messages.en; person
           onChange={event => { setName(event.target.value); save.reset(); setDeleting(false); }} />
         <button disabled={working} type="submit">{labels.renameList}</button>
       </form>
-      <p>{labels.transferUnresolved}</p>
+      <p>{labels.catalogNotice}</p>
       {!selected.record.entries.length ? <p>{labels.transferEmpty}</p> : <ol>
         {selected.record.entries.map((entry, index) => <li key={entry.id}>
-          <span>{entry.kind === "item" ? labels.transferReference : labels.transferPlaceholder}: </span>
-          {entry.kind === "item" ? <><code>{entry.videoId}</code>{entry.fallback !== undefined && <p>{entry.fallback}</p>}</>
-            : <><span>{entry.text}</span><p>{labels.lyricsUnavailable}</p></>}
+          <ListEntryView entry={entry} labels={labels} publication={publication} readable />
           <div role="group" tabIndex={-1} ref={element => {
             if (element) entryGroups.current.set(entry.id, element);
             else entryGroups.current.delete(entry.id);

@@ -119,7 +119,11 @@ function manifest(value: unknown): Manifest {
     named: { index: value.named.index, policy: value.named.policy }, catalog };
 }
 export class Publication {
-  constructor(readonly base: URL, readonly manifest: Manifest) {}
+  private readonly summaries: Map<string, Manifest["catalog"][number]>;
+  constructor(readonly base: URL, readonly manifest: Manifest) {
+    this.summaries = new Map(manifest.catalog.map(summary => [summary.videoId, summary]));
+  }
+  summary(id: string) { return this.summaries.get(id); }
   async object(hash: string, role: ObjectRecord["role"], signal?: AbortSignal) {
     const entry = this.manifest.objects[hash];
     if (!entry || entry.role !== role) throw new Error("Missing or wrong-role artifact");

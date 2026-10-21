@@ -93,6 +93,12 @@ valid snapshots exercise oversized-link refusal plus lossless file fallback.
 Open-path same-document navigation after saving/moving/exporting verifies current
 router-bound payload decoding without a reload; unsupported query suffixes remain
 invalid and all personal tables stay unchanged.
+Catalog integration journeys verify known/unavailable/not-yet-resolved states,
+literal fallback/placeholder text, exact-ID matching, no lyric request before
+Read, retry without personal writes, and no catalog title in saved/exported data.
+List-origin reading retains selected editor context, measured scroll and exact
+focus through return/Back/Forward. Reader-to-list choices are explicit and
+revision-bound, preserve repetitions and refuse concurrent-tab stale writes.
 Native interoperability and complete offline-shell/platform
 behavior remain unimplemented.
 Tests include actual 9MiB encoded, 8MiB decoded and 2,048-character complete-link
@@ -167,9 +173,9 @@ IDs or a release acceptance declaration.
 | SEARCH-12/13 | Sampled independent substring/full-matrix oracle, counted-gram candidates, native core checks and real browser search | Ordinary fixture text only; reviewed profiles/aliases/markers, exhaustive proof and complete native parity pending |
 | PLAT-01/05 | Real React and Compose apps; built-site browser journeys at desktop/mobile/320px and one native API36 reading journey | PWA installation, complete routes/layout/interaction modes and supported-platform/device matrix pending |
 | I18N-01/02/03, SET-04 | Matching two-locale resources; web first-use ordered browser-language selection, configured fallback and explicit locale/theme persistence without changing canonical text | Native first-use/preference parity, complete script/personal preferences and full localization conformance pending |
-| LIB-01/02/03/04/08/09/10/11 | Web favorites/lists, independent repeated IDs/plain text, duplicate-name confirmation, create/rename/duplicate/delete, occurrence add/edit/move/remove/manual replacement and non-destructive fixture v1 migration | Catalog resolution, recitation/offline/production migrations and Android Room personal state absent |
-| UX-13 | In-session Library/Favorites query/results/index retention, Back/Forward and reader return with measured scroll/focus restoration; removed-result/direct-reader/reload coverage | No persistent search history; filters, list/Explore, offline and Android continuity pending |
-| XFER-01/02/03/04/05/06/08 | Bounded worker codecs, preview/saved-list file/link export, static open-path links, explicit transactional new-list-only save, cancellation/errors, no-write and stale-confirmation/post-encode checks | Catalog resolution, platform share adapters, native round trips, verified App Links and full backups incomplete |
+| LIB-01/02/03/04/08/09/10/11 | Web favorites/lists, independent occurrences/plain text, duplicate-name confirmation, management/manual replacement, catalog-only details/explicit reading, reader-to-list addition and fixture v1 migration | Recitation/offline/production migrations and Android Room personal state absent |
+| UX-13 | In-session Library/Favorites context and list-origin selected editor state, Back/Forward/reader return with measured scroll/focus; removed-result/direct-reader/reload coverage | No persistent search history; filters/Explore, offline and Android continuity pending |
+| XFER-01/02/03/04/05/06/08 | Bounded worker codecs, preview/saved-list export, static links, transactional new-list-only save, catalog-only details, cancellation/errors, no-write and stale-confirmation/post-encode checks | Platform share adapters, native round trips, verified App Links and full backups incomplete |
 | SET-01/02 | Owned settings/schema guards, Shared policy binding and immutable clean fixture-tool pin | Complete production settings inventory, language/protocol/backup contracts and all compatibility fixtures pending |
 | QUAL-01/02/03 | Semantic browser controls, keyboard focus entrypoint, standalone canonical reading and no video/tracking dependencies | Full keyboard/screen-reader/contrast/scaling/platform journeys remain unverified; no formal conformance claim |
 

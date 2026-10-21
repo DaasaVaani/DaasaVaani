@@ -8,8 +8,12 @@ import { Link } from "react-router-dom";
 import { newList, type PersonalStore } from "./personal-model";
 import { listNameHint, useListSave } from "./ListSave";
 import { ListExport, transferMessage, type ExportSource } from "./ListExport";
+import { ListEntryView } from "./ListEntryView";
+import type { Publication } from "./artifacts";
 
-export function ListPreview({ labels, initialLink, personal }: { labels: typeof messages.en; initialLink?: string; personal?: PersonalStore }) {
+export function ListPreview({ labels, initialLink, personal, publication }: {
+  labels: typeof messages.en; initialLink?: string; personal?: PersonalStore; publication?: Publication;
+}) {
   const id = useId();
   const [link, setLink] = useState("");
   const [snapshot, setSnapshot] = useState<ListSnapshot>();
@@ -60,12 +64,10 @@ export function ListPreview({ labels, initialLink, personal }: { labels: typeof 
       <button onClick={() => { controller.current?.abort(); setBusy(false); }}>{labels.cancel}</button></>}
     {error && <p role="alert" className={styles.error}>{transferMessage(error, labels)}</p>}
     {snapshot && <div aria-label={labels.transferTitle}>
-      <h3>{snapshot.name}</h3><p>{labels.transferUnresolved}</p>
+      <h3>{snapshot.name}</h3><p>{labels.catalogNotice}</p>
       {!snapshot.entries.length ? <p>{labels.transferEmpty}</p> : <ol>
         {snapshot.entries.map((entry, position) => <li key={position}>
-          <span>{entry.kind === "item" ? labels.transferReference : labels.transferPlaceholder}: </span>
-          {entry.kind === "item" ? <><code>{entry.videoId}</code>{entry.fallback !== undefined && <p>{entry.fallback}</p>}</>
-            : <span>{entry.text}</span>}
+          <ListEntryView entry={entry} labels={labels} publication={publication} />
         </li>)}
       </ol>}
       {source && <ListExport source={source} labels={labels} disabled={busy || save.busy} onBusyChange={setExportBusy} onStart={save.reset} />}
