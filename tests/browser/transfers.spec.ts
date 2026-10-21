@@ -68,7 +68,8 @@ test("worker preview preserves ordered plain text, exports a file/link and opens
   const notices = await page.request.get("/third-party-licenses.md");
   expect(notices.status()).toBe(200);
   expect(await notices.text()).toContain("pako");
-  expect(await notices.text()).toContain("unicode-case-folding");
+  expect(await notices.text()).toContain("Unicode 16.0.0 personal-name data");
+  expect(await notices.text()).not.toContain("unicode-case-folding");
   const workerNotice = await page.request.get("/pako-license.txt");
   expect(workerNotice.status()).toBe(200);
   expect(await workerNotice.text()).toContain("Copyright");

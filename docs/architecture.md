@@ -83,10 +83,11 @@ Initial values and exact field bounds belong only in the linked owning files.
 Native owned settings and current limitations are documented in the
 [Android guide](https://github.com/DaasaVaani/AndroidApp/blob/main/README.md).
 The [official Unicode16 resources](https://github.com/DaasaVaani/shared/blob/main/docs/unicode-name-matching.md)
-are published. Website still uses legacy name-key matching pending its preserving
-consumer migration; advancing Shared does not migrate stored keys or establish
-cross-platform matching conformance. Remaining production settings/schemas and
-lifecycle budgets must also close before claiming full declarative coverage.
+drive the Website's personal-name adapter independently of platform Unicode
+tables. Build/package checks verify owned settings, resource identity and license
+distribution. Native independently consumes that same profile; this is not
+production search/transliteration policy or full durable personal/transfer parity.
+Remaining production settings/schemas and lifecycle budgets remain open.
 
 ## Runtime boundaries
 
@@ -239,10 +240,20 @@ Operations copy the ordered array in O(n); the transaction still validates the
 entire personal state/accounting before committing. A committed mutation returns
 its new revision so subsequent local edits use the same atomic result.
 
-Create/import/rename/duplicate warns on another name's NFC + full default Unicode
-case-folded + NFC key. The dependency/Unicode data is pinned by the package
-manifest/lock; neither UI locale nor a collation/trim alters this key. Stored names
-remain byte-for-byte unchanged. Confirmed reuse still creates independent lists.
+Create/import/rename/duplicate warns on another name's official Unicode16
+NFC + full default C/F fold + NFC key, using
+[`unicode16-default-full-nfc-v1`](../src/unicode-names.ts). No host normalization,
+locale, trim, lowercase or moving package table participates. Strict build checks
+bind the pinned Shared settings/manifest/table/vector/license bytes; complete
+Unicode License V3 is included in the distribution.
+
+The v3 database stores raw names only, not derived keys or profile caches.
+Compute this explicit profile on demand without rewriting any name, ID, occurrence,
+reference, order, preference or header. Existing names that now compare equal
+remain independent and opening a database does not ask for destructive repair.
+No database migration/version bump is invented for absent caches; any future
+persisted-key cache must version the profile and provide preserving migration.
+Confirmed reuse still creates independent lists.
 The confirmation captures epoch/revision; another tab's mutation forces renewed
 review, even if a confirmation was already visible. Live queries refresh
 personal views across tabs; they do not overwrite a captured edit/confirmation.

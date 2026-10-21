@@ -1,5 +1,61 @@
 # Documentation history
 
+## 2026-10-22: official Unicode16 consumer adoption without stored-key rewrites
+
+- Archived the preceding current architecture: list matching used host NFC and
+  unicode-case-folding1.1.2 pinned by package manifests, and Website consumer
+  adoption was still pending. Inspection established that v3 stores only exact
+  raw names, not derived keys/profile caches. The approved Shared alternative
+  computes version-identified keys on demand; no database schema bump, invented
+  cache migration, automatic renaming/merging or personal-row rewrite is needed.
+- Website adopts the actual Shared Unicode16 tables in a strict TypeScript scalar
+  NFC/full C/F fold/NFC adapter. All create/import/rename/duplicate checks retain
+  the shared `listNameKey` path and existing transactional revision/confirmation
+  protocol. Existing newly equal names remain independent, while future mutations
+  use the new profile. Removed the obsolete package; no new dependency/toolchain.
+- Build verifies strict owned Unicode settings, manifest/table metadata, exact
+  table/vector sizes/SHA256 and original license SHA256. Production distribution
+  includes the byte-identical complete Unicode License V3 and notice link.
+  Future Vite native-config import warnings introduced during development were
+  corrected with explicit TypeScript extension/JSON import attributes.
+- The preceding real-reader Website8bf3fe8e29b65fb345cc7d6629bba75c3d393dee passed
+  exact preflight39686264004, main/build/Pages39686572031 and managed39686572514.
+  Live HTTPS desktop/mobile verification saw zero owner requests before consent,
+  873 preparation requests for871 lyrics, no read-time request, exact18-row
+  canonical/layout agreement for003cdfdd-bc88-4c61-a120-3a7848aaaab4, unchanged
+  personal stores and no overflow/fixture label.
+- Android independently published207a3ccad6c2f814b1d886b5b7f7f7cd1844a9d2 with the
+  same Unicode16 profile, unchanged Shared pin and no persisted list-name-key
+  migration to invent. Full build/lint,31 core and21 API36 connected tests passed,
+  including official normalization/folding conformance; exact preflight39686343042
+  and main39686945416 passed. Parent verified main SHA and required job steps
+  including all-variant/JVM/lint build, hygiene/YAML/whitespace. Durable native
+  lists remain a separate open slice.
+- Website `npm.cmd install --package-lock-only --ignore-scripts --offline
+  --no-audit --no-fund` updated only the removed dependency. An independent
+  structural comparison proved every other lockfile field unchanged.
+  `npm run build` passed; `npm test -- unicode-names` initially passed38
+  cases before adding the host-normalization prohibition case.
+- Final `npm run check` passed75 unit tests, strict TypeScript/Vite build and
+  all171 desktop/Pixel7/320px browser cases with no failures/skips/cancellations.
+  Adapter coverage executes33 Shared vectors, all comparisons/invalid units,
+ 199650 official normalization equations and1112064-scalar folding. The first
+  full run exposed three stale browser assertions requiring the removed
+  unicode-case-folding license; they now require the new Unicode16 notice and
+  refuse the obsolete package. The repeated full run passed.
+- `node node_modules\@playwright\test\cli.js test lists --grep
+  'official Unicode16|new Unicode16'` passed all6 new browser journeys.
+  Fresh-build tests compared the distributed license bytes exactly, verified
+  newly equal raw-name records remain independent/unchanged at native DB30,
+  and verified old-package collision splitting plus explicit rename/reuse
+  confirmation/cancellation. No resource/table or personal-cache migration was
+  fabricated.
+- Strict YAML parsing passed4 tracked files; Node stdin documentation checks
+  passed20 Markdown files and153 stable requirement IDs; Shared hygiene passed64
+  tracked files. actionlint1.7.12/ShellCheck0.11.0 and both whitespace checks
+  passed. The existing bundle-size advisory remains; no performance or full
+  production-language/persistence/release readiness is claimed.
+
 ## 2026-10-22: reviewed canonical publication and separate real readers
 
 - Archived the preceding current-guide statements: this application was described

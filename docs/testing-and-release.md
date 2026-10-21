@@ -89,6 +89,15 @@ npm run test:e2e -- lyrics
 These focused checks do not replace `npm run check` before finalization/push.
 Actual hosted objects and real desktop/mobile reading require separate post-deploy
 verification; synthetic tests are not owner-text/linguistic review.
+The actual Unicode16 personal-name adapter executes all Shared integer vectors,
+comparisons and invalid UTF16 units, official normalization equations and full
+scalar folding against official C/F records, with host normalization disabled in
+an additional guard case. Build guards reject changed settings/table/vector/license
+bytes. Browser journeys check byte-identical packaged licensing, an old-package
+collision that now splits, existing newly equal names without any v3 database/
+row rewrite, and future explicit independent reuse/rename cancellation.
+`npm test -- unicode-names` is the focused unit command. These are Unicode-data/
+algorithm checks, not transliteration, linguistic review or complete native lists.
 `npm run demo` publishes only synthetic fixture artifacts and serves the
 local Website at the configured settings/web.yml port. It is not a production
 Library deployment or a source migration.

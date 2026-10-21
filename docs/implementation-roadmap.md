@@ -75,10 +75,13 @@ actual-ceiling rejection, plus connected preview/re-export evidence. It displays
 catalog known/pending/unavailable states without guessing matches and does not
 save a list. Failed/cancelled provider writes can leave an incomplete selected
 destination; the warning preserves this distinction from unchanged personal data.
-Official Unicode16 name-matching resources/reference fixtures are available in
-Shared. Consumer adoption and preserving derived-key migrations remain separate
-gates; platform-dependent lowercase/ICU substitution is not cross-platform
-matching conformance, and migration must never rename or merge stored lists.
+Official Unicode16 name matching is implemented in both consumers using Shared's
+pinned tables and conformance fixtures, without platform lowercase/ICU.
+Website derives keys on demand from raw names; no persisted-key cache exists
+in v3. Native has no durable list-name keys yet. Existing names/identities remain
+unchanged; future persisted caches require explicit profile-aware preserving
+migration, never automatic renaming/merging. This prerequisite does not complete
+native durable lists, typed transfers or full personal-state parity.
 
 The [real lyric preview](lyric-preview.md) provides partial DATA-01/02/04/05,
 UX-07/13, OFF-02 and SET-01/02 evidence. It preserves canonical line/layout

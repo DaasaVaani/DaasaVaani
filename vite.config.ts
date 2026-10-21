@@ -11,7 +11,9 @@ import schema from "./settings/web.schema.json" with { type: "json" };
 import personalSchema from "./shared/schemas/personal-transfer-settings.schema.json" with { type: "json" };
 import defaultsSchema from "./shared/schemas/ui-defaults.schema.json" with { type: "json" };
 import publicationSettingsSchema from "./shared/schemas/publication-policy-settings.schema.json" with { type: "json" };
+import { verifyUnicodeResources } from "./tools/unicode-resources.ts";
 
+verifyUnicodeResources();
 const config = strictYaml(readFileSync(new URL("./settings/web.yml", import.meta.url), "utf8"));
 const bounds = strictYaml(readFileSync(new URL("./shared/settings/publication-policy.yml", import.meta.url), "utf8"));
 const validate = new Ajv2020({ strict: true }).compile<Omit<WebConfig, "defaultUiLanguage" | "defaultTheme" | "uiLanguages" | "uiThemes" | "maxFavorites">>(schema);
@@ -66,6 +68,9 @@ export default defineConfig({
       await copyFile(fileURLToPath(new URL("./node_modules/pako/LICENSE", import.meta.url)), resolve(options.dir, "pako-license.txt"));
       await appendFile(resolve(options.dir, "third-party-licenses.md"),
         "\n## pako worker dependency\n\nSee [the complete MIT/Zlib notice](pako-license.txt).\n");
+      await copyFile(fileURLToPath(new URL("./shared/resources/unicode16/LICENSE.txt", import.meta.url)), resolve(options.dir, "unicode16-license.txt"));
+      await appendFile(resolve(options.dir, "third-party-licenses.md"),
+        "\n## Unicode 16.0.0 personal-name data\n\nDerived from the pinned official Unicode data. See [the complete Unicode License V3](unicode16-license.txt).\n");
     },
   }], base: config.base, build: { license: { fileName: "third-party-licenses.md" } },
   server: { port: config.demoPort, watch: { ignored: path => {

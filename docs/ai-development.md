@@ -36,6 +36,12 @@ demonstrations do not close remaining production contracts or prove full readine
 | Tooling | Exact npm lockfiles and Gradle wrapper/version catalog; use the current command registry |
 | Approval | Staged implementation authorized; production language/lifecycle/personal/publication gates and release evidence remain incomplete |
 
+Website/native personal-name matching uses the official Shared Unicode16 profile.
+Website v3 stores only raw names and computes explicit-profile keys on demand:
+there is no stored cache to rewrite or schema migration to invent. Keep existing
+names/IDs/contents unchanged and never auto-merge/rename newly equivalent lists.
+See [the storage/name protocol](architecture.md#transactions-names-and-exact-accounting).
+
 ## Non-negotiable boundaries
 
 - Follow the approved [lyric identity contract](https://github.com/DaasaVaani/shared/blob/main/docs/lyric-identity.md):

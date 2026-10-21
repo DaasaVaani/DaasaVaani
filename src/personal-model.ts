@@ -2,7 +2,8 @@ import Ajv2020 from "ajv/dist/2020";
 import recordSchema from "../shared/schemas/list-record.schema.json";
 import transferSchema from "../shared/schemas/list-transfer.schema.json";
 import type { ListSnapshot } from "./list-transfer-types";
-import { caseFold } from "unicode-case-folding";
+import { unicodeNameKey as listNameKey } from "./unicode-names";
+export { unicodeNameKey as listNameKey, unicodeNameProfile } from "./unicode-names";
 
 export interface Personal {
   id: "personal"; favorites: string[]; language: "en" | "kn"; theme: WebConfig["defaultTheme"];
@@ -181,7 +182,6 @@ export function exportListSnapshot(state: PersonalStore, id: string, expected: R
   if (!record) throw new PersonalError("stale");
   return listSnapshot(record);
 }
-export const listNameKey = (name: string) => caseFold(name.normalize("NFC")).normalize("NFC");
 export function saveRecord(state: PersonalStore, record: ListRecord, expected: Revision, existing: boolean, confirmDuplicate = false): PersonalStore {
   if (!validList(record)) throw new PersonalError("listInvalid");
   const previous = state.lists.find(list => list.id === record.id);

@@ -339,6 +339,66 @@ test("confirmed import persists plain text and repeated independent occurrences 
   await expect(page.getByRole("list", { name: "Lists", exact: true }).getByRole("button", { name: snapshot.name, exact: true })).toBeVisible();
   expect(await records(page)).toEqual(saved);
 });
+test("official Unicode16 separates an old-package collision, retains rename confirmation and distributes the complete data license", async ({ page }) => {
+  const license = await page.request.get("/unicode16-license.txt");
+  expect(license.status()).toBe(200);
+  expect(await license.body()).toEqual(readFileSync(new URL("../../shared/resources/unicode16/LICENSE.txt", import.meta.url)));
+  expect(await (await page.request.get("/third-party-licenses.md")).text()).toContain("unicode16-license.txt");
+  await page.goto("/#/lists"); await create(page, "ss");
+  await expect(page.getByRole("list", { name: "Lists", exact: true }).getByRole("button", { name: "ss", exact: true })).toBeVisible();
+  const name = String.fromCodePoint(122773);
+  await create(page, name);
+  const choose = page.getByRole("list", { name: "Lists", exact: true }).getByRole("button", { name, exact: true });
+  await expect(choose).toBeVisible();
+  await expect(page.getByRole("button", { name: "Save with same name", exact: true })).toHaveCount(0);
+  await choose.click();
+  const before = await records(page), rename = page.getByRole("form", { name: "Rename list", exact: true });
+  await rename.getByLabel("List name", { exact: true }).fill("ss");
+  await rename.getByRole("button", { name: "Rename list", exact: true }).click();
+  await expect(page.getByRole("button", { name: "Save with same name", exact: true })).toBeVisible();
+  await page.getByRole("button", { name: "Cancel", exact: true }).click();
+  expect(await records(page)).toEqual(before);
+});
+test("new Unicode16 equivalence never rewrites existing lists, identities or the v3 database before explicit independent reuse", async ({ page }) => {
+  await page.goto("/#/lists");
+  await expect(page.getByRole("form", { name: "Create empty list", exact: true })).toBeVisible();
+  const before = await records(page), names = [String.fromCodePoint(0x105c9), String.fromCodePoint(0x105d2, 0x307)];
+  const lists = names.map(name => ({ id: crypto.randomUUID(), name, entries: [
+    { id: crypto.randomUUID(), kind: "placeholder", text: "  Synthetic preserved occurrence  " },
+  ] }));
+  await page.evaluate(async input => {
+    const database = await new Promise<IDBDatabase>((resolve, reject) => {
+      const request = indexedDB.open(input.name, 30);
+      request.onsuccess = () => resolve(request.result); request.onerror = () => reject(request.error);
+    });
+    try {
+      const transaction = database.transaction("lists", "readwrite");
+      const done = new Promise<void>((resolve, reject) => {
+        transaction.oncomplete = () => resolve(); transaction.onabort = () => reject(transaction.error); transaction.onerror = () => reject(transaction.error);
+      });
+      for (const list of input.lists) transaction.objectStore("lists").put(list);
+      await done;
+    } finally { database.close(); }
+  }, { name: databaseName, lists });
+  const seeded = await records(page);
+  await page.reload();
+  await expect(page.getByRole("list", { name: "Lists", exact: true }).getByRole("button")).toHaveCount(2);
+  expect(await records(page)).toEqual(seeded);
+  const name = names[0];
+  if (name === undefined) throw new Error("Missing Unicode16 name");
+  await create(page, name);
+  await expect(page.getByRole("button", { name: "Save with same name", exact: true })).toBeVisible();
+  expect(await records(page)).toEqual(seeded);
+  await page.getByRole("button", { name: "Cancel", exact: true }).click();
+  expect(await records(page)).toEqual(seeded);
+  await create(page, name);
+  await page.getByRole("button", { name: "Save with same name", exact: true }).click();
+  await expect(page.getByRole("list", { name: "Lists", exact: true }).getByRole("button")).toHaveCount(3);
+  const saved = await records(page);
+  expect(saved.values.lists).toEqual(expect.arrayContaining(lists));
+  expect(saved.values.personal).toEqual(before.values.personal);
+  expect(saved.version).toBe(before.version); expect(saved.layout).toEqual(before.layout);
+});
 test("duplicate-name cancellation is no-write and a changed revision requires renewed confirmation across tabs", async ({ page, context }) => {
   await upload(page);
   await page.getByRole("button", { name: "Save to My Library", exact: true }).click();

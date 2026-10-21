@@ -103,8 +103,12 @@ silent truncation, false success or weaker validation.
   catalog, not production linguistic search or a ZIP/persistent-snapshot planner.
   See the [preview guide](lyric-preview.md).
 - Official Unicode16 personal-name normalization/folding resources and independent
-  conformance fixtures exist in Shared; consumer migration is separate and must
-  preserve stored names/IDs without automatic merging.
+  conformance fixtures drive the actual web/native adapters. Website checks the
+  official normalization equations/full scalar folding and derives versioned
+  keys on demand; raw-name v3 records have no cached key to migrate. Stable
+  insertion ordering is O(d squared) worst case/O(d) storage for decomposed name
+  length d, bounded by personal-name policy. This is not linguistic search
+  normalization, a performance benchmark or permission to merge/rename lists.
 - ALG-05/06/08-13: complete algorithms are not implemented. Basic verified online
   reading and process-local Android preparation are not aligned transliteration,
   a ZIP planner, persistent activation/GC, ingestion or recoverable personal backup.
