@@ -96,6 +96,15 @@ silent truncation, false success or weaker validation.
   accounting, atomic collection/identity checks, non-destructive v1/v2 migration and
   stale revision/epoch refusal. Actual configured byte/collection boundaries have
   executable coverage. Full recoverable backup/replacement is not implemented.
+- ALG-07/08: the separate canonical publication reader preplans descriptor,
+  manifest and every item against aggregate/count limits before bounded worker
+  downloads. All objects must validate before activation; cancellation aborts and
+  settles siblings. Literal title filtering/paging exposes the full prepared
+  catalog, not production linguistic search or a ZIP/persistent-snapshot planner.
+  See the [preview guide](lyric-preview.md).
+- Official Unicode16 personal-name normalization/folding resources and independent
+  conformance fixtures exist in Shared; consumer migration is separate and must
+  preserve stored names/IDs without automatic merging.
 - ALG-05/06/08-13: complete algorithms are not implemented. Basic verified online
   reading and process-local Android preparation are not aligned transliteration,
   a ZIP planner, persistent activation/GC, ingestion or recoverable personal backup.

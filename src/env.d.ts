@@ -1,5 +1,9 @@
 interface WebConfig {
   formatVersion: 1; base: string; descriptorUrl: string; demoPort: number;
+  lyricPreview: {
+    descriptorUrl: string; pageSize: number; maxItems: number;
+    maxEncodedBytes: number; maxDecodedBytes: number; concurrentRequests: number;
+  };
   canonicalBaseUrl: string; listLinkPath: string; listFileName: string; transferChunkBytes: number; listCompressionLevel: number;
   defaultUiLanguage: "en" | "kn"; defaultTheme: "light" | "dark" | "warm" | "device";
   databaseName: string; maxFavorites: number; fontFamily: string;

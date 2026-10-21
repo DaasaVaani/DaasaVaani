@@ -1,16 +1,18 @@
 # Implementation roadmap
 
-**Status: staged implementation authorized; initial fixture milestone only.**
+**Status: staged implementation authorized; prelaunch text-only reading and isolated fixtures.**
 Use [requirements](requirements.md), [current design](design-decisions.md),
 [architecture gates](architecture.md) and the
 [Shared specification](https://github.com/DaasaVaani/shared/blob/main/docs/implementation-specification.md).
-No source migration or live API ingestion is authorized. Remaining production
+Reviewed owner-text import/publication is authorized; unrestricted source
+reinterpretation and first live API ingestion are not. Remaining production
 gates must close before their owning slices; no phase is globally complete.
 The approved [lyric identity and optional media contract](https://github.com/DaasaVaani/shared/blob/main/docs/lyric-identity.md)
 is the target for P1/P4/P5a/P7: text-only lyric publication, permanent UUID lookup,
-typed references and versioned legacy-preserving transfers. Schemas/adapters/
-consumers remain unimplemented. Follow its Shared-first rollout; contract
-approval alone does not authorize source import, renaming or personal migration.
+typed references and versioned legacy-preserving transfers. Source/publication
+schemas and separate real readers implement the initial slice; typed personal/
+transfer adapters and full production publication remain open. Follow its
+Shared-first rollout without inferred legacy mapping or identity changes.
 
 Publication requires exact main checks, successful deployment and live HTTPS
 verification. A preflight pass or main push alone is not deployment evidence.
@@ -22,13 +24,13 @@ does not waive any validation gate.
 | Surface | Available | Still incomplete |
 | --- | --- | --- |
 | P0 | npm manifests/locks, React/Vite checks, native Gradle wrapper/catalog and JVM/SDK integration | Complete selected dependency integration and production command/release matrix |
-| P1 | Fixture-only strict YAML/Markdown/identity/hold validation and item schema | Full production source/settings/registry/verse/alignment schemas and diagnostics |
+| P1 | Strict real canonical/draft source and optional authoring schemas, identity/hold/verse-range/Latin-mapping checks; separate fixture validation | Full registry/rights resolution, public metadata adapters and production diagnostics |
 | P2 | Two-locale UI generation with committed web/Android resources | Reviewed five-Latin/nine-non-Latin tables, transliteration, technical grammar, plurals/escaping conformance |
-| P4 | Fixture gzip/hash/canonicalization/index producer; sampled independent OSA/candidate parity | Durable ledger/receipts, semantic dates, ZIP/planner, complete language/profile index and proof/capacity evidence |
-| P5 | Responsive online fixture reading/search, explicit consent, errors, direct routes, first-use browser locale/explicit override/themes and Library/Favorites session Back/Forward continuity | Full filters/discovery/script/helper/video/accessibility/platform journeys |
+| P4 | Real canonical text-only hash-addressed publication; separate fixture index producer and sampled OSA/candidate parity | Public populated-metadata/Latin/media adapters, durable ledger/receipts, semantic dates, ZIP/planner and complete language/profile index evidence |
+| P5 | Separate consented real full-library in-memory preview/UUID reading, literal title filter, complete paging and reader continuity; existing fixture search/preferences/themes | Production individual on-demand reading, full filters/discovery/script/helper/video/accessibility/platform journeys |
 | P5a | Transactional web favorites/preferences/lists, bounded worker preview/saved-list file/link export, optional browser share/copy adapters with manual fallbacks, confirmed import/basic management/independent occurrence editing, catalog-only reference details/explicit reading, reader-to-list addition and fixture v1/v2 migration | Recents/bookmarks/learning/recitation, real sharing-surface interoperability, native durable lists/occurrences, full backups and production migrations |
 | P6 | No persistent offline snapshot implementation | Journals/atomic activation/resume/repair/reader-safe GC and service worker lifecycle |
-| P7 | Native fixture-only full preparation in memory, reading/search, durable Room favorites/preferences with locale/theme controls, strict bounded list-file/pasted-link preview/re-export before preparation, core and connected tests | Native durable lists/occurrences/backups, signed App Links/receiving-app matrix, durable preparation/recovery, typed navigation/DI and full parity/device matrix |
+| P7 | Separate native real canonical full preparation/reading in memory; fixture search, Room favorites/preferences, locale/theme and bounded transfer preview/re-export, core and connected tests | Native durable lists/occurrences/backups, signed App Links/receiving-app matrix, durable preparation/recovery, typed personal references and full parity/device matrix |
 | P3/P8/P9 | Dependency-ordered Shared/fixture-publisher pins; full web fixture CI/Pages and native build/core/lint CI | Live-provider clarification, production ingestion/publication/signing, device CI and release readiness |
 
 The fixture capability is deliberately named `fixture-catalog-v1`; all UIs label
@@ -73,9 +75,18 @@ actual-ceiling rejection, plus connected preview/re-export evidence. It displays
 catalog known/pending/unavailable states without guessing matches and does not
 save a list. Failed/cancelled provider writes can leave an incomplete selected
 destination; the warning preserves this distinction from unchanged personal data.
-Native durable lists also require a version-pinned portable full casefold and
-canonical-normalization resource/strategy; platform-dependent lowercase/ICU
-substitution is not approved as cross-platform matching conformance.
+Official Unicode16 name-matching resources/reference fixtures are available in
+Shared. Consumer adoption and preserving derived-key migrations remain separate
+gates; platform-dependent lowercase/ICU substitution is not cross-platform
+matching conformance, and migration must never rename or merge stored lists.
+
+The [real lyric preview](lyric-preview.md) provides partial DATA-01/02/04/05,
+UX-07/13, OFF-02 and SET-01/02 evidence. It preserves canonical line/layout
+identity without optional media and never writes fixture personal references.
+It is not production profile search, persistent offline preparation or the final
+PWA individual-reading path. Populated source metadata remains a publisher gate
+until its matching public adapters are implemented; empty authoring fields are
+not invented classifications, rights grants or Source Latin eligibility.
 
 LIB-02/03/04/08/09/10 receive partial web management evidence: plain-text
 placeholder/reference entry forms, optional user fallback labels, independent

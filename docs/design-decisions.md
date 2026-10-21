@@ -2,7 +2,8 @@
 
 **Status:** individual directions selected; exact contracts and overall final
 production design closure remains pending. Staged implementation of the recommended
-plan is authorized; source migration is not. [Requirements](requirements.md) own product scope; the
+plan and reviewed owner-text import/publication are authorized; unrestricted source
+or personal migration is not. [Requirements](requirements.md) own product scope; the
 [Shared specification](https://github.com/DaasaVaani/shared/blob/main/docs/implementation-specification.md)
 owns current cross-repository detail. [HISTORY.md](../HISTORY.md) is the only
 archive of questionnaires, alternatives, changes and dated observations.
@@ -25,6 +26,7 @@ archive of questionnaires, alternatives, changes and dated observations.
 | Transfer | Original gzip members in ZIP STORE100/32MiB; bounded byte/request planner; images online only, no offline video/images |
 | Offline | Explicit full validation/atomic pointer, active+one target, verified-artifact resume, safe reader pins/GC/fences, same-version repair/degradation, current-only hosting |
 | Personal | One transactional Room/Dexie personal DB, typed identities, repeated occurrences, exact byte/collection bounds, forward non-destructive migration |
+| Personal name matching | Official Unicode16 NFC/full default C/F folding/NFC with preserving derived-key migration; no automatic list renaming or merging |
 | Lists/backups | Portable new-list-only minimal transfers; same-platform logical gzip full backups/confirmed replacement, preview revision/fencing, truthful locale postcommit |
 | Reading | Independent UI/script preferences; explicit Latin choice, system fonts, themes/density/helper, accessible navigation and explicit latest-list resume |
 | Links/shell | Root Website and /open/ hash links, host-root association, normal worker activation, no forced reload or automatic content replacement |
@@ -34,8 +36,11 @@ archive of questionnaires, alternatives, changes and dated observations.
 
 The [approved lyric identity contract](https://github.com/DaasaVaani/shared/blob/main/docs/lyric-identity.md)
 owns typed lyric/legacy references, target minimal-list v2, text-only publication
-eligibility and staged compatibility. This is not implemented in the current
-fixture/v1 formats and does not authorize source or personal-data migration.
+eligibility and staged compatibility. Real source/publication schemas and separate
+canonical readers implement the initial text-only slice. Fixture/v1 formats remain
+legacy-only; typed personal/transfer migrations and full production adapters remain
+open. The [preview guide](lyric-preview.md) defines the current narrower lifecycle,
+not a change to approved production PWA on-demand reading/offline behavior.
 
 ## Current readiness gates
 

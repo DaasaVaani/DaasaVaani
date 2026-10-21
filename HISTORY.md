@@ -1,5 +1,73 @@
 # Documentation history
 
+## 2026-10-22: reviewed canonical publication and separate real readers
+
+- Archived the preceding current-guide statements: this application was described
+  as fixture-only; all source import/migration remained unauthorized; lyric-ID
+  schemas/adapters/readers were described as unimplemented; portable Unicode
+  name-matching resources were a prerequisite still to be selected/completed.
+  Those were the prior state, not standing prohibitions on the subsequently
+  approved owner-text import/publication and official Unicode16 work.
+- Owner reviewed/approved all supplied lyric text, selected complete approved
+  author-editable fields with unknown text/collections empty and Source Latin
+  assessments null, and authorized the strict explicit-credit-footer adapter.
+  Library preserved originals and the earlier imported identities. The adapter
+  recovered642 additional records:871 published,125 exceptions still held
+  (122 ambiguous returning-Kannada, one encoding, one control and one missing
+  initial Kannada section). All996 original names/lengths/SHA256 values remained
+  unchanged; none were tracked or committed.
+- Shared8bd8793afb9f2fd43d52b62bc5436bbd4da1b0ce published complete optional source
+  fields, neutral reviewed prelaunch labels and official Unicode16 personal-name
+  resources/reference conformance. Its25 tests,199650 normalization equations,
+  exhaustive1112064-scalar folding and hygiene/workflow checks passed; exact
+  preflight39679248387 and main39679540067 passed before consumer adoption.
+  Advancing the Website pin does not migrate its legacy derived name keys.
+- Library source PR DaasaVaani/library#5 passed39681512307 and merged normally
+  to c2837ccf383b976a1e2d20928ff018256270551c. Main39681697398 and post-merge
+  publication/deployment39681751052 passed. Live descriptor and all871 encoded/
+  decoded objects validated against schemas/hashes/paths/identities:16406 line
+  IDs and5164 layout rows, manifest
+  `0b48b8b5ce5c1c1546f19746eae73c0a9248c65ff3dba97ff0b57db2ff8c0a7d`.
+  Earlier229 public summaries/item references remained exactly unchanged.
+  Website independently pins that clean fixture-tool producer without relaxing
+  the immutable revision guard.
+- Native real canonical reading published as7258cbc8e537314d56d1c4e4edfa76ab55a469e1;
+  full core/build/lint/connected validation and exact preflight39680994491/
+  main39681394329 passed. Expanded live871-item preparation and newly added
+  lyric reading matched canonical text/layout; personal DB/WAL/shared-memory
+  files remained byte-identical. This is memory-only read-only preview evidence.
+- Website adds separately consented complete-publication preparation, bounded
+  concurrent hash/size/schema/identity validation, literal title filtering/
+  complete paging and canonical UUID reading with cancellation/retry and
+  in-session navigation continuity. Real routes do not write fixture personal
+  data or display fixture-only failure/notice UI. Production on-demand PWA
+  reading, typed personal migration, full language/metadata/offline/publication
+  protocols and release gates remain open.
+- Website final functional `npm run check` passed36 unit tests, strict TypeScript/
+  Vite production build and165 browser cases across desktop/Pixel7/320px, with
+  no failed/skipped/cancelled cases. The existing bundle-size advisory remains.
+  `npm test -- lyric-publication` passed6 loader cases; the initial focused
+  `npm run test:e2e -- lyrics --project=desktop` actually exercised all15 new
+  cases across all three projects because this environment's npm argument
+  forwarding omitted the project flag.
+- `python shared\tools\check_repository.py` passed64 Shared tracked files
+  (not a Website-root hygiene claim). `node --input-type=module` stdin checks
+  passed20 tracked Website Markdown files for UTF8/newlines/whitespace/local
+  links/anchors/fences and all153 distinct requirement IDs; the checker was
+  corrected to include digit-bearing I18N IDs. Strict Node/YAML parsing passed
+  all4 tracked YAML files. actionlint1.7.12 with ShellCheck0.11.0 and both
+  `git diff --check`/`git diff --cached --check` passed.
+- Local production-preview actual hosted-feed reading requested873 objects
+  after consent (descriptor, manifest,871 items), then zero additional objects
+  on Read. The newly recovered003cdfdd-bc88-4c61-a120-3a7848aaaab4 rendered all18
+  canonical/layout rows exactly as its public item, with unchanged personal
+  stores and no desktop overflow. Visual inspection found and removed a redundant
+  fixture-only "canonical test text" eyebrow; regression coverage now rejects it
+  on the real route. An npm preview argument-forwarding failure and an owned
+  port4173 conflict were resolved with the direct Vite CLI/explicit helper stop;
+  neither failed startup was counted as validation. Final full suites passed
+  with the isolated runner's own server and unchanged strict port policy.
+
 ## 2026-10-22: confirmed video-independent lyric identity
 
 - Owner confirmed the proposed permanent lyric UUIDv4 model, optional reviewed

@@ -27,10 +27,10 @@ demonstrations do not close remaining production contracts or prove full readine
 
 | Surface | Current capability |
 | --- | --- |
-| Website | Responsive fixture reader/complete paged search, browsing/list-reader continuity, favorites/preferences, worker preview/saved-list exports with optional browser share/copy adapters, transactional lists/occurrence editing, truthful catalog resolution and explicit reader-to-list addition |
-| Shared | Fixture/minimal-list/logical-list-record contracts, portable settings, deterministic catalog generator and committed web/Android UI resources |
-| Library | Strict fixture Markdown/settings parsing, deterministic hash-addressed gzip publication and counted-gram index |
-| Android | Native Compose fixture preparation/reading/search, durable Room favorites/preferences and locale/theme controls, strict list-file/pasted-link preview/re-export before preparation, pure Kotlin core, debug APK/JVM/lint/emulator checks |
+| Website | Separate consented real text-only in-memory preparation/catalog/UUID reader; responsive fixture reader/complete paged search, browsing/list-reader continuity, favorites/preferences, worker transfer/export and transactional lists/occurrences |
+| Shared | Lyric/source/publication and fixture/minimal-list/logical-list contracts, official Unicode16 name-matching resources, portable settings and generated web/Android UI catalogs |
+| Library | Reviewed owner-text import with stable identities/held exceptions, complete empty authoring fields, canonical text-only post-merge publication; separate synthetic indexed fixture publisher |
+| Android | Separate real canonical preparation/reading; native fixture reading/search, durable Room favorites/preferences, locale/theme and bounded list preview/re-export; production persistence/parity remain incomplete |
 | Website library/ | Absent; reviewed sources belong only to Library |
 | Website settings/ | Web schema/settings; portable defaults and bounds consumed from Shared |
 | Tooling | Exact npm lockfiles and Gradle wrapper/version catalog; use the current command registry |
@@ -42,6 +42,11 @@ demonstrations do not close remaining production contracts or prove full readine
   production lyric UUIDs are independent of optional videos/images. Keep current
   fixture/v1 semantics intact; no fake video IDs, inferred matches or source/
   personal migrations without separate authorization.
+- Reviewed owner-text import/publication is authorized in Library. Keep originals
+  local/uncommitted and exceptions held; the footer adapter preserves explicitly
+  structured credits as provenance rather than inventing registry/media facts.
+  Real UUIDs must never enter fixture `videoId` fields. Follow the
+  [preview boundary](lyric-preview.md) until typed personal migrations exist.
 - Kannada canonical; transliterate never translate. UI locale and lyric script
   independent; first-use UI follows supported browser preferences with configured
   fallback, and explicit stored override wins. Uncertain lyrics held, corrections

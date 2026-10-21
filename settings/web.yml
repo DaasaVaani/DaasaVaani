@@ -1,6 +1,13 @@
 formatVersion: 1
 base: /
 descriptorUrl: /demo/latest.json
+lyricPreview:
+  descriptorUrl: https://daasavaani.github.io/library/lyrics/latest.json
+  pageSize: 24
+  maxItems: 10000
+  maxEncodedBytes: 67108864
+  maxDecodedBytes: 67108864
+  concurrentRequests: 4
 canonicalBaseUrl: https://daasavaani.github.io/
 listLinkPath: open/
 listFileName: list.dvlist.json.gz

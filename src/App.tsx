@@ -1,4 +1,4 @@
-import { useEffect, useId, useRef, useState } from "react";
+import { useEffect, useId, useRef, useState, type ReactNode } from "react";
 import { HashRouter, NavLink, Link, Route, Routes, useLocation, useNavigate, useParams, useSearchParams } from "react-router-dom";
 import messages from "../shared/generated/web/ui.json";
 import type { FixtureItem, SearchIndex, SearchPolicy } from "../shared/types/publication";
@@ -9,9 +9,13 @@ import { NavigationContinuity } from "./navigation";
 import { ListPreview } from "./ListPreview";
 import { Lists } from "./Lists";
 import { AddToList } from "./AddToList";
+import { Lyrics } from "./Lyrics";
 import styles from "./App.module.css";
 
 type Labels = typeof messages.en;
+function FixtureOnly({ children }: { children: ReactNode }) {
+  return /^\/lyrics(?:\/|$)/u.test(useLocation().pathname) ? null : children;
+}
 function ListRoute({ labels, personal, publication }: { labels: Labels; personal?: PersonalStore; publication?: Publication }) {
   const location = useLocation();
   const link = new URL(__WEB_CONFIG__.listLinkPath, __WEB_CONFIG__.canonicalBaseUrl).href +
@@ -192,6 +196,7 @@ export default function App() {
   const [personal, setPersonal] = useState<Personal>(browserDefaultPersonal);
   const [deviceDark, setDeviceDark] = useState(() => matchMedia("(prefers-color-scheme: dark)").matches);
   const [error, setError] = useState("");
+  const [fixtureError, setFixtureError] = useState("");
   const [attempt, setAttempt] = useState(0);
   const labels = messages[personal.language];
   useEffect(() => {
@@ -203,6 +208,7 @@ export default function App() {
   useEffect(() => {
     const controller = new AbortController();
     setError("");
+    setFixtureError("");
     setPersonalReady(false);
     setStore(undefined);
     const failed = (reason: unknown) => {
@@ -210,7 +216,7 @@ export default function App() {
     };
     loadPublication(controller.signal).then(library => {
       if (!controller.signal.aborted) setPublication(library);
-    }).catch(failed);
+    }).catch(reason => { if (!controller.signal.aborted) setFixtureError(errorText(reason)); });
     const stop = watchPersonal(state => {
       if (!controller.signal.aborted) {
         setStore(state);
@@ -247,15 +253,21 @@ export default function App() {
       <span className={styles.mark} aria-hidden="true">ದಾ</span><span>{labels.appName}<small>{labels.tagline}</small></span>
     </Link><nav aria-label={labels.appName}>
       <NavLink to="/" end>{labels.library}</NavLink>
+      <NavLink to="/lyrics">{labels.ownerLyrics}</NavLink>
       <NavLink to="/favorites">{labels.favorites}</NavLink>
       <NavLink to="/lists">{labels.lists}</NavLink>
       <NavLink to="/settings">{labels.settings}</NavLink>
     </nav></header>
     <main id="content" tabIndex={-1} className={styles.main}>
-      <aside className={styles.notice}>{labels.fixtureNotice}</aside>
+      <FixtureOnly><aside className={styles.notice}>{labels.fixtureNotice}</aside></FixtureOnly>
       {error && <section className={styles.error} role="alert"><h2>{labels.error}</h2><p>{error}</p>
         <button onClick={() => setAttempt(value => value + 1)}>{labels.retry}</button></section>}
-      {(!publication || !personalReady) && !error && <p role="status">{labels.loading}</p>}
+      <FixtureOnly>
+        {fixtureError && <section className={styles.error} role="alert"><h2>{labels.error}</h2><p>{fixtureError}</p>
+          <button onClick={() => setAttempt(value => value + 1)}>{labels.retry}</button></section>}
+        {(!publication || !personalReady) && !error && !fixtureError && <p role="status">{labels.loading}</p>}
+      </FixtureOnly>
+      <Lyrics labels={labels} />
       {publication && personalReady && <>
         <BrowsingSession key={`all-${attempt}`} publication={publication} labels={labels} personal={personal} favoritesOnly={false} />
         <BrowsingSession key={`favorites-${attempt}`} publication={publication} labels={labels} personal={personal} favoritesOnly />
@@ -265,6 +277,7 @@ export default function App() {
         <Route path="/" element={null} />
         <Route path="/favorites" element={null} />
         <Route path="/lists" element={null} />
+        <Route path="/lyrics/*" element={null} />
         <Route path="/item/:id" element={publication && personalReady && store
           ? <Reader publication={publication} labels={labels} personal={personal} store={store} toggle={toggle} /> : null} />
         <Route path="/settings" element={<section className={styles.reader}><h1>{labels.settings}</h1>
@@ -285,7 +298,7 @@ export default function App() {
         <Route path="/list/:payload" element={<ListRoute labels={labels} personal={store} publication={publication} />} />
         <Route path="*" element={<p role="alert">{labels.unknownRoute} <Link to="/">{labels.back}</Link></p>} />
       </Routes>
-      <footer className={styles.footer}>{labels.unavailableFeatures}</footer>
+      <FixtureOnly><footer className={styles.footer}>{labels.unavailableFeatures}</footer></FixtureOnly>
     </main>
   </HashRouter>;
 }

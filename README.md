@@ -3,11 +3,15 @@
 Hari Dasa Sahitya discovery, reading, practice and recitation through a responsive
 static PWA and a separate native Android app.
 
-**Status: initial fixture-only implementation; not a production release.**
+**Status: text-only prelaunch reading and isolated fixture features; not a production release.**
 The approved [lyric identity and optional media contract](https://github.com/DaasaVaani/shared/blob/main/docs/lyric-identity.md)
 defines permanent lyric UUIDs and text-only publication without YouTube/images.
-That target is not yet implemented; current fixture identifiers/formats are
-unchanged, and source import/migration remains unauthorized.
+Library publishes owner-approved canonical lyrics without videos or images.
+The [real lyric preview](docs/lyric-preview.md) downloads and validates the
+complete publication only after explicit consent, then supports UUID-based
+reading in memory. It has no personal-data writes or persistent offline state.
+Existing fixture identifiers/formats are unchanged. Typed personal references,
+production metadata adapters and the complete production lifecycle remain open.
 
 The responsive React Website reads hash-verified artifacts from the Library fixture
 publisher, with explicit indexed-search consent, canonical Kannada reading,
@@ -33,14 +37,16 @@ selectable links and complete downloads remain available as fallbacks. System
 handoff is not delivery confirmation. Available verified catalog titles resolve list references without fetching
 lyrics; explicit Read opens known entries, and readers can add independent
 occurrences to chosen lists. Recitation remains incomplete.
-Shared generates the English/Kannada UI resources; Android has a native preparation/
-reading fixture demo with durable Room favorites/preferences and locale/theme
+Shared generates the English/Kannada UI resources; Android has separate real
+text-only preparation/reading and fixture features with durable Room favorites/preferences and locale/theme
 controls, strict local list-file/pasted-link preview and actual re-export.
 Native preview works before preparation but cannot yet save a durable list;
 verified App Links and real receiving-app delivery remain open.
 Production contracts, reviewed transliteration, persistent
 offline snapshots and the remaining product journeys are incomplete.
-Staged implementation is authorized; source migration and live API ingestion are not.
+Staged implementation and the reviewed owner-text import/publication are authorized.
+Unapproved source reinterpretation, inferred media mappings and first live API
+ingestion are not.
 
 [AI instructions](AGENTS.md) | [Documentation](docs/README.md) |
 [Requirements](docs/requirements.md) | [Current design](docs/design-decisions.md) |
@@ -97,7 +103,8 @@ for fixture publication, build, unit and browser checks. The demo publisher requ
 the clean validated Library revision in settings/tooling.yml with its Node
 dependencies installed. `npm run demo` publishes synthetic
 fixtures and serves the local demo on the configured port. No actual lyrics are
-bundled or migrated. For authorized Shared pin updates,
+bundled in Website builds; the real reader requests published artifacts only
+after consent. Original owner inputs remain local and uncommitted. For authorized Shared pin updates,
 follow the [Shared-first publication order](docs/testing-and-release.md#shared-submodule-updates).
 
 Update current guides with changes. Past decisions, dated observations and test

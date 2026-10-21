@@ -1,0 +1,121 @@
+import { afterEach, expect, test, vi } from "vitest";
+import { lyricFixture, lyricId } from "../tests/lyric-fixture";
+import { prepareLyrics } from "./lyric-publication";
+import type { LyricItem } from "../shared/types/lyrics";
+
+afterEach(() => vi.unstubAllGlobals());
+function serve(fixture: ReturnType<typeof lyricFixture>) {
+  const base = new URL(".", __WEB_CONFIG__.lyricPreview.descriptorUrl);
+  const requests: string[] = [];
+  vi.stubGlobal("fetch", vi.fn(async (input: RequestInfo | URL, options?: RequestInit) => {
+    options?.signal?.throwIfAborted();
+    const url = new URL(input instanceof Request ? input.url : String(input));
+    requests.push(url.href);
+    const bytes = fixture.files.get(url.href.slice(base.href.length));
+    return bytes ? new Response(new Uint8Array(bytes)) : new Response(null, { status: 404 });
+  }));
+  return requests;
+}
+test("complete preparation validates every UUID object before exposing exact text/layout and never reads source or fixture identities", async () => {
+  const fixture = lyricFixture(), requests = serve(fixture), progress: number[] = [];
+  const ready = await prepareLyrics(undefined, done => progress.push(done));
+  expect(ready.catalog).toHaveLength(2);
+  expect(ready.item(lyricId(1))?.lines.map(line => line.text)).toEqual(["ಕನ್ನಡ 😀  ", " \t ", "", "ಅಕ್ಷರ"]);
+  expect(ready.item("fixture-one")).toBeUndefined();
+  expect(ready.item("__proto__")).toBeUndefined();
+  expect(progress).toEqual([0, 1, 2]);
+  expect(requests).toHaveLength(4);
+  expect(requests.every(url => url.startsWith(new URL(".", __WEB_CONFIG__.lyricPreview.descriptorUrl).href))).toBe(true);
+  expect(fetch).toHaveBeenCalledWith(new URL(__WEB_CONFIG__.lyricPreview.descriptorUrl), expect.objectContaining({ credentials: "omit", cache: "no-store" }));
+});
+test("additive optional fields are compatible while unknown required capabilities and future formats fail explicitly", async () => {
+  serve(lyricFixture(1, { item: item => { item.optionalFuture = "ignored"; },
+    manifest: manifest => { manifest.optionalFuture = true; }, descriptor: descriptor => { descriptor.optionalFuture = []; } }));
+  expect((await prepareLyrics()).catalog).toHaveLength(1);
+  serve(lyricFixture(1, { manifest: manifest => { Object.assign(manifest, { requiredCapabilities: ["unknown-v2"] }); } }));
+  await expect(prepareLyrics()).rejects.toThrow("required capability");
+  serve(lyricFixture(1, { descriptor: descriptor => { Object.assign(descriptor, { formatVersion: 2 }); } }));
+  await expect(prepareLyrics()).rejects.toThrow("descriptor");
+});
+test("hash, byte sizes, item-summary identity, duplicate catalog/line identities and malformed Unicode fail without a prepared result", async () => {
+  const corrupt = lyricFixture();
+  const first = corrupt.manifest.catalog[0];
+  if (!first) throw new Error("Synthetic fixture missing first entry");
+  corrupt.files.set(first.item.path, Buffer.from("corrupt"));
+  serve(corrupt);
+  await expect(prepareLyrics()).rejects.toThrow("size mismatch");
+  const damaged = lyricFixture(), reference = damaged.manifest.catalog[0]?.item;
+  if (!reference) throw new Error("Synthetic fixture missing item reference");
+  const data = damaged.files.get(reference.path), byte = data?.[10];
+  if (!data || byte === undefined) throw new Error("Synthetic gzip missing payload");
+  data[10] = byte ^ 1;
+  serve(damaged);
+  await expect(prepareLyrics()).rejects.toThrow("SHA256 mismatch");
+  const edits: ((item: LyricItem) => void)[] = [
+    item => { item.lyricId = lyricId(99); },
+    item => {
+      item.lines = [{ kind: "line", lineId: lyricId(1), text: "ಕನ್ನಡ" }];
+    },
+    item => {
+      item.lines = [{ kind: "line", lineId: lyricId(9), text: "\ud800" }];
+    },
+    item => {
+      item.lines = [{ kind: "line", lineId: lyricId(9), text: " \t " }];
+    },
+  ];
+  for (const edit of edits) {
+    serve(lyricFixture(1, { item: edit }));
+    await expect(prepareLyrics()).rejects.toThrow();
+  }
+  serve(lyricFixture(2, { manifest: manifest => { const entry = manifest.catalog[0]; if (entry) manifest.catalog.push({ ...entry }); } }));
+  await expect(prepareLyrics()).rejects.toThrow("Duplicate");
+  serve(lyricFixture(2, { item: (item, index) => {
+    if (index === 2) item.lines = [{ kind: "line", lineId: lyricId(1).slice(0, -1) + "1", text: "ಕನ್ನಡ" }];
+  } }));
+  await expect(prepareLyrics()).rejects.toThrow("Duplicate");
+  serve(lyricFixture(1, { item: item => { item.lines = [{ kind: "layout", text: "" }]; } }));
+  await expect(prepareLyrics()).rejects.toThrow("no canonical");
+  serve(lyricFixture(1, { item: item => {
+    item.lines = [Object.assign({ kind: "layout" as const, text: "" }, { lineId: lyricId(9) })];
+  } }));
+  await expect(prepareLyrics()).rejects.toThrow("Layout");
+  serve(lyricFixture(1, { manifest: manifest => {
+    const entry = manifest.catalog[0]; if (entry) entry.item.decodedBytes++;
+  } }));
+  await expect(prepareLyrics()).rejects.toThrow("decoded size mismatch");
+});
+test("configured preparation limits accept exact totals and reject one-byte/one-item over before any item download", async () => {
+  const fixture = lyricFixture(), settings = { ...__WEB_CONFIG__.lyricPreview, maxItems: 2,
+    maxEncodedBytes: fixture.encodedBytes, maxDecodedBytes: fixture.decodedBytes };
+  serve(fixture);
+  expect((await prepareLyrics(undefined, undefined, settings)).catalog).toHaveLength(2);
+  for (const patch of [{ maxEncodedBytes: fixture.encodedBytes - 1 }, { maxDecodedBytes: fixture.decodedBytes - 1 }, { maxItems: 1 }]) {
+    const requests = serve(fixture);
+    await expect(prepareLyrics(undefined, undefined, { ...settings, ...patch })).rejects.toThrow("configured");
+    expect(requests).toHaveLength(2);
+  }
+});
+test("actual configured complete-library decoded boundary is accepted and limit+1 refuses all item requests", async () => {
+  const each = 7 * 1024 * 1024;
+  const build = (last: number) => lyricFixture(9, { item: (item, index) => { item.syntheticPadding = "x".repeat(index === 9 ? last : each); } });
+  const first = build(each), last = each + __WEB_CONFIG__.lyricPreview.maxDecodedBytes - first.decodedBytes;
+  const boundary = build(last);
+  expect(boundary.decodedBytes).toBe(__WEB_CONFIG__.lyricPreview.maxDecodedBytes);
+  serve(boundary);
+  expect((await prepareLyrics()).catalog).toHaveLength(9);
+  const over = build(last + 1), requests = serve(over);
+  expect(over.decodedBytes).toBe(__WEB_CONFIG__.lyricPreview.maxDecodedBytes + 1);
+  await expect(prepareLyrics()).rejects.toThrow("configured preparation byte limits");
+  expect(requests).toHaveLength(2);
+});
+test("aborted preparation propagates cancellation and never exposes a partial catalog", async () => {
+  const controller = new AbortController();
+  vi.stubGlobal("fetch", vi.fn((_input: RequestInfo | URL, options?: RequestInit) => new Promise<Response>((_resolve, reject) => {
+    const signal = options?.signal;
+    if (!signal) throw new Error("Missing request cancellation signal");
+    signal.addEventListener("abort", () => reject(signal.reason), { once: true });
+  })));
+  const pending = prepareLyrics(controller.signal);
+  controller.abort(new DOMException("Cancelled", "AbortError"));
+  await expect(pending).rejects.toThrow("Cancelled");
+});

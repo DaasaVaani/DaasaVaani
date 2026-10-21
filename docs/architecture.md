@@ -10,7 +10,7 @@ indexes the [Shared specification](https://github.com/DaasaVaani/shared/blob/mai
 
 | Component | Owns | Boundary |
 | --- | --- | --- |
-| Library sources | Flat reviewed Markdown, registries, assets/catalog settings and stable identities | No client runtime or secrets; migration unauthorized |
+| Library sources | Flat reviewed Markdown, registries, assets/catalog settings and stable identities | Reviewed owner-text import authorized; no client runtime, committed originals or unapproved reinterpretation |
 | Local ingestion | Full uploads discovery/reconciliation, conservative extraction/held drafts, reviewed assets and source PR | No scheduled/CI ingestion, fabricated metadata or actual PR-generated variants |
 | Shared | Normative contracts/fixtures/portable settings/UI catalogs/generator/resources | No lyrics, app runtime or publisher |
 | Library publisher | Post-merge global variants/index/artifacts/ledger/policy/ZIP/planner/host validation | No drafts/source-only leakage, item overrides or partial deployment |
@@ -30,7 +30,8 @@ lyric UUIDs; reviewed images/videos are optional associations, not identity.
 Target minimal-list v2 distinguishes lyric and preserved legacy references.
 The contract owns the complete staged rollout/acceptance obligations; executable
 fixtures and the current personal-storage protocol below remain unchanged.
-No source/personal migration or automatic legacy mapping is authorized now.
+Reviewed owner-text import/publication is authorized separately. No automatic
+legacy mapping or unrestricted source/personal migration is authorized.
 
 ```text
 manual local API -> proposed Library source/assets/settings -> review PR
@@ -38,6 +39,12 @@ manual local API -> proposed Library source/assets/settings -> review PR
 -> static compatible artifacts -> clients
 -> explicit preparation/refresh -> completely validated active snapshot
 ```
+
+Owner-supplied text follows the independent local import -> reviewed canonical
+Markdown -> source PR -> post-merge text-only publication path. Structured credit
+footers remain provenance, not inferred classifications/media. The
+[prelaunch reader](lyric-preview.md) consumes only that public artifact family;
+it does not access originals or source Markdown.
 
 First API ingestion remains blocked pending provider clarification. Offline/
 synthetic fixture analysis does not waive that hold. Source PR tooling fixtures
@@ -61,7 +68,8 @@ Initial values and exact field bounds belong only in the linked owning files.
 
 | Owner/source and keys | Current application and validation | Compatibility/open work |
 | --- | --- | --- |
-| [Web settings/schema](../settings/web.schema.json): `base`, `descriptorUrl`, `canonicalBaseUrl`, `listLinkPath`, `listFileName` | Strict build-time settings; static assets/artifact entry and minimal-list URL/file projection | Public route/origin changes require old-link/hosting review; published artifacts remain fixture-only |
+| [Web settings/schema](../settings/web.schema.json): `base`, `descriptorUrl`, `canonicalBaseUrl`, `listLinkPath`, `listFileName` | Strict build-time settings; fixture artifact entry and minimal-list URL/file projection | Public route/origin changes require old-link/hosting review; distinct real-publication settings below never reinterpret fixture formats |
+| [Web settings/schema](../settings/web.schema.json): `lyricPreview.descriptorUrl`, `pageSize`, `maxItems`, `maxEncodedBytes`, `maxDecodedBytes`, `concurrentRequests` | Credential-free absolute HTTPS endpoint, full preparation plan/count/aggregate bounds before item requests, bounded workers and explicit complete paging | Separate `lyric-preview-v1`, consented memory-only lifecycle; no production on-demand, persistent offline or typed personal migration claim |
 | [Web settings](../settings/web.yml): `transferChunkBytes`, `listCompressionLevel` | Byte allocation/compression controls passed to the dedicated codec worker; schema and actual-ceiling codec tests | Encoding choices do not narrow accepted valid input or change decoded/text limits |
 | [Web settings](../settings/web.yml): `databaseName` | Build-time Dexie/native IndexedDB identity | Changing it is not a migration; it would strand the prior database and requires explicit compatibility handling |
 | [Web settings](../settings/web.yml): `fontFamily`, `readerFontSize`, `space`, `contentWidth`, `readerWidth`, `themes` | Typed CSS tokens, system fonts, three palettes and measured contrast checks | Personal font/density/helper/script settings and physical-device/font conformance remain incomplete |
@@ -74,9 +82,11 @@ Initial values and exact field bounds belong only in the linked owning files.
 
 Native owned settings and current limitations are documented in the
 [Android guide](https://github.com/DaasaVaani/AndroidApp/blob/main/README.md).
-Portable Unicode casefold/normalization data, the remaining production settings/
-schemas and lifecycle budgets must be completed before claiming full declarative
-settings or cross-platform matching conformance.
+The [official Unicode16 resources](https://github.com/DaasaVaani/shared/blob/main/docs/unicode-name-matching.md)
+are published. Website still uses legacy name-key matching pending its preserving
+consumer migration; advancing Shared does not migrate stored keys or establish
+cross-platform matching conformance. Remaining production settings/schemas and
+lifecycle budgets must also close before claiming full declarative coverage.
 
 ## Runtime boundaries
 

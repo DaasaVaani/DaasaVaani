@@ -1,10 +1,22 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "type": "object", "additionalProperties": false,
-  "required": ["formatVersion", "base", "descriptorUrl", "canonicalBaseUrl", "listLinkPath", "listFileName", "transferChunkBytes", "listCompressionLevel", "demoPort", "databaseName", "fontFamily", "readerFontSize", "space", "contentWidth", "readerWidth", "themes", "demoViewports"],
+  "required": ["formatVersion", "base", "descriptorUrl", "lyricPreview", "canonicalBaseUrl", "listLinkPath", "listFileName", "transferChunkBytes", "listCompressionLevel", "demoPort", "databaseName", "fontFamily", "readerFontSize", "space", "contentWidth", "readerWidth", "themes", "demoViewports"],
   "properties": {
     "formatVersion": { "const": 1 }, "base": { "type": "string", "pattern": "^/" },
     "descriptorUrl": { "type": "string", "minLength": 1 },
+    "lyricPreview": {
+      "type": "object", "additionalProperties": false,
+      "required": ["descriptorUrl", "pageSize", "maxItems", "maxEncodedBytes", "maxDecodedBytes", "concurrentRequests"],
+      "properties": {
+        "descriptorUrl": { "type": "string", "pattern": "^https://[^\\s?#]+/latest\\.json$" },
+        "pageSize": { "type": "integer", "minimum": 1, "maximum": 1000 },
+        "maxItems": { "type": "integer", "minimum": 1, "maximum": 100000 },
+        "maxEncodedBytes": { "type": "integer", "minimum": 1, "maximum": 9007199254740991 },
+        "maxDecodedBytes": { "type": "integer", "minimum": 1, "maximum": 9007199254740991 },
+        "concurrentRequests": { "type": "integer", "minimum": 1, "maximum": 32 }
+      }
+    },
     "canonicalBaseUrl": { "type": "string", "pattern": "^https://[^\\s?#]+/$" },
     "listLinkPath": { "type": "string", "pattern": "^[A-Za-z0-9_-]+/$" },
     "listFileName": { "type": "string", "pattern": "^[A-Za-z0-9_-]+\\.dvlist\\.json\\.gz$" },

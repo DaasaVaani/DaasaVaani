@@ -27,6 +27,8 @@ const validatePersonal = new Ajv2020({ strict: true }).compile<typeof __TRANSFER
 if (!validatePersonal(personal)) throw new Error("Invalid portable personal limits: " + JSON.stringify(validatePersonal.errors));
 const canonical = new URL(config.canonicalBaseUrl);
 if (canonical.protocol !== "https:" || canonical.username || canonical.password || canonical.search || canonical.hash) throw new Error("Invalid canonical Website URL");
+const lyricDescriptor = new URL(config.lyricPreview.descriptorUrl);
+if (lyricDescriptor.protocol !== "https:" || lyricDescriptor.username || lyricDescriptor.password) throw new Error("Invalid lyric preview URL");
 const validatePublicationSettings = new Ajv2020({ strict: true }).compile<typeof __BOUNDS__>(publicationSettingsSchema);
 if (!validatePublicationSettings(bounds)) throw new Error("Invalid publication safety settings: " + JSON.stringify(validatePublicationSettings.errors));
 const fixturePrefix = new URL(".", new URL(config.descriptorUrl, "http://localhost")).pathname;

@@ -31,7 +31,8 @@ alongside tooling changes.
 
 ## Current executable checks
 
-Executable tooling covers the explicitly fixture-only milestone. It does not
+Executable tooling covers isolated fixture features and the separate real
+canonical prelaunch reader. It does not
 establish complete production-schema/language/lifecycle or release conformance.
 
 From Website:
@@ -71,6 +72,23 @@ page, two-page and two-page-plus-one sizes. They cover complete ranked reachabil
 keyboard/new-page focus, independent Favorites paging, reader Back/Forward,
 query reset and worker-error recovery without stale cards or false no-results.
 These synthetic fixtures are not a production language/corpus benchmark.
+The [real-preview suite](../tests/browser/lyrics.spec.ts) serves only synthetic,
+independently hashed public-family objects. It verifies explicit whole-download
+consent, complete title paging, exact canonical text/layout, locale independence,
+Back/Forward focus/scroll, corrupt-object failure/retry, cancellation, unknown IDs,
+reload reconsent and byte-equivalent personal database snapshots. Loader units
+cover compatible optional fields versus unsupported capabilities/versions,
+identity/control/layout/hash/size failures and aggregate/count exact/+1 bounds,
+including the actual configured decoded-byte ceiling. Incremental commands:
+
+```powershell
+npm test -- lyric-publication
+npm run test:e2e -- lyrics
+```
+
+These focused checks do not replace `npm run check` before finalization/push.
+Actual hosted objects and real desktop/mobile reading require separate post-deploy
+verification; synthetic tests are not owner-text/linguistic review.
 `npm run demo` publishes only synthetic fixture artifacts and serves the
 local Website at the configured settings/web.yml port. It is not a production
 Library deployment or a source migration.
@@ -180,8 +198,8 @@ tracked paths: include new documentation deliberately and preserve unrelated sta
 | Full application check | Current command |
 | --- | --- |
 | Website | `npm run check`: unit tests, fresh fixture build/typecheck and three-viewport production-preview browser tests |
-| Shared | `npm run check`: deterministic UI generation and fixture/settings tests |
-| Library | `npm run check`: typecheck and all fixture-publisher tests |
+| Shared | `npm run check`: deterministic UI/Unicode generation and all contract/settings/conformance tests |
+| Library | `npm run check`: typecheck, canonical source validation and all source/import/publisher tests |
 | Android | Generated config, full build/core/JVM/lint and connected test above; no app JVM test sources |
 | Production/release | Incomplete: full schemas/tables, snapshots/personal migration, signing/platform/accessibility/capacity matrix |
 | Performance/capacity harness | Not implemented; no production timing/memory/corpus result claimed |
@@ -193,7 +211,7 @@ IDs or a release acceptance declaration.
 
 | Requirements | Current evidence | Boundary |
 | --- | --- | --- |
-| DATA-02/07/08 | Library tests preserve LF/CRLF text/UUIDs, reject malformed/duplicate lines and exclude held synthetic items | Fixture schema only; full production fields, filenames, verses/alignment and authoring/migration incomplete |
+| DATA-01/02/04/05/07/08 | Real canonical source/import/publication contracts, optional empty authoring fields, LF/CRLF/UUID preservation, verse/alignment validation, held-input isolation and separate media-independent readers; synthetic failure fixtures | Populated public metadata/Latin/media adapters, full rights/registry closure, typed personal migration and production lifecycle remain incomplete |
 | SEARCH-12/13 | Sampled independent substring/full-matrix oracle, counted-gram candidates, native core checks and real browser search | Ordinary fixture text only; reviewed profiles/aliases/markers, exhaustive proof and complete native parity pending |
 | PLAT-01/05 | Real React and Compose apps; built-site browser journeys at desktop/mobile/320px and one native API36 reading journey | PWA installation, complete routes/layout/interaction modes and supported-platform/device matrix pending |
 | I18N-01/02/03, SET-04 | Matching two-locale resources; web first-use ordered browser-language selection, configured fallback, persisted four-mode appearance with contrast/media checks; native durable locale/theme preferences; canonical text remains independent | Complete script/personal preferences, device/font matrix and full localization conformance pending |
@@ -241,9 +259,10 @@ than silently selecting a different revision.
 The [approved lyric identity contract](https://github.com/DaasaVaani/shared/blob/main/docs/lyric-identity.md#7-required-acceptance-evidence)
 adds target acceptance obligations: text-only publication/reading, unchanged
 personal and line/verse identities after media additions/removals, typed v1/v2
-legacy compatibility and no inferred mapping/source mutation. These suites are
-not implemented by documentation approval; current fixture checks do not prove
-that target. Source/record migrations require separate explicit authorization.
+legacy compatibility and no inferred mapping/source mutation. The source/publication and separate canonical-reader slice has executable
+evidence; fixture personal/transfer checks still do not prove typed-reference,
+media-evolution or full lifecycle acceptance. Source/record migrations require
+their own explicit authorization.
 
 Use [requirements acceptance scenarios](requirements.md) and
 [Shared traceability](https://github.com/DaasaVaani/shared/blob/main/docs/implementation-specification.md#14-requirement-and-verification-traceability).

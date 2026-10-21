@@ -14,12 +14,14 @@
 6. [Roadmap](implementation-roadmap.md) and [testing/release](testing-and-release.md):
    implementation prerequisites and full finalization/push validation.
 
-Staged implementation is authorized. The current fixture-only milestone is not
+Staged implementation is authorized. The current prelaunch reader and fixture features are not
 full production design closure or release readiness. Consult the roadmap for
 actual coverage and remaining gates; guides do not prove provider permission.
 The approved [lyric identity and optional media contract](https://github.com/DaasaVaani/shared/blob/main/docs/lyric-identity.md)
-defines the video-independent target and legacy compatibility. Current executable
-fixtures remain unchanged; source migration is not authorized.
+defines video-independent identity and legacy compatibility.
+The [real lyric preview](lyric-preview.md) reads the reviewed text-only publication
+separately from unchanged fixture personal/transfer formats. Its limited
+in-memory lifecycle does not establish production offline/personal conformance.
 
 ## Owners
 
@@ -32,7 +34,8 @@ fixtures remain unchanged; source migration is not authorized.
 
 Consumers independently pin Shared and query published Library artifacts.
 Website has no library source directory. Its settings directory owns web settings;
-portable configuration stays in Shared. Source migration remains unauthorized.
+portable configuration stays in Shared. Reviewed owner-text import/publication
+is authorized in Library; further reinterpretation or inferred mappings are not.
 Actual Node/React and Kotlin/Compose fixture tooling is documented in the testing guide.
 
 ## Community and operations
