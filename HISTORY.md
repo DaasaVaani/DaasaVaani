@@ -1,5 +1,53 @@
 # Documentation history
 
+## 2026-10-21: transactional web list import and storage
+
+- Continued autonomous batches under the owner's direct-main authorization.
+  The prior managed Actions analyzer completed successfully; both CodeQL jobs
+  passed and the obsolete Website validation branch was removed.
+- Published Shared storage/UI prerequisites first at
+  `167f555c4a77f1bb21b4cbbb6a587b3f6f4960c1`, with preflight39618663621 and
+  main39618742418 successful before advancing this Website's gitlink.
+  Android/Library pins and the immutable fixture producer were not changed.
+- Added exact transactional list/count/UTF8 accounting, fresh list/occurrence
+  UUIDs, confirmed new-list-only import, duplicate-name confirmation, rename,
+  independent duplication/deletion and live cross-tab personal views. User text,
+  order and repeated/unresolved references are retained; no lyric fetch or
+  readiness assertion is introduced by saving.
+- Added exact unicode-case-folding1.1.2 (MIT, bundled types) after native lowercase
+  and collator checks did not implement full Unicode caseless name comparison.
+  NFC/full default folding is a warning key only; stored names are never changed.
+  Installation followed the manifest edit with scripts disabled. npm reported
+  locked optional Linux bindings during cleanup but installed successfully.
+- The first full check passed18 unit and54 of57 browser cases; the3 newer-schema
+  cases exposed Dexie's VersionError fallback/schema-patching behavior. Replaced
+  that opening path with native version-gated atomic bootstrap/migration and
+  a guard against concurrent future-version upgrades. The prior version's
+  personal row is preserved; invalid migration and unsupported future data are
+  refused without deletion, partial upgrade or repair-by-schema-patching.
+- A focused Playwright invocation using a backslash-separated filename matched
+  no tests because the runner treats file selectors as regular expressions.
+  The filename-only selector then passed all6 newer/blocked-migration cases.
+- Published the final input-feedback prerequisites at Shared
+  `1950aa61f4301f6eb6957522e555e293eb2838c1`; preflight39621955548 and
+  main39622101856 passed before adopting the pin. Shared `npm run check`
+  passed13 tests and `python tools\check_repository.py` passed40 tracked files.
+- Final Website `npm run check` passed18 unit tests, strict TypeScript/Vite
+  build and all63 production-preview browser tests across desktop, Pixel7
+  and320px. This includes the actual64MiB logical-envelope ceiling/+1 byte,
+  list-count ceiling/+1,128-code-point names,512-code-point placeholder text,
+  narrow-layout wrapping and invalid draft-name refusal without any write.
+  Invalid user input has a separate actionable error from corrupt stored data;
+  hints use the configured Unicode limit without UTF16 truncation.
+- Changed-document UTF8/whitespace/fence/link/anchor checks passed7 Markdown
+  files and all153 requirement identities remained unchanged. The existing
+  main-chunk size advisory remains visible; no performance gate was claimed.
+- Archived the replaced capability wording: "This is preview only:
+  saving/managing lists is not implemented" and "Previews ... have no save action".
+  Those describe the preceding slice, not current capability. Full native
+  transfer, offline shell, per-occurrence management, recitation and recoverable
+  personal backup remain incomplete; this is not full requirement completion.
+
 ## 2026-10-21: bounded list codecs and preview
 
 - The owner requested continuing batches without waiting for further instructions,

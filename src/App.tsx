@@ -3,10 +3,12 @@ import { HashRouter, NavLink, Link, Route, Routes, useLocation, useNavigate, use
 import messages from "../shared/generated/web/ui.json";
 import type { FixtureItem, SearchIndex, SearchPolicy } from "../shared/types/publication";
 import { Publication, loadPublication } from "./artifacts";
-import { readPersonal, updatePersonal, type Personal } from "./personal";
+import { watchPersonal, updatePersonal, type Personal, type PersonalStore } from "./personal";
 import type { Hit } from "./search";
 import { NavigationContinuity } from "./navigation";
 import { ListPreview } from "./ListPreview";
+import { Lists } from "./Lists";
+import { defaultPersonal } from "./personal-model";
 import styles from "./App.module.css";
 
 type Labels = typeof messages.en;
@@ -161,8 +163,8 @@ function Library({ publication, labels, personal, favoritesOnly }: {
 export default function App() {
   const [publication, setPublication] = useState<Publication>();
   const [personalReady, setPersonalReady] = useState(false);
-  const [personal, setPersonal] = useState<Personal>({ id: "personal", favorites: [],
-    language: __WEB_CONFIG__.defaultUiLanguage, theme: __WEB_CONFIG__.defaultTheme });
+  const [store, setStore] = useState<PersonalStore>();
+  const [personal, setPersonal] = useState<Personal>(defaultPersonal);
   const [error, setError] = useState("");
   const [attempt, setAttempt] = useState(0);
   const labels = messages[personal.language];
@@ -170,16 +172,21 @@ export default function App() {
     const controller = new AbortController();
     setError("");
     setPersonalReady(false);
+    setStore(undefined);
     const failed = (reason: unknown) => {
       if (!controller.signal.aborted) setError(current => [current, errorText(reason)].filter(Boolean).join("\n"));
     };
     loadPublication(controller.signal).then(library => {
       if (!controller.signal.aborted) setPublication(library);
     }).catch(failed);
-    readPersonal().then(state => {
-      if (!controller.signal.aborted) { setPersonal(state); setPersonalReady(true); }
-    }).catch(failed);
-    return () => controller.abort();
+    const stop = watchPersonal(state => {
+      if (!controller.signal.aborted) {
+        setStore(state);
+        setPersonal(state.personal ?? defaultPersonal());
+        setPersonalReady(true);
+      }
+    }, reason => { setPersonalReady(false); setStore(undefined); failed(reason); });
+    return () => { controller.abort(); stop(); };
   }, [attempt]);
   useEffect(() => {
     const root = document.documentElement;
@@ -206,6 +213,7 @@ export default function App() {
     </Link><nav aria-label={labels.appName}>
       <NavLink to="/" end>{labels.library}</NavLink>
       <NavLink to="/favorites">{labels.favorites}</NavLink>
+      <NavLink to="/lists">{labels.lists}</NavLink>
       <NavLink to="/settings">{labels.settings}</NavLink>
     </nav></header>
     <main id="content" tabIndex={-1} className={styles.main}>
@@ -220,6 +228,7 @@ export default function App() {
         <Routes>
         <Route path="/" element={null} />
         <Route path="/favorites" element={null} />
+        <Route path="/lists" element={store ? <Lists labels={labels} personal={store} /> : null} />
         <Route path="/item/:id" element={publication && personalReady
           ? <Reader publication={publication} labels={labels} personal={personal} toggle={toggle} /> : null} />
         <Route path="/settings" element={<section className={styles.reader}><h1>{labels.settings}</h1>
@@ -234,10 +243,10 @@ export default function App() {
               aria-pressed={personal.theme === theme} onClick={() => void change(state => ({ ...state, theme }))}>{labels[theme]}</button>)}
           </fieldset>
           </>}
-          <ListPreview labels={labels} />
+          <ListPreview labels={labels} personal={store} />
         </section>} />
         <Route path="/list/:payload" element={<section className={styles.reader}>
-          <ListPreview labels={labels} initialLink={new URL(__WEB_CONFIG__.listLinkPath, __WEB_CONFIG__.canonicalBaseUrl).href + window.location.hash} />
+          <ListPreview labels={labels} personal={store} initialLink={new URL(__WEB_CONFIG__.listLinkPath, __WEB_CONFIG__.canonicalBaseUrl).href + window.location.hash} />
         </section>} />
         <Route path="*" element={<p role="alert">{labels.unknownRoute} <Link to="/">{labels.back}</Link></p>} />
       </Routes>

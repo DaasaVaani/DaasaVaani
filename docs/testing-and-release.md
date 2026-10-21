@@ -75,11 +75,19 @@ concatenated members and trailing bytes. Browser journeys exercise the actual
 worker and built open-path entry, plain-text/repeated-entry preservation, file/
 link re-export, unavailable Library and unchanged personal records. A controlled
 nonresponding worker tests cancellation/termination deterministically; it is not a
-compression-speed benchmark. List save/import, native interoperability and complete
-offline-shell/platform behavior remain unimplemented.
+compression-speed benchmark. Confirmed web import and list creation/rename/
+duplication/deletion exercise the real personal database, including cross-tab
+duplicate-name confirmation invalidation, migration rollback, future-schema refusal
+without changing unfamiliar stores, blocked-upgrade recovery and preservation of
+favorites/preferences. Native interoperability and complete offline-shell/platform
+behavior remain unimplemented.
 Tests include actual 9MiB encoded, 8MiB decoded and 2,048-character complete-link
 boundaries, not only reduced test limits. Highly compressible valid data is not
 rejected by an invented ratio cap. The build emits third-party license notices.
+Personal tests cover the actual configured complete-envelope byte ceiling and
+exactly one extra byte, including control/header/revision/identity/escaping UTF8
+overhead, plus the actual list-count ceiling and limit+1. Transport-preview
+no-write checks compare every personal table, not just preferences.
 
 Android requires Node, JDK21, the configured SDK36/build tools and an API36 emulator
 for current connected evidence. Set JAVA_HOME/ANDROID_HOME and select the intended
@@ -145,9 +153,9 @@ IDs or a release acceptance declaration.
 | SEARCH-12/13 | Sampled independent substring/full-matrix oracle, counted-gram candidates, native core checks and real browser search | Ordinary fixture text only; reviewed profiles/aliases/markers, exhaustive proof and complete native parity pending |
 | PLAT-01/05 | Real React and Compose apps; built-site browser journeys at desktop/mobile/320px and one native API36 reading journey | PWA installation, complete routes/layout/interaction modes and supported-platform/device matrix pending |
 | I18N-01, SET-04 | Matching two-locale generated UI resources; web locale/theme persistence without changing canonical text | Browser/device first-use selection, complete script/personal preferences and native preference parity pending |
-| LIB-01/04 | Web favorite toggle/reload persistence and explicit corrupt-personal-record error without overwriting stored data | Lists/offline/future migrations and Android Room personal state absent |
+| LIB-01/04/08/09/10/11 | Web favorites/lists, independent repeated IDs/plain text, duplicate-name confirmation, create/rename/duplicate/delete and non-destructive fixture v1 migration | Occurrence editing/reordering/replacement, recitation/offline/production migrations and Android Room personal state absent |
 | UX-13 | In-session Library/Favorites query/results/index retention, Back/Forward and reader return with measured scroll/focus restoration; removed-result/direct-reader/reload coverage | No persistent search history; filters, list/Explore, offline and Android continuity pending |
-| XFER-01/02/03/05/06/08 | Bounded worker codecs, strict local preview/re-export, static open-path links, cancellation/errors and unchanged IndexedDB | No saved/imported lists, share adapters, native round trips, verified App Links or full backups |
+| XFER-01/02/03/04/05/06/08 | Bounded worker codecs, preview/re-export, static open-path links, explicit transactional new-list-only save, cancellation/errors, preview-no-write and stale-confirmation checks | Saved-list export UI, catalog resolution, platform share adapters, native round trips, verified App Links and full backups incomplete |
 | SET-01/02 | Owned settings/schema guards, Shared policy binding and immutable clean fixture-tool pin | Complete production settings inventory, language/protocol/backup contracts and all compatibility fixtures pending |
 | QUAL-01/02/03 | Semantic browser controls, keyboard focus entrypoint, standalone canonical reading and no video/tracking dependencies | Full keyboard/screen-reader/contrast/scaling/platform journeys remain unverified; no formal conformance claim |
 

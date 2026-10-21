@@ -16,7 +16,7 @@ gates must close before their owning slices; no phase is globally complete.
 | P2 | Two-locale UI generation with committed web/Android resources | Reviewed five-Latin/nine-non-Latin tables, transliteration, technical grammar, plurals/escaping conformance |
 | P4 | Fixture gzip/hash/canonicalization/index producer; sampled independent OSA/candidate parity | Durable ledger/receipts, semantic dates, ZIP/planner, complete language/profile index and proof/capacity evidence |
 | P5 | Responsive online fixture reading/search, explicit consent, errors, direct routes, locale/themes and Library/Favorites session Back/Forward continuity | Full filters/discovery/script/helper/video/accessibility/platform journeys |
-| P5a | Transactional web favorites/preferences; bounded worker list-file/link preview and lossless re-export using Shared v1 schema | List persistence/management and confirmed import, recents/bookmarks/learning/recitation, native transfer parity, full backups and migrations |
+| P5a | Transactional web favorites/preferences/lists, bounded worker preview/re-export, confirmed new-list-only import, duplicate-name warning, creation/rename/duplication/deletion and tested fixture v1 migration | Occurrence add/edit/reorder/remove/replacement, recents/bookmarks/learning/recitation, saved-list export UI, native transfer parity, full backups and production migrations |
 | P6 | No persistent offline snapshot implementation | Journals/atomic activation/resume/repair/reader-safe GC and service worker lifecycle |
 | P7 | Native fixture-only full preparation in memory, reading/search, core tests and connected reading test | Room personal state, durable preparation/recovery, typed navigation/DI, parity and device matrix |
 | P3/P8/P9 | Dependency-ordered Shared/fixture-publisher pins; full web fixture CI/Pages and native build/core/lint CI | Live-provider clarification, production ingestion/publication/signing, device CI and release readiness |
@@ -34,13 +34,16 @@ available scroll/focus; removed favorites fall back to the current valid results
 Reloading discards browsing state and requires search consent again. This is not
 persistent search history, list/Explore continuity or Android/offline parity.
 
-XFER-01/02/03/05/06/08 receive partial web evidence: strict settings-derived
+XFER-01/02/03/04/05/06/08 receive partial web evidence: strict settings-derived
 schema, bounded single-member gzip/raw-deflate/base64url codecs, local plain-text
 preview, explicit cancellation and a static configured `/open/` hash entry.
-Settings/preview remain available when the Library endpoint fails. No list is
-saved, no lyric is fetched by transfer, and no offline readiness or signed native
-App Links is claimed. Preview re-export does not substitute for list management
-or confirmed new-list-only import.
+Settings/preview/list management remain available when the Library endpoint fails.
+Saving requires an explicit action after preview and creates a new independent
+list only. Duplicate names require confirmation; revision/epoch changes require
+renewed review. No lyric is fetched by transfer or saving, and no offline readiness
+or signed native App Links is claimed. The [current storage protocol](architecture.md#web-fixture-personal-storage-v2)
+does not establish full-backup exportability, complete list/recitation journeys,
+production migration coverage or native parity.
 
 ## Delivery sequence
 

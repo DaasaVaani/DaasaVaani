@@ -21,11 +21,15 @@ async function records(page: Page) {
       request.onerror = () => reject(request.error);
     });
     try {
-      return await new Promise<unknown>((resolve, reject) => {
-        const request = database.transaction("personal").objectStore("personal").getAll();
-        request.onsuccess = () => resolve(request.result);
-        request.onerror = () => reject(request.error);
-      });
+      const values: Record<string, unknown[]> = {};
+      for (const name of database.objectStoreNames) {
+        values[name] = await new Promise<unknown[]>((resolve, reject) => {
+          const request = database.transaction(name).objectStore(name).getAll();
+          request.onsuccess = () => resolve(request.result);
+          request.onerror = () => reject(request.error);
+        });
+      }
+      return values;
     } finally { database.close(); }
   });
 }
@@ -64,6 +68,7 @@ test("worker preview preserves ordered plain text, exports a file/link and opens
   const notices = await page.request.get("/third-party-licenses.md");
   expect(notices.status()).toBe(200);
   expect(await notices.text()).toContain("pako");
+  expect(await notices.text()).toContain("unicode-case-folding");
   const workerNotice = await page.request.get("/pako-license.txt");
   expect(workerNotice.status()).toBe(200);
   expect(await workerNotice.text()).toContain("Copyright");

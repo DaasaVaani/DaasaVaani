@@ -9,8 +9,10 @@ publisher, with explicit indexed-search consent, canonical Kannada reading,
 transactional favorites and independent interface-language/theme preferences.
 Library/Favorites searches and result positions survive in-session reading and
 Back/Forward navigation, without persistent search history.
-Settings can preview bounded list files/links locally and re-export validated
-snapshots. This is preview only: saving/managing lists is not implemented.
+Settings can preview bounded list files/links locally, re-export snapshots and
+explicitly save new independent lists. Lists supports creation, rename,
+duplication and confirmed deletion, with repeated occurrences and duplicate-name
+confirmation. Native transfer, occurrence editing and recitation remain incomplete.
 Shared generates the English/Kannada UI resources; Android has a native preparation/
 reading fixture demo. Production contracts, reviewed transliteration, persistent
 offline snapshots and the remaining product journeys are incomplete.

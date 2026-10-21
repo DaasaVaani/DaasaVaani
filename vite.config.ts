@@ -23,7 +23,7 @@ if (!defaults || typeof defaults !== "object" || !("uiLanguage" in defaults) ||
     !Array.isArray(defaults.supportedThemes) || defaults.supportedThemes.some(theme => !["light", "dark"].includes(theme)) ||
     !defaults.supportedThemes.includes(defaults.theme)) throw new Error("Invalid portable defaults");
 const personal = strictYaml(readFileSync(new URL("./shared/settings/personal-transfer.yml", import.meta.url), "utf8"));
-const validatePersonal = new Ajv2020({ strict: true }).compile<typeof __TRANSFER_LIMITS__ & { maxFavorites: number }>(personalSchema);
+const validatePersonal = new Ajv2020({ strict: true }).compile<typeof __TRANSFER_LIMITS__ & PersonalLimits>(personalSchema);
 if (!validatePersonal(personal)) throw new Error("Invalid portable personal limits: " + JSON.stringify(validatePersonal.errors));
 const canonical = new URL(config.canonicalBaseUrl);
 if (canonical.protocol !== "https:" || canonical.username || canonical.password || canonical.search || canonical.hash) throw new Error("Invalid canonical Website URL");
@@ -75,7 +75,7 @@ export default defineConfig({
   } } },
   define: { __WEB_CONFIG__: JSON.stringify({ ...config, defaultUiLanguage: defaults.uiLanguage,
     defaultTheme: defaults.theme, uiLanguages: defaults.supportedUiLanguages, uiThemes: defaults.supportedThemes,
-    maxFavorites: personal.maxFavorites }), __BOUNDS__: JSON.stringify(bounds),
+    maxFavorites: personal.maxFavorites }), __BOUNDS__: JSON.stringify(bounds), __PERSONAL_LIMITS__: JSON.stringify(personal),
     __TRANSFER_LIMITS__: JSON.stringify({ maxListEncodedBytes: personal.maxListEncodedBytes,
       maxListDecodedBytes: personal.maxListDecodedBytes, maxSharedUrlAscii: personal.maxSharedUrlAscii }) },
   test: { include: ["src/**/*.test.ts"], environment: "node" },

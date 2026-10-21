@@ -11,6 +11,12 @@ interface WebConfig {
 }
 declare const __WEB_CONFIG__: WebConfig;
 declare const __TRANSFER_LIMITS__: { maxListEncodedBytes: number; maxListDecodedBytes: number; maxSharedUrlAscii: number };
+interface PersonalLimits {
+  maxFavorites: number; maxLists: number; maxEntriesPerList: number; maxTotalEntries: number;
+  maxPersonalStoredBytes: number; maxListDecodedBytes: number;
+  maxListNameCodePoints: number; maxEntryTextCodePoints: number;
+}
+declare const __PERSONAL_LIMITS__: PersonalLimits;
 declare const __BOUNDS__: {
   maxDescriptorBytes: number; maxManifestEncodedBytes: number; maxManifestDecodedBytes: number;
   maxItemEncodedBytes: number; maxItemDecodedBytes: number; maxPolicyEncodedBytes: number;

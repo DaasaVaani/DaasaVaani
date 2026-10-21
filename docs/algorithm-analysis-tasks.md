@@ -85,9 +85,15 @@ silent truncation, false success or weaker validation.
 - ALG-14: the web worker implements bounded single-member gzip and raw-deflate/
   base64url list codecs, schema/UTF8/duplicate-key validation, exact byte/link
   limits and lossless preview re-export. Independent Node zlib round trips and
-  browser worker/cancellation/no-personal-write cases exist. Confirmed list import,
-  native codec interoperability and signed-link sharing remain incomplete.
-- ALG-05/06/08-13/15: complete algorithms are not implemented. Basic verified online
+  browser worker/cancellation/preview-no-write cases exist. Explicit web import
+  uses transactional new-list-only persistence with repeated independent IDs,
+  duplicate-name confirmation and revision/epoch checks. Native codec
+  interoperability and signed-link sharing remain incomplete.
+- ALG-15: fixture web-list writes have deterministic complete-envelope UTF8
+  accounting, atomic collection/identity checks, non-destructive v1 migration and
+  stale revision/epoch refusal. Actual configured byte/collection boundaries have
+  executable coverage. Full recoverable backup/replacement is not implemented.
+- ALG-05/06/08-13: complete algorithms are not implemented. Basic verified online
   reading and process-local Android preparation are not aligned transliteration,
   a ZIP planner, persistent activation/GC, ingestion or recoverable personal backup.
 
@@ -428,6 +434,10 @@ source migration, live ingestion or automatic updates to reviewed items.
   deduplicate occurrences, include lyrics or introduce a short-link backend.
 
 ### ALG-15: Recoverable backup replacement and capacity accounting
+
+The [web fixture storage protocol](architecture.md#web-fixture-personal-storage-v2)
+supplies partial executable accounting/migration/fencing evidence only. It is not
+the full-backup format and does not establish backup exportability or replacement.
 
 - **Requirements:** XFER-09/10, SET-04, LIB-05, QUAL-06.
 - **Already fixed:** separate full-backup envelope; approved personal state and

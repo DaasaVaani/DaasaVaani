@@ -76,7 +76,8 @@ reloads. Actual deployed hosting still requires byte/hash and browser validation
 - Settings and list previews do not depend on a successful Library download.
   Personal controls/readers require successful personal-record validation.
   Previews show references/user text, not guessed catalog resolution/readiness,
-  and have no save action. Re-export is local; long links require file fallback.
+  until a library-resolution adapter is available. An explicit Save creates only
+  a new independent local list; re-export is local and long links require files.
   A static build alias serves the configured open path with the same root assets.
   The production build includes generated third-party dependency license notices.
 
@@ -110,6 +111,73 @@ Personal values never enter repository settings; payloads cannot override limits
   notify/no forced reload or skipWaiting; preserve active reading/personal state.
 - Root /open/ hash links, narrow signed Android association and browser fallback;
   no forced routing or claim that installation guarantees handoff.
+
+## Web fixture personal storage v2
+
+This is the executable fixture-client protocol for favorites/preferences and
+logical lists, not the full production personal/backup contract. The
+[Shared list record](https://github.com/DaasaVaani/shared/blob/main/docs/list-transfer.md#local-list-record-v1)
+owns list/occurrence fields. All three tables share the configured personal DB:
+
+| Table | Exact logical rows |
+| --- | --- |
+| `personal` | Zero or one `{id:"personal", favorites, language, theme}`; absent row means the validated configured defaults |
+| `lists` | Independently identified Shared list records; entry array order is authoritative |
+| `control` | Exactly one `{id:"state", formatVersion:2, epoch, revision}`; fresh local UUIDv4 epoch and nonnegative safe-integer revision |
+
+### Opening and migration
+
+Native IndexedDB version20 is the fixture v2 schema; version10 is the supported
+Dexie v1 predecessor. Open at the exact native version **before** opening Dexie,
+which can otherwise retry a newer version and patch missing schema parts.
+Native upgrade creates only the specified stores/header, validates legacy
+preferences/favorites and aggregate capacity before success, and retains the
+legacy personal row unchanged. Any failure aborts the entire schema transaction.
+New initialization creates metadata only, not a personal preference or list row.
+
+Reject future/unknown versions, extra/missing stores, unexpected indexes/keypaths,
+invalid rows, duplicate identities and invalid capacities; do not delete, reset,
+coerce or silently repair data. Keep the native guard connection until the
+matching Dexie open succeeds, rejecting concurrent future-version changes.
+Blocked upgrades report closing other tabs/retrying, not data deletion. Invalid
+personal storage disables Save/personal reading controls but does not disable
+local transfer preview or re-export. There is no downgrade/reset migration.
+
+### Transactions, names and exact accounting
+
+Every personal mutation uses one read-write transaction spanning all three
+tables. Read/validate the complete current state, check captured epoch/revision,
+validate the prospective state including the incremented revision, then write
+only the intended record and header. Failure rolls back all writes. Creation/
+import/duplication allocates fresh cryptographic UUIDv4 list/occurrence IDs;
+rename retains identities. List and occurrence UUID sets are checked independently
+across the database, preserving repeated references/text and unresolved IDs.
+
+Create/import/rename/duplicate warns on another name's NFC + full default Unicode
+case-folded + NFC key. The dependency/Unicode data is pinned by the package
+manifest/lock; neither UI locale nor a collation/trim alters this key. Stored names
+remain byte-for-byte unchanged. Confirmed reuse still creates independent lists.
+The confirmation captures epoch/revision; another tab's mutation forces renewed
+review, even if a confirmation was already visible. Live queries refresh
+personal views across tabs; they do not overwrite a captured edit/confirmation.
+
+The exact logical accounting envelope, serialized as compact UTF8 JSON without
+BOM, is `{format:"fixture-personal-storage",formatVersion:2,control,personal,lists}`.
+Key order is the order shown; header keys follow the table above. `personal` is
+an empty array or one row with keys `id,favorites,language,theme`. `lists` is sorted
+by ASCII UUID; row keys are `id,name,entries`. Each entry uses `id,kind,videoId`
+then optional `fallback`, or `id,kind,text`. No text/array normalization occurs.
+Every header, UUID, JSON escape, comma/bracket and revision digit is included.
+No timestamps exist in this version; adding them requires a versioned protocol
+and accounting change rather than an uncounted field.
+
+Enforce Shared `maxPersonalStoredBytes`, collection/total-occurrence ceilings and
+each list's actual minimal-export JSON decoded-byte bound before commit. Count
+serialized Unicode scalars exactly without allocating an output-sized byte
+buffer. Physical IndexedDB/index/quota usage differs from logical bytes.
+This envelope contains local control data and is **never a full-backup export**.
+Full-backup headers, complete personal collections, replacement/crash/locale
+recovery and exportability require their own exact contracts/tests.
 
 ## Selected foundation and incomplete gates
 
