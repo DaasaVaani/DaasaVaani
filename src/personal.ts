@@ -4,6 +4,7 @@ import {
   type ListRecord, type Personal, type PersonalStore, type Revision,
 } from "./personal-model";
 export type { Personal, PersonalStore } from "./personal-model";
+export const browserDefaultPersonal = () => defaultPersonal(navigator.languages.length ? navigator.languages : [navigator.language]);
 
 const db = new Dexie(__WEB_CONFIG__.databaseName);
 db.version(1).stores({ personal: "id" });
@@ -111,13 +112,13 @@ export function watchPersonal(next: (state: PersonalStore) => void, error: (reas
   return () => subscription.unsubscribe();
 }
 export async function readPersonal(): Promise<Personal> {
-  return (await readStore()).personal ?? defaultPersonal();
+  return (await readStore()).personal ?? browserDefaultPersonal();
 }
 export async function updatePersonal(change: (value: Personal) => Personal): Promise<Personal> {
   await ready();
   return db.transaction("rw", personal, lists, control, async transaction => {
     const state = await stored(transaction);
-    const value = change(state.personal ?? defaultPersonal());
+    const value = change(state.personal ?? browserDefaultPersonal());
     validatePersonal(value);
     const next = { ...nextRevision(state, state.control), personal: value };
     validateStore(next);

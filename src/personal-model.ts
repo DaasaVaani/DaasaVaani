@@ -30,7 +30,11 @@ const object = (value: unknown): value is Record<string, unknown> => Boolean(val
 const keys = (value: Record<string, unknown>, expected: string[]) =>
   Object.keys(value).length === expected.length && expected.every(key => Object.hasOwn(value, key));
 
-export function defaultPersonal(): Personal {
+export function defaultPersonal(preferredLanguages: readonly string[] = []): Personal {
+  for (const tag of preferredLanguages) {
+    const language = __WEB_CONFIG__.uiLanguages.find(value => value === tag.split("-")[0]?.toLowerCase());
+    if (language) return { id: "personal", favorites: [], language, theme: __WEB_CONFIG__.defaultTheme };
+  }
   return { id: "personal", favorites: [], language: __WEB_CONFIG__.defaultUiLanguage, theme: __WEB_CONFIG__.defaultTheme };
 }
 export function validatePersonal(value: unknown, limits = __PERSONAL_LIMITS__): asserts value is Personal {

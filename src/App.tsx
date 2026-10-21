@@ -3,15 +3,20 @@ import { HashRouter, NavLink, Link, Route, Routes, useLocation, useNavigate, use
 import messages from "../shared/generated/web/ui.json";
 import type { FixtureItem, SearchIndex, SearchPolicy } from "../shared/types/publication";
 import { Publication, loadPublication } from "./artifacts";
-import { watchPersonal, updatePersonal, type Personal, type PersonalStore } from "./personal";
+import { browserDefaultPersonal, watchPersonal, updatePersonal, type Personal, type PersonalStore } from "./personal";
 import type { Hit } from "./search";
 import { NavigationContinuity } from "./navigation";
 import { ListPreview } from "./ListPreview";
 import { Lists } from "./Lists";
-import { defaultPersonal } from "./personal-model";
 import styles from "./App.module.css";
 
 type Labels = typeof messages.en;
+function ListRoute({ labels, personal }: { labels: Labels; personal?: PersonalStore }) {
+  const location = useLocation();
+  const link = new URL(__WEB_CONFIG__.listLinkPath, __WEB_CONFIG__.canonicalBaseUrl).href +
+    "#" + location.pathname + location.search + location.hash;
+  return <section className={styles.reader}><ListPreview labels={labels} personal={personal} initialLink={link} /></section>;
+}
 const errorText = (error: unknown) => error instanceof Error ? error.message : String(error);
 interface ReaderProps { publication: Publication; labels: Labels; personal: Personal; toggle: (id: string) => void }
 
@@ -164,7 +169,7 @@ export default function App() {
   const [publication, setPublication] = useState<Publication>();
   const [personalReady, setPersonalReady] = useState(false);
   const [store, setStore] = useState<PersonalStore>();
-  const [personal, setPersonal] = useState<Personal>(defaultPersonal);
+  const [personal, setPersonal] = useState<Personal>(browserDefaultPersonal);
   const [error, setError] = useState("");
   const [attempt, setAttempt] = useState(0);
   const labels = messages[personal.language];
@@ -182,7 +187,7 @@ export default function App() {
     const stop = watchPersonal(state => {
       if (!controller.signal.aborted) {
         setStore(state);
-        setPersonal(state.personal ?? defaultPersonal());
+        setPersonal(state.personal ?? browserDefaultPersonal());
         setPersonalReady(true);
       }
     }, reason => { setPersonalReady(false); setStore(undefined); failed(reason); });
@@ -245,9 +250,7 @@ export default function App() {
           </>}
           <ListPreview labels={labels} personal={store} />
         </section>} />
-        <Route path="/list/:payload" element={<section className={styles.reader}>
-          <ListPreview labels={labels} personal={store} initialLink={new URL(__WEB_CONFIG__.listLinkPath, __WEB_CONFIG__.canonicalBaseUrl).href + window.location.hash} />
-        </section>} />
+        <Route path="/list/:payload" element={<ListRoute labels={labels} personal={store} />} />
         <Route path="*" element={<p role="alert">{labels.unknownRoute} <Link to="/">{labels.back}</Link></p>} />
       </Routes>
       <footer className={styles.footer}>{labels.unavailableFeatures}</footer>

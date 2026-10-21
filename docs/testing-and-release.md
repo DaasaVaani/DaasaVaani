@@ -52,7 +52,10 @@ Browser tests require the clean Library revision in settings/tooling.yml with `n
 the installed Playwright Chromium (`npx playwright install chromium` if missing).
 The configured suite exercises desktop, Pixel7 and320px layouts, explicit index
 consent, actual search/reading, preference/favorite persistence and corrupt-artifact
-errors. Session-continuity journeys verify query/results, restored keyboard focus
+errors. First-use locale cases exercise ordered supported/regional browser
+preferences, unsupported fallback, an empty preference list, explicit saved
+override/reload and independent theme/canonical Kannada behavior.
+Session-continuity journeys verify query/results, restored keyboard focus
 and measured scroll position through Back/Forward and reader return, no repeated
 index download, separate Library/Favorites searches, removed favorites, direct
 reader fallback and reset on reload. `npm run demo` publishes only synthetic fixture artifacts and serves the
@@ -87,6 +90,9 @@ Saved-list journeys download/decompress the actual gzip, locally reopen links,
 compare every table before/after and verify stored rather than unsaved names.
 Controlled workers test post-encode revision refusal and cancellation; high-entropy
 valid snapshots exercise oversized-link refusal plus lossless file fallback.
+Open-path same-document navigation after saving/moving/exporting verifies current
+router-bound payload decoding without a reload; unsupported query suffixes remain
+invalid and all personal tables stay unchanged.
 Native interoperability and complete offline-shell/platform
 behavior remain unimplemented.
 Tests include actual 9MiB encoded, 8MiB decoded and 2,048-character complete-link
@@ -160,7 +166,7 @@ IDs or a release acceptance declaration.
 | DATA-02/07/08 | Library tests preserve LF/CRLF text/UUIDs, reject malformed/duplicate lines and exclude held synthetic items | Fixture schema only; full production fields, filenames, verses/alignment and authoring/migration incomplete |
 | SEARCH-12/13 | Sampled independent substring/full-matrix oracle, counted-gram candidates, native core checks and real browser search | Ordinary fixture text only; reviewed profiles/aliases/markers, exhaustive proof and complete native parity pending |
 | PLAT-01/05 | Real React and Compose apps; built-site browser journeys at desktop/mobile/320px and one native API36 reading journey | PWA installation, complete routes/layout/interaction modes and supported-platform/device matrix pending |
-| I18N-01, SET-04 | Matching two-locale generated UI resources; web locale/theme persistence without changing canonical text | Browser/device first-use selection, complete script/personal preferences and native preference parity pending |
+| I18N-01/02/03, SET-04 | Matching two-locale resources; web first-use ordered browser-language selection, configured fallback and explicit locale/theme persistence without changing canonical text | Native first-use/preference parity, complete script/personal preferences and full localization conformance pending |
 | LIB-01/02/03/04/08/09/10/11 | Web favorites/lists, independent repeated IDs/plain text, duplicate-name confirmation, create/rename/duplicate/delete, occurrence add/edit/move/remove/manual replacement and non-destructive fixture v1 migration | Catalog resolution, recitation/offline/production migrations and Android Room personal state absent |
 | UX-13 | In-session Library/Favorites query/results/index retention, Back/Forward and reader return with measured scroll/focus restoration; removed-result/direct-reader/reload coverage | No persistent search history; filters, list/Explore, offline and Android continuity pending |
 | XFER-01/02/03/04/05/06/08 | Bounded worker codecs, preview/saved-list file/link export, static open-path links, explicit transactional new-list-only save, cancellation/errors, no-write and stale-confirmation/post-encode checks | Catalog resolution, platform share adapters, native round trips, verified App Links and full backups incomplete |

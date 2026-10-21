@@ -18,6 +18,14 @@ function code(action: () => unknown, expected: string) {
   }
 }
 describe("transactional personal model", () => {
+  test("first-use language follows the first supported browser preference and configured fallback without changing canonical text settings", () => {
+    expect(defaultPersonal(["fr-FR", "kn-IN", "en-US"]).language).toBe("kn");
+    expect(defaultPersonal(["en-GB", "kn"]).language).toBe("en");
+    expect(defaultPersonal(["KN-IN"]).language).toBe("kn");
+    expect(defaultPersonal(["fr-FR", "de"]).language).toBe(__WEB_CONFIG__.defaultUiLanguage);
+    expect(defaultPersonal([])).toEqual({ id: "personal", favorites: [], language: __WEB_CONFIG__.defaultUiLanguage, theme: __WEB_CONFIG__.defaultTheme });
+    expect(defaultPersonal(["kn-IN"]).theme).toBe(__WEB_CONFIG__.defaultTheme);
+  });
   test("stable-read exports project only minimal fields without writing, allocating identities or wrapping revision counters", () => {
     const record = newList(snapshot), state = { ...empty(), personal: defaultPersonal(), lists: [record] };
     const before = structuredClone(state);

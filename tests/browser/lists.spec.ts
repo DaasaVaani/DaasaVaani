@@ -1,5 +1,5 @@
 import { test, expect, type Page } from "@playwright/test";
-import { gzipSync, gunzipSync } from "node:zlib";
+import { gzipSync, gunzipSync, deflateRawSync } from "node:zlib";
 import { createHash } from "node:crypto";
 import { readFileSync } from "node:fs";
 import { strictYaml } from "../../shared/tools/generate-catalog.mjs";
@@ -235,6 +235,27 @@ test("saved-list exports use the stored name and exact minimal snapshot without 
   await expect(page.getByRole("heading", { name: snapshot.name, exact: true })).toBeVisible();
   expect(await records(page)).toEqual(before);
   expect(requests.filter(url => url.endsWith(".json.gz"))).toHaveLength(0);
+});
+test("same-document open-path export navigation decodes the current route, not an old lists hash", async ({ page }) => {
+  const original = { ...snapshot, name: "Synthetic route regression" };
+  await page.goto("/open/#/list/" + deflateRawSync(JSON.stringify(original)).toString("base64url"));
+  await expect(page.getByRole("heading", { name: original.name, exact: true })).toBeVisible();
+  await page.getByRole("button", { name: "Save to My Library", exact: true }).click();
+  await page.getByRole("link", { name: "View saved lists", exact: true }).click();
+  await page.getByRole("list", { name: "Lists", exact: true }).getByRole("button", { name: original.name, exact: true }).click();
+  await page.getByRole("group", { name: "Entry 2 of 3", exact: true }).getByRole("button", { name: "Move up", exact: true }).click();
+  await expect(page.getByRole("group", { name: "Entry 1 of 3", exact: true })).toBeFocused();
+  const before = await records(page);
+  await page.getByRole("button", { name: "Create snapshot link", exact: true }).click();
+  const output = page.locator("input[readonly]"); await expect(output).toBeVisible();
+  const url = new URL(await output.inputValue());
+  await page.goto(url.pathname + url.hash);
+  await expect(page.getByRole("heading", { name: original.name, exact: true })).toBeVisible();
+  await expect(page.locator("main ol > li").first()).toContainText("<b>Plain text</b>");
+  expect(await records(page)).toEqual(before);
+  await page.goto(url.pathname + url.hash + "?unexpected=1");
+  await expect(page.getByRole("alert")).toContainText("Invalid or unsupported");
+  expect(await records(page)).toEqual(before);
 });
 test("an export changed during encoding is refused until a fresh list selection", async ({ page, context }) => {
   await upload(page); await page.getByRole("button", { name: "Save to My Library", exact: true }).click();

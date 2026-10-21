@@ -7,6 +7,8 @@ static PWA and a separate native Android app.
 The responsive React Website reads hash-verified artifacts from the Library fixture
 publisher, with explicit indexed-search consent, canonical Kannada reading,
 transactional favorites and independent interface-language/theme preferences.
+First use follows the first supported browser-language preference, falling back
+to configured English; an explicit saved language overrides browser preferences.
 Library/Favorites searches and result positions survive in-session reading and
 Back/Forward navigation, without persistent search history.
 Settings can preview bounded list files/links locally, re-export snapshots and

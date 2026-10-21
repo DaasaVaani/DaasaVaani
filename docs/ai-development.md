@@ -39,7 +39,9 @@ demonstrations do not close remaining production contracts or prove full readine
 ## Non-negotiable boundaries
 
 - Kannada canonical; transliterate never translate. UI locale and lyric script
-  independent; uncertain lyrics held, corrections and identities preserved.
+  independent; first-use UI follows supported browser preferences with configured
+  fallback, and explicit stored override wins. Uncertain lyrics held, corrections
+  and identities preserved.
 - Shared owns portable contracts/settings/fixtures and UI catalogs/generator/
   committed resources. Library owns source/assets/registries/ingestion/publisher.
   Consumers query published artifacts and pin Shared independently.

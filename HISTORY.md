@@ -1,5 +1,40 @@
 # Documentation history
 
+## 2026-10-21: browser first-use UI language
+
+- Implemented I18N-02 for the web fixture client: select the first supported
+  primary language in browser preference order, including regional/script tags;
+  use browser language if the preference list is empty and configured English
+  when none is supported. Stored explicit preferences remain authoritative.
+- Used one pure default resolver plus the browser adapter consistently for
+  initial rendering, absent stored preferences and the first personal mutation.
+  No automatic preference write, lyric-script switch or theme reset was added.
+- `npm run check` passed23 unit tests, strict TypeScript/Vite and all96 browser
+  cases, including ordered regional preferences, fallback, empty preference list,
+  explicit override/reload, dark-theme retention and canonical Kannada.
+- Archived the preceding coverage-table limitation "Browser/device first-use
+  selection" was pending. Native first-use and full localization conformance
+  remain open; this does not claim device parity.
+- Saved-list export commit54db66feebad681f08366e5528999102d23787e9 passed
+  preflight39632998514 and main39633308148 including both required jobs and
+  Pages deployment. Explicit approved manual-main recovery acceptance was
+  dispatched separately as39635501893; dispatch alone is not a pass.
+- The actual `workflow_dispatch` run39635501893 passed Workflow lint, full web
+  build/tests and Pages deployment at54db66f, verifying the approved main-only
+  recovery mode without weakening checks. Both managed analyses39633308509 passed.
+- Real public export verification caught a same-document route bug after an
+  edited/moved saved list: valid gzip/link bytes decoded independently, but preview
+  failed until reload. The parent had captured `window.location.hash` outside
+  router updates. A location-aware route now derives the current complete hash,
+  retaining invalid query/hash suffixes for explicit rejection.
+- A first screenshot probe failed before running because an inline JavaScript
+  Windows path needed `String.raw`; the corrected live probe exposed the actual
+  route bug above. The smaller unchanged-list probe was insufficient, so retained
+  the exact edited/moved open-path regression rather than accepting reload as a fix.
+- Final `npm run check` passed23 unit tests, strict TypeScript/Vite and all99
+  browser cases including same-document navigation and no-write invalid suffixes.
+  No full live round-trip success is claimed for the unfixed public revision.
+
 ## 2026-10-21: stable-read saved-list export
 
 - Continued after occurrence commit5045c6626b902b814e6d2c59f50cd02604a5b301:

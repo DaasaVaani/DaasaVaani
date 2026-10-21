@@ -121,7 +121,7 @@ owns list/occurrence fields. All three tables share the configured personal DB:
 
 | Table | Exact logical rows |
 | --- | --- |
-| `personal` | Zero or one `{id:"personal", favorites, language, theme}`; absent row means the validated configured defaults |
+| `personal` | Zero or one `{id:"personal", favorites, language, theme}`; absent row means first supported browser language plus validated configured defaults |
 | `lists` | Independently identified Shared list records; entry array order is authoritative |
 | `control` | Exactly one `{id:"state", formatVersion:2, epoch, revision}`; fresh local UUIDv4 epoch and nonnegative safe-integer revision |
 
@@ -134,6 +134,15 @@ Native upgrade creates only the specified stores/header, validates legacy
 preferences/favorites and aggregate capacity before success, and retains the
 legacy personal row unchanged. Any failure aborts the entire schema transaction.
 New initialization creates metadata only, not a personal preference or list row.
+For an absent preference row, inspect `navigator.languages` in preference order
+(or `navigator.language` if empty), matching each case-insensitive primary
+language subtag against configured supported UI languages. Regional/script tags
+select that supported UI language; no match uses the configured fallback English.
+The first explicit personal mutation stores the resulting preference with that
+mutation, not an automatic initialization write. A stored language always wins
+over browser preferences. UI selection never changes canonical Kannada, lyric
+script or theme. The pure model accepts preference tags explicitly; only the
+browser adapter reads navigator values.
 
 Reject future/unknown versions, extra/missing stores, unexpected indexes/keypaths,
 invalid rows, duplicate identities and invalid capacities; do not delete, reset,
@@ -185,6 +194,11 @@ object-URL cleanup, lossless oversized-link file fallback and privacy warnings.
 Starting export cancels any pending save confirmation; decoding, saving and
 encoding controls cannot concurrently commit a pending confirmation. No catalog
 details/lyrics are fetched and no readiness state is inferred.
+The hash-link preview derives its complete hash from the router's current
+location, including route query/hash text so unsupported suffixes are rejected.
+It must not capture `window.location.hash` in the parent outside router updates:
+same-document navigation from a saved list must decode the newly selected link,
+not depend on a reload or unrelated personal-state render.
 
 The exact logical accounting envelope, serialized as compact UTF8 JSON without
 BOM, is `{format:"fixture-personal-storage",formatVersion:2,control,personal,lists}`.
