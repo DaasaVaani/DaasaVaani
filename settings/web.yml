@@ -1,0 +1,30 @@
+formatVersion: 1
+base: /
+descriptorUrl: /demo/latest.json
+demoPort: 5173
+databaseName: DaasaVaani-personal
+fontFamily: system-ui, "Nirmala UI", sans-serif
+readerFontSize: 28
+space: 8
+contentWidth: 1160
+readerWidth: 760
+demoViewports:
+  desktop: { width: 1440, height: 1000 }
+  mobile: { width: 390, height: 844 }
+themes:
+  light:
+    background: "#f6f3eb"
+    surface: "#fffdf8"
+    text: "#242e29"
+    muted: "#57645c"
+    accent: "#285642"
+    border: "#d6dcd0"
+    highlight: "#eee7d2"
+  dark:
+    background: "#17221d"
+    surface: "#202f27"
+    text: "#f0f0e6"
+    muted: "#bdc8bd"
+    accent: "#a8d3b5"
+    border: "#405448"
+    highlight: "#3c4130"

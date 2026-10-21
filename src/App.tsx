@@ -1,0 +1,204 @@
+import { useEffect, useRef, useState } from "react";
+import { HashRouter, NavLink, Link, Route, Routes, useParams, useSearchParams } from "react-router-dom";
+import messages from "../shared/generated/web/ui.json";
+import type { FixtureItem, SearchIndex, SearchPolicy } from "../shared/types/publication";
+import { Publication, loadPublication } from "./artifacts";
+import { readPersonal, updatePersonal, type Personal } from "./personal";
+import type { Hit } from "./search";
+import styles from "./App.module.css";
+
+type Labels = typeof messages.en;
+const errorText = (error: unknown) => error instanceof Error ? error.message : String(error);
+interface ReaderProps { publication: Publication; labels: Labels; personal: Personal; toggle: (id: string) => void }
+
+function Reader({ publication, labels, personal, toggle }: ReaderProps) {
+  const { id } = useParams();
+  const [params] = useSearchParams();
+  const [item, setItem] = useState<FixtureItem>();
+  const [error, setError] = useState("");
+  const lineId = params.get("line");
+  useEffect(() => {
+    const controller = new AbortController();
+    setItem(undefined);
+    setError("");
+    if (!id) { setError("Missing item identity"); return; }
+    publication.item(id, controller.signal).then(value => {
+      setItem(value);
+      if (lineId && !value.lines.some(line => line.id === lineId)) setError("The matching line is unavailable; no location was guessed");
+    }).catch(reason => { if (!controller.signal.aborted) setError(errorText(reason)); });
+    return () => controller.abort();
+  }, [id, lineId, publication]);
+  useEffect(() => {
+    if (item && lineId) document.getElementById(lineId)?.scrollIntoView({ block: "center" });
+  }, [item, lineId]);
+  return <section className={styles.reader}>
+    <Link to="/" className={styles.back}>← {labels.back}</Link>
+    {error && <p role="alert" className={styles.error}>{error}</p>}
+    {!item && !error && <p role="status">{labels.loading}</p>}
+    {item && <>
+      <header className={styles.readerHeader}>
+        <div><p className={styles.eyebrow}>{labels.canonical}</p><h1 lang="kn">{item.title}</h1></div>
+        <button className={styles.secondary} aria-pressed={personal.favorites.includes(item.videoId)}
+          onClick={() => toggle(item.videoId)}>
+          {personal.favorites.includes(item.videoId) ? labels.removeFavorite : labels.addFavorite}
+        </button>
+      </header>
+      <div lang="kn" className={styles.lyrics}>
+        {item.lines.map(line => <p id={line.id} key={line.id} data-selected={line.id === lineId}>{line.text || "\u00a0"}</p>)}
+      </div>
+      <p className={styles.muted}>{item.description}</p>
+    </>}
+  </section>;
+}
+
+function Library({ publication, labels, personal, favoritesOnly }: {
+  publication: Publication; labels: Labels; personal: Personal; favoritesOnly: boolean;
+}) {
+  const [query, setQuery] = useState("");
+  const [composing, setComposing] = useState(false);
+  const [forced, setForced] = useState<string | null>(null);
+  const [prepared, setPrepared] = useState<{ index: SearchIndex; policy: SearchPolicy }>();
+  const [hits, setHits] = useState<Hit[]>([]);
+  const [busy, setBusy] = useState(false);
+  const [error, setError] = useState("");
+  const controller = useRef<AbortController | null>(null);
+  useEffect(() => () => controller.current?.abort(), []);
+  useEffect(() => {
+    if (!prepared || composing) return;
+    if (!query.trim()) { setHits([]); setBusy(false); setError(""); return; }
+    let worker: Worker | undefined;
+    let active = true;
+    setBusy(true);
+    const timer = setTimeout(() => {
+      worker = new Worker(new URL("./search.worker.ts", import.meta.url), { type: "module" });
+      worker.onmessage = (event: MessageEvent<{ hits?: Hit[]; error?: string }>) => {
+        if (!active) return;
+        setBusy(false);
+        if (event.data.error) { setError(event.data.error); setHits([]); }
+        else { setError(""); setHits(event.data.hits ?? []); }
+      };
+      worker.onerror = event => { if (active) { setError(event.message || "Search worker failed"); setBusy(false); } };
+      worker.postMessage({ id: 1, query, ...prepared });
+    }, forced === query ? 0 : prepared.policy.debounceMs);
+    return () => { active = false; clearTimeout(timer); worker?.terminate(); };
+  }, [query, prepared, composing, forced]);
+  async function prepare() {
+    controller.current?.abort();
+    const current = new AbortController();
+    controller.current = current;
+    setBusy(true);
+    setError("");
+    try { setPrepared(await publication.prepareSearch(current.signal)); }
+    catch (reason) { if (!current.signal.aborted) setError(errorText(reason)); }
+    finally { if (!current.signal.aborted) setBusy(false); }
+  }
+  const matching = new Map(hits.map(hit => [hit.itemId, hit]));
+  const searching = Boolean(prepared && query.trim());
+  let entries = searching
+    ? hits.map(hit => publication.manifest.catalog.find(item => item.videoId === hit.itemId)).filter(value => value !== undefined)
+    : publication.manifest.catalog;
+  if (favoritesOnly) entries = entries.filter(item => personal.favorites.includes(item.videoId));
+  const shown = entries.slice(0, prepared?.policy.pageSize ?? publication.manifest.catalog.length);
+  return <>
+    <section className={styles.hero}>
+      <p className={styles.eyebrow}>{labels.ready}</p>
+      <h1>{favoritesOnly ? labels.favorites : labels.library}<span className={styles.count}>{entries.length}</span></h1>
+      <p className={styles.muted}>{labels.tagline}</p>
+      {!prepared ? <div className={styles.consent}>
+        <p>{labels.searchConsent}</p>
+        <button onClick={() => void prepare()} disabled={busy}>{labels.loadSearch} · {Math.ceil(publication.manifest.objects[publication.manifest.named.index]!.encodedBytes / 1024)} KiB</button>
+      </div> : <form onSubmit={event => { event.preventDefault(); if (!composing) setForced(query); }}>
+        <label className={styles.srOnly} htmlFor="query">{labels.search}</label>
+        <input id="query" type="search" placeholder={labels.search} value={query}
+          onChange={event => { setQuery(event.target.value); setForced(null); }}
+          onCompositionStart={() => setComposing(true)}
+          onCompositionEnd={event => { setComposing(false); setQuery(event.currentTarget.value); }} />
+      </form>}
+      {error && <p role="alert" className={styles.error}>{error}</p>}
+    </section>
+    <section className={styles.grid} aria-label={favoritesOnly ? labels.favorites : labels.library} aria-busy={busy}>
+      {shown.map((item, position) => {
+        const line = matching.get(item.videoId)?.lineIds[0];
+        return <article className={styles.card} key={item.videoId}>
+          <div className={styles.cardTop}><span className={styles.number}>{String(position + 1).padStart(2, "0")}</span>
+            <span className={styles.muted}>{personal.favorites.includes(item.videoId) ? "★" : "✦"}</span></div>
+          <h2 lang="kn">{item.title}</h2>
+          <p className={styles.muted}>{item.description}</p>
+          <div className={styles.tags}>{item.tags.map(tag => <span key={tag}>{tag}</span>)}</div>
+          <Link className={styles.readLink} to={`/item/${encodeURIComponent(item.videoId)}${line ? "?line=" + encodeURIComponent(line) : ""}`}>
+            {labels.open}<span aria-hidden="true"> ↗</span>
+          </Link>
+        </article>;
+      })}
+      {!shown.length && !busy && <p role="status">{favoritesOnly && !searching ? labels.emptyFavorites : labels.noResults}</p>}
+    </section>
+  </>;
+}
+
+export default function App() {
+  const [publication, setPublication] = useState<Publication>();
+  const [personal, setPersonal] = useState<Personal>({ id: "personal", favorites: [],
+    language: __WEB_CONFIG__.defaultUiLanguage, theme: __WEB_CONFIG__.defaultTheme });
+  const [error, setError] = useState("");
+  const [attempt, setAttempt] = useState(0);
+  const labels = messages[personal.language];
+  useEffect(() => {
+    const controller = new AbortController();
+    setError("");
+    Promise.all([loadPublication(controller.signal), readPersonal()]).then(([library, state]) => {
+      setPublication(library); setPersonal(state);
+    }).catch(reason => { if (!controller.signal.aborted) setError(errorText(reason)); });
+    return () => controller.abort();
+  }, [attempt]);
+  useEffect(() => {
+    const root = document.documentElement;
+    root.lang = personal.language;
+    document.title = labels.appName;
+    root.style.setProperty("--font", __WEB_CONFIG__.fontFamily);
+    for (const [name, value] of Object.entries(__WEB_CONFIG__.themes[personal.theme])) root.style.setProperty(`--${name}`, value);
+    for (const [name, value] of Object.entries({ space: __WEB_CONFIG__.space, "reader-font": __WEB_CONFIG__.readerFontSize,
+      "content-width": __WEB_CONFIG__.contentWidth, "reader-width": __WEB_CONFIG__.readerWidth })) root.style.setProperty(`--${name}`, `${value}px`);
+  }, [personal.language, personal.theme]);
+  async function change(mutator: (state: Personal) => Personal) {
+    try { setPersonal(await updatePersonal(mutator)); }
+    catch (reason) { setError(errorText(reason)); }
+  }
+  const toggle = (id: string) => { void change(state => ({ ...state, favorites: state.favorites.includes(id)
+    ? state.favorites.filter(value => value !== id) : [...state.favorites, id] })); };
+  return <HashRouter>
+    <a className={styles.skip} href="#content" onClick={event => {
+      event.preventDefault(); document.getElementById("content")?.focus();
+    }}>{labels.skipToContent}</a>
+    <header className={styles.header}><Link className={styles.brand} to="/">
+      <span className={styles.mark} aria-hidden="true">ದಾ</span><span>{labels.appName}<small>{labels.tagline}</small></span>
+    </Link><nav aria-label={labels.appName}>
+      <NavLink to="/" end>{labels.library}</NavLink>
+      <NavLink to="/favorites">{labels.favorites}</NavLink>
+      <NavLink to="/settings">{labels.settings}</NavLink>
+    </nav></header>
+    <main id="content" tabIndex={-1} className={styles.main}>
+      <aside className={styles.notice}>{labels.fixtureNotice}</aside>
+      {error && <section className={styles.error} role="alert"><h2>{labels.error}</h2><p>{error}</p>
+        <button onClick={() => setAttempt(value => value + 1)}>{labels.retry}</button></section>}
+      {!publication && !error && <p role="status">{labels.loading}</p>}
+      {publication && <Routes>
+        <Route path="/" element={<Library key="all" publication={publication} labels={labels} personal={personal} favoritesOnly={false} />} />
+        <Route path="/favorites" element={<Library key="favorites" publication={publication} labels={labels} personal={personal} favoritesOnly />} />
+        <Route path="/item/:id" element={<Reader publication={publication} labels={labels} personal={personal} toggle={toggle} />} />
+        <Route path="/settings" element={<section className={styles.reader}><h1>{labels.settings}</h1>
+          <fieldset><legend>{labels.language}</legend>
+            {__WEB_CONFIG__.uiLanguages.map(language => <button key={language} className={styles.secondary}
+              aria-pressed={personal.language === language} onClick={() => void change(state => ({ ...state, language }))}>
+              {messages[language].languageName}</button>)}
+          </fieldset>
+          <fieldset><legend>{labels.appearance}</legend>
+            {__WEB_CONFIG__.uiThemes.map(theme => <button key={theme} className={styles.secondary}
+              aria-pressed={personal.theme === theme} onClick={() => void change(state => ({ ...state, theme }))}>{labels[theme]}</button>)}
+          </fieldset>
+        </section>} />
+        <Route path="*" element={<p role="alert">{labels.unknownRoute} <Link to="/">{labels.back}</Link></p>} />
+      </Routes>}
+      <footer className={styles.footer}>{labels.unavailableFeatures}</footer>
+    </main>
+  </HashRouter>;
+}

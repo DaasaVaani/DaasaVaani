@@ -6,8 +6,9 @@
   [AI development guide](docs/ai-development.md), [current design](docs/design-decisions.md)
   and [validation policy](docs/testing-and-release.md).
 - This repository owns the Website/PWA and product requirements. The application
-  is not implemented. Final design approval and separate coding authorization
-  remain required; do not resolve open gates by assuming defaults.
+  has a fixture-only initial implementation. Staged implementation is authorized;
+  close remaining production gates before their owning slices and never equate
+  synthetic demos with full requirement, linguistic or release conformance.
 - Use this root file as the single repository-wide AI instruction entrypoint.
   Do not add a competing Copilot instruction file or duplicate detailed guides.
 
@@ -28,8 +29,10 @@
 
 - Map changes/tests to requirement IDs. Read relevant code and contracts first.
   Ask before changing approved scope or resolving a significant deferred choice.
-- Website is React/strict TypeScript/Vite, static on Pages; Android is separate
-  Kotlin/Compose. Do not invent manifests, commands, successful builds or tests.
+- Website is React/strict TypeScript/Vite; Android is separate Kotlin/Compose.
+  Use actual commands in the validation guide. Do not invent successful builds/tests.
+- Keep `fixture-catalog-v1` visibly isolated from real content. The fixture publisher
+  is development/test tooling, not production ingestion/publication or linguistic proof.
 - Shared owns portable contracts/fixtures/settings and the UI catalog generator
   with committed generated resources. Library owns reviewed sources, assets,
   registries, ingestion and publisher. Each consumer pins Shared independently.

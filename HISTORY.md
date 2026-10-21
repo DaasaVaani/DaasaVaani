@@ -1,5 +1,62 @@
 # Documentation history
 
+## 2026-10-21: validated initial cross-platform fixture milestone
+
+- The owner authorized implementing the recommended staged plan without further
+  choice questions and requested desktop, mobile and native simulator demos.
+  Implemented an initial end-to-end milestone, not the full product or a release.
+- Shared foundations were published and CI-validated first at
+  `b0950e2f01823c471b18fff8abb49ce176d8f26e`. Library tooling was then published
+  at `bcd6faac835fc1aaec21aef9f47cc89f742ccaf3` and passed exact-revision CI
+  run39587730965 before becoming Website's immutable fixture-tooling pin.
+- Built responsive React reading, streaming role/size/hash/capability checks,
+  explicit index consent, real worker-based counted-gram/OSA search, direct item/
+  line routes, transactional Dexie favorites and independent UI locale/themes.
+  Configured knobs use owned settings and pinned Shared defaults/bounds.
+- All records were explicitly synthetic alphabet/common-word fixtures. No actual
+  sahitya, source migration, verified video metadata, live provider ingestion or
+  source-PR generated real variants were introduced.
+- The first browser demonstration failed because Vite retained an obsolete config
+  after a missing-Shared-file restart. Restarting after adopting validated Shared
+  resolved it; real headed desktop/mobile windows and screenshots were verified.
+- Initial gzip serving auto-decoded bytes before integrity verification. Explicit
+  raw-gzip dev/preview middleware preserved exact bytes. Windows republication
+  subsequently exposed a live static-descriptor file handle blocking atomic rename:
+  activation failed explicitly and retained the previous descriptor. Serving the
+  descriptor through the same bounded fixture transport resolved it; republication
+  while the live server/browser windows remained open then succeeded.
+- `npm run check`: passed4 Vitest tests, a fresh TypeScript/Vite production build
+  and all12 browser journeys over desktop, Pixel7 and320px. Journeys covered actual
+  consent/search/reading, favorite/locale persistence, no overflow, corrupt-artifact
+  errors and invalid-personal-record preservation. Browser tests use built preview,
+  not a development-server proxy. The >500kB main-chunk warning was not suppressed;
+  no performance benchmark or complete accessibility/platform claim was made.
+- Shared `npm run check`: passed5 tests and unchanged generated catalogs. Library
+  `npm run check`: passed5 publisher tests. Documentation audit passed40 Markdown
+  files with UTF8/newlines/whitespace/fences, local/cross-repository links/anchors,
+  all153 unchanged requirement identities and one root AI entrypoint per owner.
+  actionlint1.7.12 with ShellCheck0.11.0 and strict workflow YAML parsing passed.
+- Consolidated Pages into the validation workflow: immutable producer checkout,
+  fresh fixture build and all web suites precede artifact upload; both workflow
+  lint and web checks gate deployment. The retired placeholder job is archived
+  below. No production Library deployment or full readiness was claimed.
+- Updated current requirements status, roadmap, algorithm coverage, command
+  registry and AI guides to describe actual partial capability and remaining work.
+  Reviewed language tables, persistent snapshots, lists/backups, full native
+  personal parity, production publication/ingestion and release evidence remain.
+
+## Retired placeholder Pages workflow
+
+The separate .github/workflows/deploy.yml deployed only root index.html on main
+pushes, with no application build, tests, fixture publication or validated Library
+integration. It copied that file into RUNNER_TEMP/daasavaani-pages, uploaded the
+temporary directory with upload-pages-artifact and deployed it to github-pages.
+Its pages concurrency group canceled in-progress runs; the deployment job held
+contents:read, pages:write and id-token:write. It used the pinned checkout,
+configure-pages, upload-pages-artifact and deploy-pages actions retained in the
+consolidated workflow. Application checks and deployment now share validate.yml;
+current operating guidance is outside this archive.
+
 ## Archive policy
 
 This is the sole archive for past decisions, superseded guidance, dated
@@ -260,7 +317,7 @@ PWA installation/storage behavior varies by browser.
 | `library/` | Absent from this Website checkout. Reported legacy-looking sources are in a separate sibling path and remain unreviewed; ownership/migration is unresolved. |
 | `settings/` | Directory exists but is empty. Library is the approved target for catalog-specific settings; no source files/contracts are present here. |
 | [index.html](index.html) | Website placeholder; Library publishing and Website integration are not implemented. |
-| [.github/workflows/deploy.yml](.github/workflows/deploy.yml) | Stages/deploys only the Website placeholder, not Library sources or validated content. |
+| [.github/workflows/deploy.yml](#retired-placeholder-pages-workflow) | Stages/deploys only the Website placeholder, not Library sources or validated content. |
 | [.github/copilot-instructions.md](#retired-ai-entrypoint) | Concise AI coding guidance linked to the shared docs. |
 
 Generated groups and search/filter indexes will be built from reviewed content

@@ -1,7 +1,8 @@
 # Architecture boundaries and decision gates
 
 **Status:** selected directions with incomplete exact contracts and overall design
-approval pending. No application implementation/coding authorization is implied.
+production closure pending. Staged implementation is authorized; the current
+fixture capability is not the complete production contract.
 [Requirements](requirements.md) own behavior; [current design](design-decisions.md)
 indexes the [Shared specification](https://github.com/DaasaVaani/shared/blob/main/docs/implementation-specification.md).
 
@@ -32,6 +33,15 @@ manual local API -> proposed Library source/assets/settings -> review PR
 First API ingestion remains blocked pending provider clarification. Offline/
 synthetic fixture analysis does not waive that hold. Source PR tooling fixtures
 do not authorize generating real item variants/previews.
+
+The initial fixture pipeline has strict metadata/settings parsing, hash-addressed
+gzip objects, a policy-bound counted-gram index and independent browser/native
+readers. It intentionally has no production ledger/ZIP planner or persistent
+offline activation. Those protocols remain gated; fixtures never become reviewed content.
+Development/preview transport serves exact encoded object bytes and a fresh
+descriptor without automatic HTTP gzip decoding or a long-held static descriptor
+handle. Publishing immutable fixture objects must not trigger automatic reader
+reloads. Actual deployed hosting still requires byte/hash and browser validation.
 
 ## Runtime boundaries
 
@@ -79,7 +89,8 @@ do not authorize generating real item variants/previews.
 
 D2 precedes source validators; D2/D3 precede ingestion text processing. D4 precedes
 integration; D4/D5 precede activation. D1 enables actual builds. D6 retains the
-external provider gate. Overall final approval precedes coding authorization.
+external provider gate. Staged authorization does not waive the applicable
+production gate or turn fixture validation into full conformance.
 
 Numeric performance goals are advisory, never a substitute for correctness,
 accessibility, cancellation, integrity/safety limits and preservation. Follow

@@ -1,11 +1,12 @@
 # DaasaVaani Requirements
 
-- Status: Approved product scope; overall final design approval pending
+- Status: Approved product scope; staged implementation authorized, production gates incomplete
 - Scope: Initial release of the Android app, responsive website/PWA, and content automation
 
 The [Shared implementation specification](https://github.com/DaasaVaani/shared/blob/main/docs/implementation-specification.md)
-owns current technical contracts and unresolved gates. Application implementation
-requires separate authorization. Approval chronology and superseded scope belong
+owns current technical contracts and unresolved gates. Staged implementation follows
+the selected directions; each production slice still requires its applicable
+exact contracts and evidence. Approval chronology and superseded scope belong
 only in [HISTORY.md](../HISTORY.md).
 
 ## 1. Purpose

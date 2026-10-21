@@ -1,11 +1,31 @@
 # Implementation roadmap
 
-**Status: planning only; no application phase is implemented.**
+**Status: staged implementation authorized; initial fixture milestone only.**
 Use [requirements](requirements.md), [current design](design-decisions.md),
 [architecture gates](architecture.md) and the
 [Shared specification](https://github.com/DaasaVaani/shared/blob/main/docs/implementation-specification.md).
-No source migration is authorized. Overall final design approval and separate
-coding authorization remain prerequisites.
+No source migration or live API ingestion is authorized. Remaining production
+gates must close before their owning slices; no phase is globally complete.
+
+## Current implementation coverage
+
+| Surface | Available | Still incomplete |
+| --- | --- | --- |
+| P0 | npm manifests/locks, React/Vite checks, native Gradle wrapper/catalog and JVM/SDK integration | Complete selected dependency integration and production command/release matrix |
+| P1 | Fixture-only strict YAML/Markdown/identity/hold validation and item schema | Full production source/settings/registry/verse/alignment schemas and diagnostics |
+| P2 | Two-locale UI generation with committed web/Android resources | Reviewed five-Latin/nine-non-Latin tables, transliteration, technical grammar, plurals/escaping conformance |
+| P4 | Fixture gzip/hash/canonicalization/index producer; sampled independent OSA/candidate parity | Durable ledger/receipts, semantic dates, ZIP/planner, complete language/profile index and proof/capacity evidence |
+| P5 | Responsive online fixture reading/search, explicit consent, errors, direct routes, locale/themes | Full filters/discovery/script/helper/video/accessibility/platform journeys |
+| P5a | Transactional web favorites/preferences in one Dexie database | Lists/recents/bookmarks/learning/recitation, transfers, full backups and migrations |
+| P6 | No persistent offline snapshot implementation | Journals/atomic activation/resume/repair/reader-safe GC and service worker lifecycle |
+| P7 | Native fixture-only full preparation in memory, reading/search, core tests and connected reading test | Room personal state, durable preparation/recovery, typed navigation/DI, parity and device matrix |
+| P3/P8/P9 | Dependency-ordered Shared/fixture-publisher pins; full web fixture CI/Pages and native build/core/lint CI | Live-provider clarification, production ingestion/publication/signing, device CI and release readiness |
+
+The fixture capability is deliberately named `fixture-catalog-v1`; all UIs label
+synthetic records and unavailable features. Android bundles no lyrics and requires
+explicit complete fixture preparation before reading; in-memory preparation is
+not a persistent offline snapshot. Requirement families receive partial evidence,
+not blanket completed IDs. No release or full153-requirement completion is claimed.
 
 ## Delivery sequence
 

@@ -3,8 +3,8 @@
 [AGENTS.md](../AGENTS.md) is the single repository-wide AI entrypoint.
 [Requirements](requirements.md) define scope; [current design](design-decisions.md)
 and the [Shared specification](https://github.com/DaasaVaani/shared/blob/main/docs/implementation-specification.md)
-define selected directions and open gates. Final overall design approval and
-separate coding authorization remain required.
+define selected directions and open gates. Staged coding is authorized; fixture
+demonstrations do not close remaining production contracts or prove full readiness.
 
 ## Working method
 
@@ -27,12 +27,14 @@ separate coding authorization remain required.
 
 | Surface | Current capability |
 | --- | --- |
-| Website | Placeholder index.html and Pages deployment, no React/Vite app |
-| Shared/Library/Android | Independent bootstraps and hygiene workflows, no app/publisher build |
+| Website | Responsive React/Vite fixture reader, integrity validation, indexed search, favorites and locale/theme preferences |
+| Shared | Fixture contracts, portable settings, deterministic catalog generator and committed web/Android UI resources |
+| Library | Strict fixture Markdown/settings parsing, deterministic hash-addressed gzip publication and counted-gram index |
+| Android | Native Compose fixture preparation/reading/search, pure Kotlin core, debug APK/JVM/lint/emulator checks |
 | Website library/ | Absent; reviewed sources belong only to Library |
-| Website settings/ | Empty; no implemented configuration |
-| Tooling | No application manifests/runners; only documented bootstrap/documentation checks |
-| Approval | Selected directions, unresolved exact contracts/tables/protocols; no global implementation-ready declaration |
+| Website settings/ | Web schema/settings; portable defaults and bounds consumed from Shared |
+| Tooling | Exact npm lockfiles and Gradle wrapper/version catalog; use the current command registry |
+| Approval | Staged implementation authorized; production language/lifecycle/personal/publication gates and release evidence remain incomplete |
 
 ## Non-negotiable boundaries
 

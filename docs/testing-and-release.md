@@ -31,16 +31,59 @@ alongside tooling changes.
 
 ## Current executable checks
 
-There are no application manifests, builds, publisher/source/schema validators
-or app test runners. Website has placeholder Pages deployment and workflow lint;
-the other repositories have bootstrap hygiene, not application CI.
+Executable tooling covers the explicitly fixture-only milestone. It does not
+establish complete production-schema/language/lifecycle or release conformance.
 
 From Website:
 
 ```powershell
+npm ci
+npm run check
 git --no-pager diff --check
 git --no-pager diff --cached --check
 ```
+
+The full check runs unit tests, then publishes fixtures, builds/typechecks the
+current tree and runs browser tests against that fresh production build, not the
+development server. `npm run build` and `npm test` are available incrementally;
+`npm run test:e2e` also prepares/builds before starting its isolated preview server.
+
+Browser tests require the clean Library revision in settings/tooling.yml with `npm ci` completed and
+the installed Playwright Chromium (`npx playwright install chromium` if missing).
+The configured suite exercises desktop, Pixel7 and320px layouts, explicit index
+consent, actual search/reading, preference/favorite persistence and corrupt-artifact
+errors. `npm run demo` publishes only synthetic fixture artifacts and serves the
+local Website at the configured settings/web.yml port. It is not a production
+Library deployment or a source migration.
+The fixture tool repository/revision/default checkout path are centralized in
+settings/tooling.yml. CI uses the same validated revision, overriding only its
+local checkout location through DAASAVAANI_FIXTURE_PUBLISHER_ROOT. The helper
+rejects a wrong revision or dirty producer tree; never replace it with floating main.
+
+Shared: `npm ci` then `npm run check` regenerates/tests catalogs and fixture/settings
+contracts; check generated resources remain unchanged. Library: `npm ci` then
+`npm run check` runs TypeScript and all publisher tests; `npm run publish:demo`
+generates only explicitly synthetic fixtures. No real source-PR variants.
+
+Android requires Node, JDK21, the configured SDK36/build tools and an API36 emulator
+for current connected evidence. Set JAVA_HOME/ANDROID_HOME and select the intended
+device with ANDROID_SERIAL; do not target another user's device. From Android:
+
+```powershell
+npm ci
+npm run config
+.\gradlew.bat :core:build :app:build :app:lintDebug :app:lintRelease :app:connectedDebugAndroidTest --no-daemon
+```
+
+App-level JVM tests currently have no sources; the pure core has executable JVM
+tests. The connected test launches the actual Compose app, requires preparation,
+downloads/verifies the served fixtures and opens canonical text. The Website demo
+must run at the endpoint configured in Android settings. API26/other devices,
+release signing and complete Android parity are not established.
+Native CI builds all debug/release variants and runs core/JVM/lint checks; the
+connected suite is a required local finalization check with the configured server/
+owned emulator, not a claimed CI-device pass. Unsigned release compilation does
+not constitute release signing or a release-ready candidate.
 
 Also validate all changed/new Markdown for UTF8/newline/whitespace, relative file
 links, current local anchors and balanced fences. Preserve all153 unique requirement
@@ -68,11 +111,27 @@ tracked paths: include new documentation deliberately and preserve unrelated sta
 
 | Full application check | Current command |
 | --- | --- |
-| Dependency/bootstrap | Unavailable; manifests/toolchain implementation required |
-| Type/lint/build | Unavailable; application implementation required |
-| Source/settings/generated-schema checks | Unavailable; contracts/validators required |
-| Unit/contract/integration/browser/device suites | Unavailable; runners/implementations required |
-| Performance/capacity harness | Unavailable; implemented clients/corpus required |
+| Website | `npm run check`: unit tests, fresh fixture build/typecheck and three-viewport production-preview browser tests |
+| Shared | `npm run check`: deterministic UI generation and fixture/settings tests |
+| Library | `npm run check`: typecheck and all fixture-publisher tests |
+| Android | Generated config, full build/core/JVM/lint and connected test above; no app JVM test sources |
+| Production/release | Incomplete: full schemas/tables, snapshots/personal migration, signing/platform/accessibility/capacity matrix |
+| Performance/capacity harness | Not implemented; no production timing/memory/corpus result claimed |
+
+## Partial requirement evidence
+
+These mappings identify limited executable evidence, not completed requirement
+IDs or a release acceptance declaration.
+
+| Requirements | Current evidence | Boundary |
+| --- | --- | --- |
+| DATA-02/07/08 | Library tests preserve LF/CRLF text/UUIDs, reject malformed/duplicate lines and exclude held synthetic items | Fixture schema only; full production fields, filenames, verses/alignment and authoring/migration incomplete |
+| SEARCH-12/13 | Sampled independent substring/full-matrix oracle, counted-gram candidates, native core checks and real browser search | Ordinary fixture text only; reviewed profiles/aliases/markers, exhaustive proof and complete native parity pending |
+| PLAT-01/05 | Real React and Compose apps; built-site browser journeys at desktop/mobile/320px and one native API36 reading journey | PWA installation, complete routes/layout/interaction modes and supported-platform/device matrix pending |
+| I18N-01, SET-04 | Matching two-locale generated UI resources; web locale/theme persistence without changing canonical text | Browser/device first-use selection, complete script/personal preferences and native preference parity pending |
+| LIB-01/04 | Web favorite toggle/reload persistence and explicit corrupt-personal-record error without overwriting stored data | Lists/offline/future migrations and Android Room personal state absent |
+| SET-01/02 | Owned settings/schema guards, Shared policy binding and immutable clean fixture-tool pin | Complete production settings inventory, language/protocol/backup contracts and all compatibility fixtures pending |
+| QUAL-01/02/03 | Semantic browser controls, keyboard focus entrypoint, standalone canonical reading and no video/tracking dependencies | Full keyboard/screen-reader/contrast/scaling/platform journeys remain unverified; no formal conformance claim |
 
 ## Shared submodule updates
 

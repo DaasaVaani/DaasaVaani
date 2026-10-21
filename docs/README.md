@@ -14,8 +14,9 @@
 6. [Roadmap](implementation-roadmap.md) and [testing/release](testing-and-release.md):
    implementation prerequisites and full finalization/push validation.
 
-Overall final design approval and application-coding authorization remain pending.
-Guides do not prove implementation, completed tests or provider permission.
+Staged implementation is authorized. The current fixture-only milestone is not
+full production design closure or release readiness. Consult the roadmap for
+actual coverage and remaining gates; guides do not prove provider permission.
 
 ## Owners
 
@@ -27,8 +28,9 @@ Guides do not prove implementation, completed tests or provider permission.
 | [Library](https://github.com/DaasaVaani/library) | Reviewed sources/assets/registries, local ingestion and publisher |
 
 Consumers independently pin Shared and query published Library artifacts.
-Website has no library source directory and an empty settings directory. Source
-migration remains unauthorized; app/publisher tooling is not implemented.
+Website has no library source directory. Its settings directory owns web settings;
+portable configuration stays in Shared. Source migration remains unauthorized.
+Actual Node/React and Kotlin/Compose fixture tooling is documented in the testing guide.
 
 ## Community and operations
 

@@ -1,0 +1,39 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "type": "object", "additionalProperties": false,
+  "required": ["formatVersion", "base", "descriptorUrl", "demoPort", "databaseName", "fontFamily", "readerFontSize", "space", "contentWidth", "readerWidth", "themes", "demoViewports"],
+  "properties": {
+    "formatVersion": { "const": 1 }, "base": { "type": "string", "pattern": "^/" },
+    "descriptorUrl": { "type": "string", "minLength": 1 },
+    "demoPort": { "type": "integer", "minimum": 1024, "maximum": 65535 },
+    "databaseName": { "type": "string", "minLength": 1 },
+    "fontFamily": { "type": "string", "minLength": 1 },
+    "readerFontSize": { "type": "integer", "minimum": 16, "maximum": 80 },
+    "space": { "type": "integer", "minimum": 1, "maximum": 32 },
+    "contentWidth": { "type": "integer", "minimum": 320, "maximum": 2560 },
+    "readerWidth": { "type": "integer", "minimum": 240, "maximum": 1600 },
+    "themes": {
+      "type": "object", "required": ["light", "dark"], "additionalProperties": false,
+      "properties": { "light": { "$ref": "#/$defs/theme" }, "dark": { "$ref": "#/$defs/theme" } }
+    },
+    "demoViewports": {
+      "type": "object", "required": ["desktop", "mobile"], "additionalProperties": false,
+      "properties": { "desktop": { "$ref": "#/$defs/viewport" }, "mobile": { "$ref": "#/$defs/viewport" } }
+    }
+  },
+  "$defs": {
+    "theme": {
+      "type": "object", "required": ["background", "surface", "text", "muted", "accent", "border", "highlight"],
+      "additionalProperties": false,
+      "properties": {
+        "background": { "$ref": "#/$defs/color" }, "surface": { "$ref": "#/$defs/color" }, "text": { "$ref": "#/$defs/color" },
+        "muted": { "$ref": "#/$defs/color" }, "accent": { "$ref": "#/$defs/color" }, "border": { "$ref": "#/$defs/color" }, "highlight": { "$ref": "#/$defs/color" }
+      }
+    },
+    "color": { "type": "string", "pattern": "^#[0-9a-fA-F]{6}$" },
+    "viewport": {
+      "type": "object", "required": ["width", "height"], "additionalProperties": false,
+      "properties": { "width": { "type": "integer", "minimum": 320 }, "height": { "type": "integer", "minimum": 320 } }
+    }
+  }
+}

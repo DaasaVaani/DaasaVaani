@@ -3,10 +3,14 @@
 Hari Dasa Sahitya discovery, reading, practice and recitation through a responsive
 static PWA and a separate native Android app.
 
-**Status: planning/pre-implementation.** This checkout has a Website placeholder,
-documentation and Pages/hygiene workflows. No application manifests, publisher,
-reviewed source migration or app tests are implemented. Overall design approval
-and separate coding authorization remain pending.
+**Status: initial fixture-only implementation; not a production release.**
+The responsive React Website reads hash-verified artifacts from the Library fixture
+publisher, with explicit indexed-search consent, canonical Kannada reading,
+transactional favorites and independent interface-language/theme preferences.
+Shared generates the English/Kannada UI resources; Android has a native preparation/
+reading fixture demo. Production contracts, reviewed transliteration, persistent
+offline snapshots and the remaining product journeys are incomplete.
+Staged implementation is authorized; source migration and live API ingestion are not.
 
 [AI instructions](AGENTS.md) | [Documentation](docs/README.md) |
 [Requirements](docs/requirements.md) | [Current design](docs/design-decisions.md) |
@@ -47,7 +51,8 @@ acceptance scenarios and advisory performance goals.
 | [Library](https://github.com/DaasaVaani/library) | Reviewed sources/assets/registries/ingestion/publisher, generated-only https://daasavaani.github.io/library/ |
 
 Each consumer pins Shared independently and consumes validated published Library
-artifacts. Website has no library source directory; settings is empty. No
+artifacts. Website has no library source directory; settings owns web configuration.
+Portable defaults/search/transfer bounds remain owned by Shared. No
 backend/accounts/analytics/live sync/hosted short links or bundled lyric fallback.
 All configurable product values use owned settings; native toolchain manifests/
 locks own dependency pins.
@@ -57,9 +62,12 @@ locks own dependency pins.
 Start with [AGENTS](AGENTS.md), [the index](docs/README.md) and
 [contributing guidance](docs/CONTRIBUTING.md). Do not install an assumed stack.
 Current commands and full finalization/push gates are in
-[testing and release](docs/testing-and-release.md). App build/test commands do not
-exist yet. Documentation-only work requires every available documentation/bootstrap
-check; never call nonexistent app tests passed. For authorized Shared pin updates,
+[testing and release](docs/testing-and-release.md). Run `npm ci` and `npm run check`
+for fixture publication, build, unit and browser checks. The demo publisher requires
+the clean validated Library revision in settings/tooling.yml with its Node
+dependencies installed. `npm run demo` publishes synthetic
+fixtures and serves the local demo on the configured port. No actual lyrics are
+bundled or migrated. For authorized Shared pin updates,
 follow the [Shared-first publication order](docs/testing-and-release.md#shared-submodule-updates).
 
 Update current guides with changes. Past decisions, dated observations and test

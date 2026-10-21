@@ -1,8 +1,8 @@
 # Current design decisions
 
 **Status:** individual directions selected; exact contracts and overall final
-design approval remain pending. No application-coding/source-migration permission
-is implied. [Requirements](requirements.md) own product scope; the
+production design closure remains pending. Staged implementation of the recommended
+plan is authorized; source migration is not. [Requirements](requirements.md) own product scope; the
 [Shared specification](https://github.com/DaasaVaani/shared/blob/main/docs/implementation-specification.md)
 owns current cross-repository detail. [HISTORY.md](../HISTORY.md) is the only
 archive of questionnaires, alternatives, changes and dated observations.
@@ -39,7 +39,8 @@ archive of questionnaires, alternatives, changes and dated observations.
 3. Review full language/native-approximation/alias/Unicode/technical-marker/digit tables.
 4. Specify exact journal/receipt/epoch/lock-order/locale/accounting protocols.
 5. Complete configurable UI/ingestion defaults, route/signing/runbook details.
-6. Obtain overall final design approval and separate implementation authorization.
+6. Demonstrate remaining production contracts and full requirement/release evidence;
+   do not treat the authorized fixture milestone as complete product readiness.
 
 Builds, oracle/crash/migration/device/font/App Links/capacity evidence belongs to
 implementation validation, not an assumed design pass. First API ingestion needs

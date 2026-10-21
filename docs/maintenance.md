@@ -29,7 +29,10 @@ review against the intended no-mandatory-second-reviewer release policy.
 - Pin Actions to immutable commits, enforce pins when workflows support them,
   review outside contributions and never expose secrets to untrusted PR jobs.
 - Keep Pages environment/source permissions deliberate and deployment allowlists
-  limited to validated public output. Current Website deploys only placeholder index.
+  limited to validated public output. Website deploys the explicitly labeled
+  fixture-only Vite output only after workflow lint and the full web suites pass
+  in the same workflow. Its CI publisher checkout uses the validated tooling pin;
+  this is not production Library publication.
 - Source/API credentials remain local; signing keys outside repository/CI/logs.
   Preserve unsigned CI -> local verification/signing -> protected APK publication.
 - Complete provider clarification before first API ingestion; no invented legal

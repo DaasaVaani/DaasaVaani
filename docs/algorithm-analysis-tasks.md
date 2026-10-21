@@ -1,8 +1,8 @@
 # Tasks requiring algorithm-choice analysis
 
-**Status: analysis backlog with approved design results, not implementation
-authorization.** This document identifies complex and medium-complexity tasks in the available
-requirements and design records while the overall design is being finalized.
+**Status: approved algorithm directions with partial fixture implementation and
+remaining production evidence.** Staged implementation is authorized. This document
+identifies complex and medium-complexity tasks in the requirements/design records.
 It does not change product scope, close decision gates, select new dependencies,
 or claim implementation, linguistic verification or benchmark results.
 
@@ -37,7 +37,8 @@ that their correctness proofs, implementations or validation are complete.
 
 The following are current approved constraints, identified by stable decision IDs
 for traceability, not a decision chronology. Detailed values are authoritative in
-Shared. Overall final design approval and application implementation remain pending.
+Shared. Overall production closure remains incomplete; fixture implementation does
+not constitute full linguistic, protocol or release conformance.
 Past alternatives, review chronology and validation outcomes belong only in
 [HISTORY.md](../HISTORY.md).
 
@@ -68,10 +69,27 @@ matching, integrity, responsive cancellation, accessibility and preservation of
 personal/active content remain mandatory. Best-effort timing does not permit
 silent truncation, false success or weaker validation.
 
-These are design constraints only. No algorithm implementation, exhaustive proof,
-scan-oracle, benchmark, device/font or successful package integration evidence is
-established. First API ingestion remains blocked pending
-provider clarification.
+## Current executable coverage
+
+- ALG-01 to ALG-04: ordinary fixture tokenization, NFC/ASCII folding, counted
+  code-point multiset grams, exact three-column OSA fragments, AND matching and
+  deterministic best-field scoring exist in TypeScript and the native core.
+  TypeScript tests compare sampled fragment/candidate cases with an independently
+  enumerated substring/full-matrix oracle. This is not exhaustive completeness
+  proof or reviewed technical/profile/joiner conformance. Native parity coverage
+  is limited; there is no capacity/benchmark result.
+- ALG-07: fixture-only safe-integer canonical JSON, deterministic gzip/hash objects
+  and policy binding exist. Tests cover LF/CRLF identity, strict parsing, repeated
+  grams and byte/hash reproducibility. The production semantic ledger, receipts,
+  sequence reconciliation and deploy protocol remain unimplemented.
+- ALG-05/06/08-15: complete algorithms are not implemented. Basic verified online
+  reading and process-local Android preparation are not aligned transliteration,
+  a ZIP planner, persistent activation/GC, ingestion or recoverable personal backup.
+
+Completed commands/results belong in [HISTORY.md](../HISTORY.md); this section
+describes present coverage only. First API ingestion remains blocked pending
+provider clarification. Full device/font and production package integration
+evidence is not established.
 
 ## Complex-task inventory
 
@@ -694,7 +712,8 @@ Provider applicability is still an external hold before first API ingestion.
 During implementation, obtain actual oracle parity, crash/failure/migration,
 rendering/device/routing and capacity evidence. Numeric performance goals are
 advisory; safety limits and correctness remain requirements. Consolidated final
-design approval and separate coding authorization are still outstanding.
+production design closure remains outstanding; staged coding authorization does
+not waive those evidence requirements.
 
 Incremental checks may be focused. Finalization/confirmation and every push require
 full applicable builds/all tests under [validation policy](testing-and-release.md);

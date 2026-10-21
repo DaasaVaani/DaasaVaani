@@ -38,3 +38,10 @@ Thumbs.db
 
 # workspace files
 *.code-workspace
+
+# Locally published synthetic artifacts; never a production content source.
+/public/demo/
+/.fixture-publisher/
+/public/**/objects/*.json.gz
+/public/**/latest.json
+/public/**/latest.pending.json

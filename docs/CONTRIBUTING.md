@@ -23,7 +23,8 @@ security issues publicly; use the [security policy](SECURITY.md).
 - Source PRs belong in Library; contracts/specs/fixtures/UI catalogs belong in Shared. Consumers update their own Shared pins separately; no lockstep is required.
 - Fork the owning repo if needed, create a focused branch, and keep the PR scoped.
 - Preserve unrelated changes and reviewed content; update related docs and tests.
-- Use the [testing guide](testing-and-release.md). Selected environments are future choices; no application build/test runner is implemented in Website. Do not claim unavailable checks passed.
+- Use the [testing guide](testing-and-release.md) for actual Node/React and native
+  build/test commands. Fixture tests are not complete production conformance.
 - For documentation, check relative links and run `git --no-pager diff --check`.
 - Focused tests are incremental only. Finalization/confirmation and every push
   require complete applicable builds and all tests under the testing guide.
@@ -45,7 +46,8 @@ security issues publicly; use the [security policy](SECURITY.md).
   item/line overrides or edits to correct Kannada solely to force conversion.
 - Flag uncertain/missing lyrics as drafts rather than fabricate them.
 - Include required thumbnail assets and catalog-setting changes with the Library
-  source PR. `library/` is absent and `settings/` is empty in Website. Legacy-looking Markdown
+  source PR. `library/` is absent in Website; web settings live under `settings/`.
+  Legacy-looking Markdown
   reported in a sibling path has not been reviewed; no migration is authorized.
 - Follow the [content-rights policy](https://github.com/DaasaVaani/library/blob/main/docs/content-rights.md); public availability is
   not permission to redistribute.
