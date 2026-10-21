@@ -1,6 +1,6 @@
 import Dexie, { liveQuery, type Transaction } from "dexie";
 import {
-  defaultPersonal, newControl, nextRevision, parseStore, PersonalError, saveRecord, validatePersonal, validateStore,
+  defaultPersonal, exportListSnapshot, newControl, nextRevision, parseStore, PersonalError, saveRecord, validatePersonal, validateStore,
   type ListRecord, type Personal, type PersonalStore, type Revision,
 } from "./personal-model";
 export type { Personal, PersonalStore } from "./personal-model";
@@ -102,6 +102,9 @@ async function stored(transaction: Transaction): Promise<PersonalStore> {
 export async function readStore(): Promise<PersonalStore> {
   await ready();
   return db.transaction("r", personal, lists, control, stored);
+}
+export async function readListSnapshot(id: string, expected: Revision) {
+  return exportListSnapshot(await readStore(), id, expected);
 }
 export function watchPersonal(next: (state: PersonalStore) => void, error: (reason: unknown) => void): () => void {
   const subscription = liveQuery(readStore).subscribe({ next, error });

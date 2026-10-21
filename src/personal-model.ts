@@ -147,9 +147,18 @@ export function validateStore(state: PersonalStore, limits = __PERSONAL_LIMITS__
   storageBytes(state, limits.maxPersonalStoredBytes);
 }
 export function nextRevision(state: PersonalStore, expected: Revision): PersonalStore {
-  if (state.control.epoch !== expected.epoch || state.control.revision !== expected.revision) throw new PersonalError("stale");
+  assertRevision(state.control, expected);
   if (state.control.revision === Number.MAX_SAFE_INTEGER) throw new PersonalError("capacity");
   return { ...state, control: { ...state.control, revision: state.control.revision + 1 } };
+}
+function assertRevision(actual: Revision, expected: Revision): void {
+  if (actual.epoch !== expected.epoch || actual.revision !== expected.revision) throw new PersonalError("stale");
+}
+export function exportListSnapshot(state: PersonalStore, id: string, expected: Revision): ListSnapshot {
+  assertRevision(state.control, expected);
+  const record = state.lists.find(list => list.id === id);
+  if (!record) throw new PersonalError("stale");
+  return listSnapshot(record);
 }
 export const listNameKey = (name: string) => caseFold(name.normalize("NFC")).normalize("NFC");
 export function saveRecord(state: PersonalStore, record: ListRecord, expected: Revision, existing: boolean, confirmDuplicate = false): PersonalStore {

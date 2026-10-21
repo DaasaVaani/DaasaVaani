@@ -1,6 +1,6 @@
 import { describe, expect, test } from "vitest";
 import {
-  defaultPersonal, editEntry, jsonBytes, listNameKey, listSnapshot, moveEntry, newControl, newList, nextRevision, parseStore, removeEntry,
+  defaultPersonal, editEntry, exportListSnapshot, jsonBytes, listNameKey, listSnapshot, moveEntry, newControl, newList, nextRevision, parseStore, removeEntry,
   PersonalError, saveRecord, storageBytes, validatePersonal, validateStore, type PersonalStore,
 } from "./personal-model";
 import type { ListSnapshot } from "./list-transfer-types";
@@ -18,6 +18,19 @@ function code(action: () => unknown, expected: string) {
   }
 }
 describe("transactional personal model", () => {
+  test("stable-read exports project only minimal fields without writing, allocating identities or wrapping revision counters", () => {
+    const record = newList(snapshot), state = { ...empty(), personal: defaultPersonal(), lists: [record] };
+    const before = structuredClone(state);
+    expect(exportListSnapshot(state, record.id, state.control)).toEqual(snapshot);
+    code(() => exportListSnapshot(state, record.id, { ...state.control, revision: state.control.revision + 1 }), "stale");
+    code(() => exportListSnapshot(state, record.id, { ...state.control, epoch: crypto.randomUUID() }), "stale");
+    code(() => exportListSnapshot(state, "missing", state.control), "stale");
+    const maximum = { ...state, control: { ...state.control, revision: Number.MAX_SAFE_INTEGER } };
+    expect(exportListSnapshot(maximum, record.id, maximum.control)).toEqual(snapshot);
+    const copy = exportListSnapshot(state, record.id, state.control);
+    copy.name = "Changed copy"; copy.entries.splice(0, 1);
+    expect(state).toEqual(before);
+  });
   test("entry edits, moves, manual replacements and removals preserve independent identities and never mutate the source", () => {
     const record = newList(snapshot), before = structuredClone(record);
     const first = record.entries[0], placeholder = record.entries[1], last = record.entries[2];

@@ -14,7 +14,8 @@ explicitly save new independent lists. Lists supports creation, rename,
 duplication and confirmed deletion, with repeated occurrences and duplicate-name
 confirmation. Occurrences can be added, edited, moved, removed and explicitly
 replaced without changing their independent identities or other repetitions.
-Native transfer, saved-list export UI and recitation remain incomplete.
+Saved lists export independent minimal gzip files/links with stable-read revision
+checks. Native transfer and recitation remain incomplete.
 Shared generates the English/Kannada UI resources; Android has a native preparation/
 reading fixture demo. Production contracts, reviewed transliteration, persistent
 offline snapshots and the remaining product journeys are incomplete.

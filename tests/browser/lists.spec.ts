@@ -1,5 +1,6 @@
 import { test, expect, type Page } from "@playwright/test";
-import { gzipSync } from "node:zlib";
+import { gzipSync, gunzipSync } from "node:zlib";
+import { createHash } from "node:crypto";
 import { readFileSync } from "node:fs";
 import { strictYaml } from "../../shared/tools/generate-catalog.mjs";
 import type { ListSnapshot } from "../../src/list-transfer-types";
@@ -119,6 +120,13 @@ test("duplicate-name cancellation is no-write and a changed revision requires re
   await expect.poll(async () => (await records(page)).values.lists?.length).toBe(3);
   await other.reload();
   await expect(other.getByRole("list", { name: "Lists", exact: true }).getByRole("button")).toHaveCount(3);
+  const saved = await records(page);
+  await page.getByRole("button", { name: "Save to My Library", exact: true }).click();
+  await expect(page.getByRole("button", { name: "Save with same name", exact: true })).toBeVisible();
+  await page.getByRole("button", { name: "Create snapshot link", exact: true }).click();
+  await expect(page.locator("input[readonly]")).toBeVisible();
+  await expect(page.getByRole("button", { name: "Save with same name", exact: true })).toHaveCount(0);
+  expect(await records(page)).toEqual(saved);
 });
 test("occurrence editing, movement, manual replacement and removal retain IDs, text, repetitions and persisted order", async ({ page }) => {
   await upload(page);
@@ -201,6 +209,85 @@ test("entry changes do not repeat duplicate-name warnings but an actual rename s
   await rename.getByRole("button", { name: "Rename list", exact: true }).click();
   await expect(page.getByRole("button", { name: "Save with same name", exact: true })).toBeVisible();
   await page.getByRole("button", { name: "Cancel", exact: true }).click();
+  expect(await records(page)).toEqual(before);
+});
+test("saved-list exports use the stored name and exact minimal snapshot without writes or library downloads", async ({ page }) => {
+  const requests: string[] = [];
+  page.on("request", request => requests.push(request.url()));
+  await page.route("**/demo/latest.json", route => route.abort());
+  await upload(page);
+  await page.getByRole("button", { name: "Save to My Library", exact: true }).click();
+  await page.getByRole("link", { name: "View saved lists", exact: true }).click();
+  const choose = () => page.getByRole("list", { name: "Lists", exact: true }).getByRole("button", { name: snapshot.name, exact: true }).click();
+  await choose(); await page.reload(); await choose();
+  await page.getByRole("form", { name: "Rename list", exact: true }).getByLabel("List name", { exact: true }).fill("Unsaved draft name");
+  const before = await records(page);
+  await page.getByRole("button", { name: "Download list file", exact: true }).click();
+  const [download] = await Promise.all([page.waitForEvent("download"),
+    page.getByRole("link", { name: "Download list file", exact: true }).click()]);
+  const path = await download.path(); if (!path) throw new Error("Saved-list download did not complete");
+  expect(JSON.parse(gunzipSync(readFileSync(path)).toString("utf8"))).toEqual(snapshot);
+  await page.getByRole("button", { name: "Create snapshot link", exact: true }).click();
+  const output = page.locator("input[readonly]"); await expect(output).toBeVisible();
+  const url = new URL(await output.inputValue()); expect(url.protocol).toBe("https:");
+  expect(await records(page)).toEqual(before);
+  await page.goto(url.pathname + url.hash);
+  await expect(page.getByRole("heading", { name: snapshot.name, exact: true })).toBeVisible();
+  expect(await records(page)).toEqual(before);
+  expect(requests.filter(url => url.endsWith(".json.gz"))).toHaveLength(0);
+});
+test("an export changed during encoding is refused until a fresh list selection", async ({ page, context }) => {
+  await upload(page); await page.getByRole("button", { name: "Save to My Library", exact: true }).click();
+  await page.getByRole("link", { name: "View saved lists", exact: true }).click();
+  const choose = () => page.getByRole("list", { name: "Lists", exact: true }).getByRole("button", { name: snapshot.name, exact: true }).click();
+  await choose();
+  await page.route("**/*list-transfer.worker*.js", route => route.fulfill({ contentType: "text/javascript", body: "self.onmessage = () => {};" }));
+  const created = page.waitForEvent("worker");
+  await page.getByRole("button", { name: "Download list file", exact: true }).click();
+  const worker = await created;
+  const other = await context.newPage(); await other.goto("/#/lists"); await create(other, "Concurrent change");
+  await expect(other.getByRole("list", { name: "Lists", exact: true }).getByRole("button", { name: "Concurrent change", exact: true })).toBeVisible();
+  const changed = await records(page);
+  await worker.evaluate(bytes => { setTimeout(() => self.postMessage({ result: { kind: "file", bytes: new Uint8Array(bytes) } }), 100); },
+    [...gzipSync(JSON.stringify(snapshot))]);
+  await expect(page.getByRole("alert")).toContainText("Personal data changed.");
+  await expect(page.getByRole("link", { name: "Download list file", exact: true })).toHaveCount(0);
+  expect(await records(page)).toEqual(changed);
+  await page.unroute("**/*list-transfer.worker*.js"); await choose();
+  await page.getByRole("button", { name: "Create snapshot link", exact: true }).click();
+  await expect(page.locator("input[readonly]")).toBeVisible();
+  expect(await records(page)).toEqual(changed);
+});
+test("cancelling saved-list encoding terminates its worker and leaves all tables unchanged", async ({ page }) => {
+  await upload(page); await page.getByRole("button", { name: "Save to My Library", exact: true }).click();
+  await page.getByRole("link", { name: "View saved lists", exact: true }).click();
+  await page.getByRole("list", { name: "Lists", exact: true }).getByRole("button", { name: snapshot.name, exact: true }).click();
+  const before = await records(page);
+  await page.route("**/*list-transfer.worker*.js", route => route.fulfill({ contentType: "text/javascript", body: "self.onmessage = () => {};" }));
+  const created = page.waitForEvent("worker");
+  await page.getByRole("button", { name: "Download list file", exact: true }).click();
+  const worker = await created, closed = worker.waitForEvent("close");
+  await page.getByRole("button", { name: "Cancel", exact: true }).click(); await closed;
+  await expect(page.getByRole("link", { name: "Download list file", exact: true })).toHaveCount(0);
+  await expect(page.getByRole("button", { name: "Download list file", exact: true })).toBeEnabled();
+  expect(await records(page)).toEqual(before);
+});
+test("oversized saved links retain a lossless file fallback without database writes", async ({ page }) => {
+  const large: ListSnapshot = { ...snapshot, name: "Large synthetic export", entries: Array.from({ length: 64 }, (_, index) => ({
+    kind: "placeholder", text: Array.from({ length: 8 }, (_, part) => createHash("sha256").update(`${index}:${part}`).digest("hex")).join(""),
+  })) };
+  await upload(page, large); await page.getByRole("button", { name: "Save to My Library", exact: true }).click();
+  await page.getByRole("link", { name: "View saved lists", exact: true }).click();
+  await page.getByRole("list", { name: "Lists", exact: true }).getByRole("button", { name: large.name, exact: true }).click();
+  const before = await records(page);
+  await page.getByRole("button", { name: "Create snapshot link", exact: true }).click();
+  await expect(page.getByRole("alert")).toContainText("The complete link exceeds");
+  await expect(page.locator("input[readonly]")).toHaveCount(0);
+  await page.getByRole("button", { name: "Download list file", exact: true }).click();
+  const [download] = await Promise.all([page.waitForEvent("download"),
+    page.getByRole("link", { name: "Download list file", exact: true }).click()]);
+  const path = await download.path(); if (!path) throw new Error("Lossless fallback download did not complete");
+  expect(JSON.parse(gunzipSync(readFileSync(path)).toString("utf8"))).toEqual(large);
   expect(await records(page)).toEqual(before);
 });
 test("rename, independent duplication and confirmed deletion preserve unrelated lists", async ({ page }) => {

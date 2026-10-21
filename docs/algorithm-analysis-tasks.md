@@ -412,6 +412,12 @@ source migration, live ingestion or automatic updates to reviewed items.
 
 ### ALG-14: Bounded list encoding and decoding
 
+Web saved-list export uses the [fixture personal protocol](architecture.md#web-fixture-personal-storage-v2):
+one validated read transaction, minimal allowlist projection, bounded worker
+encoding, then epoch/revision recheck before exposing the independent snapshot.
+This supplies partial stable-read/no-write/cancellation evidence, not native
+round trips, platform share interoperability or full-backup exportability.
+
 - **Requirements:** LIB-08-11, XFER-01-08, QUAL-05/06.
 - **Already fixed:** versioned JSON, raw deflate and base64url in a hash fragment;
   distinct gzip UTF-8 JSON files ending `.dvlist.json.gz`. The list format marker

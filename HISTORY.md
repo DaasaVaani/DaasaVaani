@@ -1,5 +1,24 @@
 # Documentation history
 
+## 2026-10-21: stable-read saved-list export
+
+- Continued after occurrence commit5045c6626b902b814e6d2c59f50cd02604a5b301:
+  preflight39630823613 and main39631092056 passed, including Pages deployment.
+- Extracted the existing worker export UI for both imported previews and saved
+  lists. Stored exports use transactional validated snapshots, exclude IDs and
+  all unrelated personal/control state, ignore unsaved form drafts and recheck
+  epoch/revision after encoding before offering output.
+- Added no-write cancellation/stale handling, preserved explicit privacy warnings
+  and complete file fallback for oversized links. Starting export clears pending
+  save confirmation, preserving mutual exclusion with decoder/Save controls.
+- `npm run check` passed22 unit tests, strict TypeScript/Vite and all84 browser
+  cases across desktop/Pixel7/320px, including actual gzip downloads and local
+  link reopening, post-encode concurrent mutation, worker termination, full-table
+  equality, stored-name selection and high-entropy lossless fallback.
+- Archived the preceding README/roadmap/coverage limitation "saved-list export
+  UI" was incomplete. Native transfer, catalog resolution, share adapters,
+  recitation, production migrations and recoverable full backups remain open.
+
 ## 2026-10-21: independent web list occurrences
 
 - The owner approved an explicit main-only manual deployment recovery mode

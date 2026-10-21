@@ -1,9 +1,10 @@
-import { useId, useLayoutEffect, useRef, useState } from "react";
+import { useId, useLayoutEffect, useMemo, useRef, useState } from "react";
 import type messages from "../shared/generated/web/ui.json";
 import { deleteList, saveList } from "./personal";
 import { editEntry, listSnapshot, moveEntry, newList, removeEntry, type ListEntry, type ListRecord, type PersonalStore, type Revision } from "./personal-model";
 import { listNameHint, personalMessage, useListSave } from "./ListSave";
 import styles from "./App.module.css";
+import { ListExport, type ExportSource } from "./ListExport";
 
 interface EntryDraft { id?: string; kind: "item" | "placeholder"; videoId: string; text: string; fallback: string }
 
@@ -17,11 +18,14 @@ export function Lists({ labels, personal }: { labels: typeof messages.en; person
   const [error, setError] = useState("");
   const [editor, setEditor] = useState<EntryDraft>();
   const [entrySaved, setEntrySaved] = useState(false);
+  const [exportBusy, setExportBusy] = useState(false);
   const heading = useRef<HTMLHeadingElement>(null);
   const entryGroups = useRef(new Map<string, HTMLDivElement>());
   const focus = useRef<string | null | undefined>(undefined);
   const save = useListSave(labels, () => { focus.current = null; setSelected(undefined); });
-  const working = busy || save.busy;
+  const working = busy || save.busy || exportBusy;
+  const source = useMemo<ExportSource | undefined>(() => selected
+    ? { kind: "stored", id: selected.record.id, expected: selected.expected } : undefined, [selected]);
   useLayoutEffect(() => {
     if (focus.current !== undefined) {
       (focus.current === null ? heading.current : entryGroups.current.get(focus.current) ?? heading.current)?.focus();
@@ -128,6 +132,8 @@ export function Lists({ labels, personal }: { labels: typeof messages.en; person
         <button disabled={working} type="button" onClick={() => { focus.current = editor.id ?? null; setEditor(undefined); }}>{labels.cancel}</button>
       </form>}
       <button disabled={working} onClick={() => void save.run(() => newList(listSnapshot(selected.record), name), selected.expected)}>{labels.duplicateList}</button>
+      <p>{labels.transferNotice}</p>
+      {source && <ListExport source={source} labels={labels} disabled={busy || save.busy} onBusyChange={setExportBusy} onStart={save.reset} />}
       <button disabled={working} onClick={() => { save.reset(); setEditor(undefined); setEntrySaved(false); setDeleting(true); }}>{labels.deleteList}</button>
       {deleting && <section aria-label={labels.deleteNotice}><p>{labels.deleteNotice}</p>
         <button disabled={working} onClick={() => void remove()}>{labels.confirmDelete}</button>

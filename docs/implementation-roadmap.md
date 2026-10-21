@@ -21,7 +21,7 @@ does not waive any validation gate.
 | P2 | Two-locale UI generation with committed web/Android resources | Reviewed five-Latin/nine-non-Latin tables, transliteration, technical grammar, plurals/escaping conformance |
 | P4 | Fixture gzip/hash/canonicalization/index producer; sampled independent OSA/candidate parity | Durable ledger/receipts, semantic dates, ZIP/planner, complete language/profile index and proof/capacity evidence |
 | P5 | Responsive online fixture reading/search, explicit consent, errors, direct routes, locale/themes and Library/Favorites session Back/Forward continuity | Full filters/discovery/script/helper/video/accessibility/platform journeys |
-| P5a | Transactional web favorites/preferences/lists, bounded worker preview/re-export, confirmed new-list-only import, duplicate-name warning, creation/rename/duplication/deletion, independent occurrence add/edit/reorder/remove/manual replacement and fixture v1 migration | Recents/bookmarks/learning/recitation, saved-list export UI, catalog resolution, native transfer parity, full backups and production migrations |
+| P5a | Transactional web favorites/preferences/lists, bounded worker preview/saved-list file/link export, confirmed new-list-only import, duplicate-name warning, creation/rename/duplication/deletion, independent occurrence add/edit/reorder/remove/manual replacement and fixture v1 migration | Recents/bookmarks/learning/recitation, catalog resolution, platform share adapters, native transfer parity, full backups and production migrations |
 | P6 | No persistent offline snapshot implementation | Journals/atomic activation/resume/repair/reader-safe GC and service worker lifecycle |
 | P7 | Native fixture-only full preparation in memory, reading/search, core tests and connected reading test | Room personal state, durable preparation/recovery, typed navigation/DI, parity and device matrix |
 | P3/P8/P9 | Dependency-ordered Shared/fixture-publisher pins; full web fixture CI/Pages and native build/core/lint CI | Live-provider clarification, production ingestion/publication/signing, device CI and release readiness |
@@ -41,7 +41,7 @@ persistent search history, list/Explore continuity or Android/offline parity.
 
 XFER-01/02/03/04/05/06/08 receive partial web evidence: strict settings-derived
 schema, bounded single-member gzip/raw-deflate/base64url codecs, local plain-text
-preview, explicit cancellation and a static configured `/open/` hash entry.
+preview/saved-list export, explicit cancellation and a static configured `/open/` hash entry.
 Settings/preview/list management remain available when the Library endpoint fails.
 Saving requires an explicit action after preview and creates a new independent
 list only. Duplicate names require confirmation; revision/epoch changes require
@@ -49,6 +49,9 @@ renewed review. No lyric is fetched by transfer or saving, and no offline readin
 or signed native App Links is claimed. The [current storage protocol](architecture.md#web-fixture-personal-storage-v2)
 does not establish full-backup exportability, complete list/recitation journeys,
 production migration coverage or native parity.
+Saved-list export rechecks its read revision after encoding and refuses concurrent
+changes without a write. Its gzip/link projection excludes local IDs/control,
+preferences and unsaved drafts; oversized links retain a complete file fallback.
 
 LIB-02/03/04/08/09/10 receive partial web management evidence: plain-text
 placeholder/reference entry forms, optional user fallback labels, independent

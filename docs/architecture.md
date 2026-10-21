@@ -174,6 +174,18 @@ user-written text into the visible editable fallback field. It never infers an
 item match or fills a catalog title. Focus follows the affected occurrence after
 save/move/removal and returns to the list heading when no occurrence remains.
 
+Saved-list export reads/validates the three-table state in one read-only
+transaction at the selected epoch/revision and projects only the minimal-list
+allowlist. After bounded worker encoding, recheck the same epoch/revision before
+offering bytes/link. A concurrent personal mutation requires a fresh selection;
+failure/cancellation changes no table. Export uses the stored name/content, not
+unsaved editor fields, and does not increment revisions or allocate identities.
+Preview and saved-list export share one worker-based UI with explicit cancellation,
+object-URL cleanup, lossless oversized-link file fallback and privacy warnings.
+Starting export cancels any pending save confirmation; decoding, saving and
+encoding controls cannot concurrently commit a pending confirmation. No catalog
+details/lyrics are fetched and no readiness state is inferred.
+
 The exact logical accounting envelope, serialized as compact UTF8 JSON without
 BOM, is `{format:"fixture-personal-storage",formatVersion:2,control,personal,lists}`.
 Key order is the order shown; header keys follow the table above. `personal` is
