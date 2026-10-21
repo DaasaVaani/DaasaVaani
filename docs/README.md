@@ -11,6 +11,10 @@ This folder is the shared context for humans and AI coding agents.
 3. [Approved individual design decisions](design-decisions.md): selected
    libraries/approaches, alternatives/trade-offs, superseded choices and open
    questions; consolidated final design approval remains pending.
+   The [Shared implementation-design record](https://github.com/DaasaVaani/shared/blob/main/docs/implementation-specification.md)
+   now consolidates the earlier approved review passes, configuration inventory,
+   failure behavior and requirement/test traceability. The user requested this
+   documentation before another audit; unresolved gates are explicitly retained.
 4. [Architecture and decision gates](architecture.md): component ownership and
    decisions that must precede implementation.
 5. [Data contracts](https://github.com/DaasaVaani/shared/blob/main/docs/data-contracts.md): contract boundaries and schema-design

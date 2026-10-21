@@ -7,6 +7,11 @@ Markdown in a sibling path is unreviewed; assessment/migration is pending and
 not authorized. See [approved individual decisions](design-decisions.md) and
 [decision gates](architecture.md). Overall approval and coding authorization remain pending.
 
+The [Shared implementation-design record](https://github.com/DaasaVaani/shared/blob/main/docs/implementation-specification.md)
+now records the earlier approved passes. The user paused another audit to
+document them first. Every configurable value must come from owning-repository
+settings; these phases do not authorize inventing defaults or closing open gates.
+
 ## Delivery sequence
 
 Each phase must produce a working, verified slice and update its actual state
@@ -24,22 +29,29 @@ table order.
 | P5a: Personal library and reading journeys | P5; applicable D4/D5 decisions | Favorites, repeated reference/placeholder occurrences, fallback labels, snapshot transfer/new-list-only import, duplicate-name warnings with confirmed reuse, recents/labels/bookmarks, most-recent-list recitation resume and practice (LIB, XFER, REC, LEARN). | Round trips preserve repetition/order/text; create/rename/duplicate/import allow warned/confirmed duplicate names without overwrite/merge; cancelled saves preserve state; explicit Continue restores only latest list/occurrence across restart, not per-list/scroll positions or practice state, and never transfers progress; removed-location choice, lossless fallback, privacy and accessible plain text verified. |
 | P6: PWA offline slice | P5, P5a; D5 | Optional full download, active-version precedence, truthful compatibility/update guidance, soft reminders, safe same-version resume/repair and honest readiness (OFF, UX, LIB, XFER, REC, LEARN, EXP). | Complete offline functionality, filter recovery and explicit latest-list resume work without images/videos; newer incompatible content never forces loss of compatible reading or a false latest-published claim; safe website update preserves personal data and does not silently replace content; initial compatible/no-compatible paths pass; 3-day suppression and failed checks remain correct; no partial/mixed activation; degraded repair/removal recovery passes. |
 | P7: Android client | P4; applicable D1/D4/D5/D7 decisions | Android `app` plus pure-Kotlin `core`; small APK without lyrics; required preparation, published content/manual GitHub Releases guidance, active-version/reminder/resume/repair parity, density, filters, duplicate-name and latest-list-resume parity, signed links/pending destinations. May proceed alongside P5/P5a/P6. | API 26+; initial failure keeps lyrics gated but recovery/lists accessible; no onboarding bypass; full offline use and verified repair pass; incompatible newer content preserves compatible reading with truthful guidance, no silent APK/content install; initial compatible/update-required paths, removal/total-loss gates, personal data, routing/accessibility and measured sizes verified. |
-| P8: Production automation | P3, P4, P6, P7; D7 | Scheduled/backfill imports, source-only PR checks, full post-merge validation, root Pages output/association, selected shell lifecycle and signed APK workflow. | Review-to-publication, draft/internal-provenance exclusion with explicit Source Latin exception, signed APK/root links and deployment rollback tested. No forced shell activation/content replacement or permanent previous local snapshot implied. |
+| P8: Production automation | P3, P4, P6, P7; D7 | Local/manual imports, source-only PR checks, full post-merge validation, whole-artifact Pages, root association and `/open/`, unsigned CI/local signing/protected publication. | No scheduled ingestion or CI signing key. Resolve provider hold before ingestion; restore normal main protection before release. Validate failures, signed-device links and measured release evidence. |
 | P9: Release readiness | P8 | Full compatibility, accessibility, performance, privacy, and acceptance evidence. | Required tests and manual evidence complete; remaining gaps explicitly approved rather than called done. |
 
 Gate decisions may be grouped if the user approves them together. Backfill should
 not be a prerequisite for deterministic fixture-based development or tests.
 
-Round 2 does not add Find within an open lyric, an in-app correction-report
-builder, full personal-data backup, or cross-session navigation restoration.
+Find within an open lyric, an in-app correction-report builder and cross-session
+general navigation restoration remain excluded. Later passes add separate full
+personal backup/recoverable replacement, not minimal-list merging.
 The later approved revision intentionally expands snapshot entries to include
 plain-text placeholders/fallback labels and adds app/browser links. It does not
 add a backend, live lists, external placeholder URLs, selective offline saves,
 bundled Android lyrics, or thumbnails in offline packages.
-The coherence review also settles six generated Latin schemes and optional
+The later review settles five initial Latin schemes (Hunterian deferred) and optional
 Source Latin, generator-owned soft update dates, explicit safe resume/repair and
 new-list-only imports. Exact mappings, storage/format choices, date representation,
 occurrence identity and layout dimensions still require the applicable gates.
+Initial query coverage is Kannada/Latin with snapshot-pinned policy and additive
+metadata-first ranking; other scripts remain readable. Bounded item reads supply
+selected-script excerpts inside the same 550 ms target. Reading ZIPs contain up
+to 100 artifacts/32 MiB and no thumbnails; oversized objects may transfer
+individually. Backup-covered personal state/preferences share one transactional
+database; OS-language application is an explicitly recoverable postcommit effect.
 Later [questionnaire choices](design-decisions.md) settle the storage/format
 directions, public Source Latin/status exception and post-merge/global-only
 generation policy; exact schemas/versions/protocols remain open.

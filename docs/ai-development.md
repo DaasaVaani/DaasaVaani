@@ -2,6 +2,13 @@
 
 ## Authority and working method
 
+The [Shared implementation-design record](https://github.com/DaasaVaani/shared/blob/main/docs/implementation-specification.md)
+now consolidates the earlier approved passes and remaining gates. The user
+requested documenting those passes before starting another audit. Use its latest
+supersessions, not historical six-profile/ranking/backup choices. Every
+configurable value belongs in owning-repository settings, not hidden code
+defaults. This documentation is not final design approval or app implementation.
+
 [Requirements](requirements.md) are the approved product scope. This guide
 organizes implementation work; it does not override that scope.
 Read the [approved individual design decisions](design-decisions.md) before

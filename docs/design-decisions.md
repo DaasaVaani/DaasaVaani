@@ -7,10 +7,18 @@ overall final approval.** This record does not authorize application implementat
 dependency installation, deployment, release, or commits. No application
 implementation, benchmark, linguistic conformance run, or device validation is
 established. Four-repository bootstrap is complete; Library source migration is
-pending and Website submodule wiring remains staged locally, not committed.
+pending and unauthorized.
 
-[Requirements](requirements.md) own product behavior. This record owns the
-selected technical direction, rationale, alternatives and remaining questions.
+**Current reading order:** [section 10B](#10b-approved-review-pass-supersessions)
+and the [Shared implementation-design record](https://github.com/DaasaVaani/shared/blob/main/docs/implementation-specification.md)
+record the latest approved choices. Sections 1-10A preserve earlier rationale
+and history, not current instructions where superseded. Older six-profile,
+no-hold, blanket-normalization, ranking, backup/storage, bundle, hosting and
+release entries must not be implemented instead of 10B.
+
+[Requirements](requirements.md) own product behavior. This file preserves the
+selection history/index; Shared owns the consolidated cross-repository design
+record, with operations in their owning repositories.
 [Architecture gates](architecture.md) and [contract guidance](https://github.com/DaasaVaani/shared/blob/main/docs/data-contracts.md)
 identify prerequisites for a coding-ready specification. A selected library is
 not an approved version pin or evidence that its defaults satisfy the contract.
@@ -407,7 +415,9 @@ resources, and Library sources/ingestion/publication. These are approved
 boundaries and tool choices, not completed application implementation, CI,
 toolchain pins, or deployment. New repositories were created and bootstrapped with hygiene workflows, security
 policies, issue/PR templates, and Dependabot for GitHub Actions. Their bootstrap
-commits/pushes were authorized setup actions; this task makes no commits or pushes.
+commits/pushes were authorized setup actions. Documentation and direct-main
+publication of earlier approved passes were separately authorized; this is not
+application-implementation authorization.
 
 | Decision | Selection and rationale/trade-off |
 | --- | --- |
@@ -496,6 +506,11 @@ settings, safe migration, capacity and retention remain open.
 
 ## 10A. Decisions approved in the gap-closure pass
 
+Historical snapshot: retain these entries for selection IDs and rationale.
+Section 10B is the current refinement; serialized examples here are not final
+schemas. The old package table is not verified integration evidence: later
+primary npm requests failed TLS, and mirror research is not registry verification.
+
 These individually approved decisions follow the full gap analysis. Where one
 supersedes earlier text elsewhere, the entry says so and the user's decision
 prevails. Each stable ID appears in section 12.
@@ -577,6 +592,49 @@ prevails. Each stable ID appears in section 12.
 | Observability (`observability-policy`) | No telemetry, crash reporting, analytics or diagnostics export. Users report through GitHub issue forms. Errors stay explicit in the UI. |
 | Branch protection (`branch-protection-policy`) | Protect `main` in all four repositories: PRs and named checks required, no force pushes or deletions, admins not exempt, no required second reviewer. Self-approval is not independent review. Not yet applied; applying it needs explicit authorization. |
 
+## 10B. Approved review-pass supersessions
+
+Recorded on 2026-10-21 at the user's request to document earlier passes before
+another audit. This is not final completeness/design approval. The detailed
+owner/contract/failure/configuration/test record is now in
+[Shared](https://github.com/DaasaVaani/shared/blob/main/docs/implementation-specification.md).
+
+| Area | Current approved choice; supersedes conflicting earlier wording |
+| --- | --- |
+| Drafts/layout | Legitimate incomplete drafts and complete items with a nonempty publication-hold reason are unpublished; no general status field. Structural/reference/duplicate errors fail validation. Blank separators are explicit layout without lyric UUIDs; no invented verses. |
+| R01-R04: metadata/language/catalogs | Stable reviewed bilingual registries and composer/ankita 1:1 relation, Unknown for absent classification; saint/guru subjects via tags/context. Exact reviewed pinned profiles/independent fixtures, ISO15919 filename-only ASCII slug, explicit Latin picker, simple named-placeholder/cardinal-plural catalogs. |
+| Latin/Tamil refinements | Five initial Latin profiles, Hunterian deferred. IAST Kannada e/ē, o/ō, ṛ/ṝ, vocalic l̥ versus lateral ḷ. Native approximations with declared losses; Tamil Grantha-origin letters plus consonant superscripts, no extra vowel/nasal superscripts. Exact full tables remain open. |
+| R05-R07: contracts/dates/normalization | JSON Schema 2020-12; strict non-mutating producer and compatible optional-field consumer. Durable Library first-publication/output-changed-at ledger, removal/reintroduction and no-op stability. NFC, profile-significant case/diacritics, punctuation boundaries and only reviewed joiner equivalences. |
+| R08 B/R08b/S08 B: search | Publisher candidate acceleration plus exact code-point OSA-fragment verification, completeness proof/scan oracle. Initial Kannada/Latin query coverage; other scripts readable. IDs/upload/library-added dates removed from text search. Metadata-first buckets and additive weights: title > composer=ankita > deity > tags=form=category > context labels > context description > lyrics. Enough lower-field evidence may outweigh title; numeric/quality/aggregation/tie details remain open. |
+| R09 replaced by S03 | Selected-script excerpts come from bounded item-artifact reads, local after preparation and online before PWA preparation. Index carries matching data/anchors, not all-rendering readable copies. The 550 ms full visible-result target includes I/O and 250 ms debounce. |
+| R10-R15: transport/lifecycle | Individual objects plus common thumbnail-free ZIP STORE bundles up to100/32MiB. Deterministic byte/request trade-offs, durable coordinator/journal/activation, Web Locks/fencing with optional BroadcastChannel/focus recheck, on-use verification plus bounded audit, artifact-level resume without Range, UIDT34+/FGS26-33. Exact budgets/journal structures remain open. |
+| R16-R18: personal data | Typed item/line/verse/occurrence references; forward-tested non-destructive migrations, never reinstall-and-lose-data downgrade advice. Recent50 distinct successfully opened lyrics, disable stops writes/clear separate; NFC/case-insensitive duplicate-name warnings retaining entered text. Distinct minimal-list/full-backup formats. |
+| R19-R21: navigation/adapters | Typed anchors and pending destinations, Search/My Library primary, Explore/Settings secondary, accessible non-drag alternatives and standard platform player/share/copy/file/screen-awake adapters with lifecycle errors. |
+| R22-R25: ingestion/assets | Local official uploads full-scan pagination, committed/pending reconciliation and channel serialization. Sanitized console/machine report/PR summary, not scheduled CI/Actions ingestion. Conservative held extraction and reviewed WebP pipeline. First API ingestion remains provisional and blocked pending provider clarification. |
+| R26: foundation | Stable compatible pinned baseline researched, not installed/build-proven. Koin-attested Kotlin candidate2.4.20 supersedes unverified2.4.21. AGP9 app built-in Kotlin, JVM core kotlin.jvm; Compose/serialization track chosen Kotlin. Primary npm TLS failed; retain mirror provenance caveat. |
+| R27-R29/C01: release/hosting/docs | Owning-repo deterministic checks and broad risk-based physical/boundary evidence. Unsigned CI -> local maintainer signing -> protected signed-APK verification/publication, no signing key in CI. Host-limit/headroom preflight supersedes no-size-budget gate. Current-only remote publication; explicit restart may be needed. Whole validated Pages artifact, no descriptor-last/global-CDN-atomicity promise. Shared design entry point; Website requirements authoritative. |
+| Fonts | System fonts only. Confirmed failures disclose unsupported rendering/environment and offer explicit alternatives; no silent script switching or false readiness. |
+
+All S01-S12 A choices were approved except **S08 B**:
+
+| ID | Refinement |
+| --- | --- |
+| S01 | Every configurable default/switch/mapping/weight/limit belongs in strict owned YAML settings, with generated JSON where needed; no hidden/duplicated production defaults. Algorithms/invariants remain code; personal state/secrets separate. |
+| S02 | Required hash-verified policy artifact binds index/query to its snapshot, not latest app/remote defaults. |
+| S03 | Item reads for excerpts, replacing R09 embedded all-rendering text; I/O remains within PERF-01. |
+| S04 | Complete suitable unaligned Source Latin may be whole-text read; indexing/helpers/anchors require reviewed canonical-line mapping. Raw source/status public, no fabricated alignment/generated filling. |
+| S05 | Individual online images separate from offline reading bundles; exclusion after transfer is insufficient. |
+| S06 | Dedicated static `/open/` hash entry with scoped Android links/browser fallback; old root hash links remain web-readable; association file stays at host root. |
+| S07 | All backup-covered state/preferences in one transactional personal Room/Dexie DB, replacing split Room/DataStore backup state. Full restore is confirmed recoverable replacement. OS locale applies postcommit with truthful restored-data/unapplied-language retry. Android Auto Backup personal DB only, never content/journals/false readiness. |
+| S08 B | Additive weights, not strict lexicographic priority. |
+| S09 | Two global publisher-generated common/compact ASCII search-only profiles, not display variants or item-specific rules; exact tables pending. |
+| S10 | Native approximations and allowed Tamil Grantha/consonant markers, no extra vocalic/nasal superscripts, empty mapping or foreign-script leakage. |
+| S11 | Initial settings values: query256 code points/16terms, page20, complete URL2048 ASCII characters, ZIP up to100/32MiB, decoded list8MiB, full-backup JSON64MiB. Oversized individual objects may transfer directly under their own limits. No truncation or invented capacity measurements; remaining limits open. |
+| S12 | Applied/verified sibling PR/check rules with temporary admin-only direct-push bypass and no-bypass force/delete guards; Website unchanged from earlier exception. Restore intended normal policy before release, not unprotected sibling history. |
+
+See [maintenance](maintenance.md) for actual ruleset IDs and current-versus-release
+policy. No application or configuration files are introduced by this documentation.
+
 ## 11. Remaining approval and implementation gates
 
 No gate is declared fully closed by this interim record. Section 10A closed
@@ -586,19 +644,20 @@ many items below; the table lists what is still open.
 | --- | --- |
 | D1 foundation | Android pins to verify (BOM, KSP, AGP 9.4.0), per-repository bootstrap/check commands, exact manifests. Node/npm and npm package pins are decided in 10A but re-verified when manifests are created. |
 | D2 sources/taxonomy | Actual channel metadata coverage audit; exact schemas/field cardinalities not settled, vocabularies/aliases, library-added date/backfill policy, legacy inventory and mapping evidence. UUID, markers, filenames, drafts and the registries/settings split are decided. |
-| D3 language/localization | Hunterian reference (from the user), profile files and expected fixtures, permitted samples/default review, target approximation tables, YAML catalog conversion/escaping/plurals, React Aria Kannada messages, real-device script rendering with system fonts. |
-| D4 search/public/transfer | JSON Schema dialect and exact types, capability names, bump rules, supported-version window, punctuation set and Unicode pin, tokenization for Kannada, ranking weights and excerpts, query/size/memory bounds and the PERF-01 feasibility measurement, link-length limit, file header/extension. |
-| D5 lifecycle/personal | Journal format, lease expiry, GC timing, interrupted targets, repair/audit scheduling, planner byte/request budgets, bundle count N and byte cap, personal schemas, recents semantics, export/import format, navigation/pending destinations and recitation details. |
+| D3 language/localization | Five exact profile/native-approximation/alias tables, pins/independent expectations, permitted samples, catalogs/escaping/plurals, Kannada announcements and system-font evidence. Hunterian deferred, not an initial blocker. |
+| D4 search/public/transfer | Exact 2020-12 types/capabilities, Unicode/tokenization tables, additive ranking/aggregation/ties, remaining resource bounds, I/O-inclusive PERF-01 evidence, file headers/extensions and signed-device links. |
+| D5 lifecycle/personal | Exact journal/leases/fencing/GC/recovery scheduling, planner budgets, personal/backup schemas/migrations, postcommit locale recovery/navigation. Bundle100/32MiB and recent50-successful-open semantics selected. |
 | D6 import/assets | API pagination/quota, batches/pending-PR reconciliation, taxonomy proposals, image encoder dependency and thumbnail dimensions, local ingestion runbook, provider-terms check for stored YouTube metadata. |
-| D7 release/hosting | Capacity measurement against 1 GB/10 minutes with doubled artifacts, bandwidth, worker behavior, App Links path patterns and device fragment verification, key backup procedure, rulesets application (needs authorization), release evidence. |
+| D7 release/hosting | Capacity/headroom/bandwidth, root worker behavior, `/open/` fragment verification, exact local-signing handoff/key backup/release evidence. Temporary admin rules applied; restore normal protection before release. |
 
 Remaining UI decisions include exact theme/spacing/column tokens, fonts, player,
 file/sharing/screen-awake libraries, accessible navigation/reordering and their
 failure paths. Selected Material 3/React Aria do not choose all of these.
 
-Continue the questionnaire, reconcile the complete contracts and requirement
-traceability, and obtain overall final approval. Only then produce the final
-coding-ready implementation specification. Application coding remains separate.
+The user authorized documenting earlier approvals now, before another audit.
+The Shared record includes those choices, traceability and open gates, not a
+final coding-ready declaration. Further audit follows this documentation task;
+final approval and application coding remain separate.
 
 ## 12. Questionnaire coverage
 

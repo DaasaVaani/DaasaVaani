@@ -4,7 +4,7 @@ An open-source project to make Hari Dasa Sahitya easy to discover and read throu
 an Android app and an accessible, mobile-first website.
 
 **Status: planning / pre-implementation.** This Website repo has a placeholder,
-its Pages workflow, documentation and source files awaiting migration. The four
+its Pages workflow and documentation, not reviewed Library sources. The four
 public repositories are bootstrapped, but app/content tools, Library Pages and
 Website publication integration are not implemented. Product capabilities below
 remain planned. Individual choices are recorded; final approval/contracts remain pending.
@@ -12,6 +12,7 @@ remain planned. Individual choices are recorded; final approval/contracts remain
 [Documentation](docs/README.md) |
 [Requirements](docs/requirements.md) |
 [Design decisions](docs/design-decisions.md) |
+[Recorded implementation design](https://github.com/DaasaVaani/shared/blob/main/docs/implementation-specification.md) |
 [Roadmap](docs/implementation-roadmap.md) |
 [Contribute](docs/CONTRIBUTING.md) |
 [Security](docs/SECURITY.md)
@@ -23,8 +24,8 @@ remain planned. Individual choices are recorded; final approval/contracts remain
 - Canonical Kannada lyrics with reviewed transliterations into Latin/English,
   Devanagari, Telugu, Tamil, Malayalam, Gujarati, separate Bengali and Assamese, Gurmukhi,
   and Odia scripts. **Lyrics are never translated.**
-- Six selectable generated Latin variants: ISO 15919:2001, IAST, Hunterian,
-  Baraha, ITRANS and Harvard-Kyoto, with exact Kannada profiles still to be pinned
+- Five initial generated Latin variants: ISO 15919:2001, IAST Kannada,
+  Baraha, ITRANS and Harvard-Kyoto; Hunterian is deferred. Exact profiles must be pinned
   and tested. Suitable complete supplied text may also appear as Source Latin,
   never silently mixed with generated lines. Users choose their variant; any
   recommendation awaits side-by-side sample review.
@@ -38,7 +39,7 @@ remain planned. Individual choices are recorded; final approval/contracts remain
   category and narrative context. Tags are searchable only; no upload-year
   filter. Require all query terms, including within-word substrings and bounded
   code-point typo matches: `dir sh` matches `vadiraja krishna`. Match selected
-  scripts and reviewed alternative Latin spellings, preview matching lines, and
+  Kannada/Latin queries and reviewed search-only spellings, preview selected-script lines, and
   open at the matching verse. Keep active filters visible, remove them
   individually, or clear filters without losing the typed query.
   A prebuilt global JSON/gzip index is downloaded, not built on clients.
@@ -80,7 +81,8 @@ remain planned. Individual choices are recorded; final approval/contracts remain
 - On-demand online lyric reading on the website/PWA, with an optional explicit
   complete-library download for offline use. Download lyrics, metadata, script
   variants, indexes and required reading assets, not thumbnails or videos.
-  Prefer system fonts with necessary tested offline fallback coverage.
+  Use system fonts only, with explicit warnings/alternate choices for confirmed
+  unsupported renderings; no bundled/downloaded fallback fonts.
 - Per-list offline-readiness checks distinguish available library lyrics,
   unresolved references and intentional placeholder counts/warnings.
   Reading, search, lists, practice, and discovery work from downloaded content.
@@ -104,6 +106,10 @@ remain planned. Individual choices are recorded; final approval/contracts remain
   no PR previews or per-item generated-text overrides. Global conversion fixes
   preserve canonical Kannada. Supplied Source Latin/status is public even when
   unsuitable, but unsuitable text is not a selectable/searchable reading variant.
+- Separate full personal export/restore, with explicit recoverable replacement
+  and disclosed Android Auto Backup for the personal database, never content.
+- Every configurable value belongs in reviewed owning-repository `settings/`
+  files, not hardcoded defaults, mappings, ranking weights or limits.
 
 ## Repository organization
 
@@ -121,8 +127,8 @@ Each consumer pins Shared independently. `library/` is absent from this Website 
 empty; neither contains the Library sources. Legacy-looking Markdown has been
 reported in the separate sibling `WebsiteLibrary\dasasahitya` path, but it has
 not been reviewed or established as authoritative. Any source assessment or
-migration remains pending and unauthorized; this documentation update does not
-inspect or change sibling repositories. Website submodule wiring is staged locally but uncommitted.
+migration remains pending and unauthorized. The recorded review passes are
+documented across their owning repositories; this does not migrate source content.
 Library Pages and Website-side publication integration are not implemented.
 
 See [approved individual decisions and trade-offs](docs/design-decisions.md) for
@@ -141,7 +147,7 @@ The planned website will be fully static on GitHub Pages, without an application
 backend, server-side database, or server-side user-list storage. Static artifact downloads,
 local browser/app storage, explicit YouTube playback, and maintainer-side GitHub
 Actions remain allowed. Signed Android APKs will be
-distributed through [GitHub Releases](https://github.com/DaasaVaani/DaasaVaani.github.io/releases).
+distributed through [AndroidApp GitHub Releases](https://github.com/DaasaVaani/AndroidApp/releases).
 This is the intended distribution route, not a claim that an app release exists.
 Google Play distribution is deferred.
 
@@ -157,9 +163,10 @@ the expected approximately 2,500 songs do not establish package size.
 
 Targets include Android 8.0/API 26+, current and previous major versions of
 Chrome, Edge, Firefox, and Safari, and responsive layouts from 320 CSS pixels.
-Accessibility is best effort with no WCAG claim. The initial release test matrix
-covers only the latest Chromium and the latest Android emulator; other targets are
-unverified until tested. PWA installation/storage behavior varies by browser.
+Accessibility is best effort with no WCAG claim. Risk-based release evidence must
+cover platform boundaries and physical devices; latest Chromium/emulator smoke
+alone does not establish the supported matrix. No app/device results exist yet.
+PWA installation/storage behavior varies by browser.
 
 ## Explore the repository
 

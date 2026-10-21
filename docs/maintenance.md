@@ -8,12 +8,11 @@ and releases.
 
 - The repository is public; organization base access is read-only. Only the two
   organization owners were listed with repository administration access.
-- An active `main` ruleset requires a PR, one approval, stale-review dismissal,
-  approval after the latest reviewable push, and resolved review conversations.
-  The GitHub Actions `Workflow lint` check is required, with the branch up to
-  date before merging. Repository administrators may bypass review and check
-  requirements when merging a PR. Their bypass is PR-only: direct pushes, force
-  pushes, and branch deletion remain protected.
+- Website PR/check ruleset 25497312 retains one approval, stale-review dismissal,
+  last-push approval, resolved conversations and the up-to-date `Workflow lint`
+  check. Its explicitly authorized temporary repository-admin bypass is now
+  `always`, permitting direct pushes as well as PR merges. Separate active
+  ruleset 25525161 forbids force pushes/deletion with no bypass, including admins.
 - Secret scanning, push protection, private vulnerability reporting, Dependabot
   alerts, and Dependabot security updates are enabled.
 - Actions default to read-only tokens and cannot approve PR reviews. Only
@@ -37,6 +36,33 @@ Remaining owner tasks:
 - After the pinned workflows merge, enable repository SHA-pin enforcement.
   Enabling it prematurely would block the existing tag-based deploy workflow.
 
+### Temporary direct-main exception across all four repositories
+
+The user explicitly approved this temporary configuration and will restore
+normal protection before release. API reads verified all sibling mains protected.
+Only the PR/check rulesets have repository-admin role 5 `always` bypass:
+
+| Repository | PR/check ruleset | No-bypass force/delete guard | Required existing check |
+| --- | --- | --- | --- |
+| Website | 25497312 | 25525161 | Workflow lint |
+| Shared | 25526641 | 25526636 | Bootstrap files and YAML syntax |
+| AndroidApp | 25526642 | 25526638 | Bootstrap files and YAML syntax |
+| Library | 25526643 | 25526637 | Bootstrap files and YAML syntax |
+
+The three siblings previously had no main protection. Their new PR rules require
+zero approving reviews, no code-owner/last-push approval and no extra approval
+for unattributed changes; the last setting was explicitly disabled after GitHub
+defaulted it to true. Resolved conversations and up-to-date hygiene checks remain
+required for non-bypassing writers. No nonexistent application check is required.
+Website's existing review parameters were otherwise left unchanged.
+
+**Release blocker:** remove temporary admin PR/check bypass and verify the
+approved normal policy in every repository: required PR/named checks, no admin
+exemption, no mandatory second reviewer, no force pushes/deletion. Do not revert
+siblings to unprotected main or blindly restore Website's original one-reviewer
+snapshot as though it were the newer approved normal policy. The original
+Website ruleset was exported for recovery outside the repositories.
+
 ## Before inviting broader contributions
 
 - Enable GitHub private vulnerability reporting and verify the route in
@@ -51,7 +77,8 @@ Remaining owner tasks:
 - Enable secret scanning/push protection and dependency alerts where available.
   Review feature availability for this repository rather than assume it.
 - Verify community-policy links, issue/PR templates, and reporting routes.
-- Obtain content/media permissions before historical imports.
+- Resolve the provider-policy hold before first ingestion. Maintain applicable
+  legal responsibilities without inventing a per-item rights publication gate.
 
 ## Deployment and release safety
 
@@ -60,8 +87,10 @@ Remaining owner tasks:
   this allowlist with validated public build output and verify that internal
   data is absent. All tracked source files remain public in this repository.
 - Configure Pages environments/deployment permissions deliberately.
-- Store API and APK signing credentials in protected secret storage. Keep a
-  secure signing-key backup and restrict release access.
+- Keep the local ingestion API credential and APK signing key outside CI,
+  repositories and logs. CI builds unsigned APK candidates; a maintainer verifies
+  and signs locally; a protected workflow verifies/publishes the signed APK.
+  Retain secure key backup and restricted release access.
 - Establish compatible content versions, signed APK verification, and rollback
   procedures before production releases.
 - Publish supported versions/security-update expectations in the security policy
@@ -79,8 +108,8 @@ Remaining owner tasks:
 - Review release notes, license changes, security advisories, and compatibility;
   run relevant checks before merging updates. Avoid blind automatic merges.
 - Test updates against API 26, supported browsers, and content-format compatibility.
-- Repository CI checks workflow syntax and whitespace, not application or
-  content correctness. No application dependency ecosystem is selected yet.
+- Repository CI checks hygiene, not app/content correctness. Selected Node/npm
+  and Android directions are not installed manifests, verified pins or app CI.
 
 ## Suggested recurring review
 

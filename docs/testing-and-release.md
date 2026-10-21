@@ -41,6 +41,10 @@ Do not guess commands or install a new runner merely to fill this table.
 
 ## Approved risk-based process (implementation pending)
 
+Use the [Shared approved-pass traceability matrix](https://github.com/DaasaVaani/shared/blob/main/docs/implementation-specification.md#14-requirement-and-verification-traceability)
+and its explicit remaining gates. This update documents earlier approvals before
+another audit; no application or conformance tests are claimed.
+
 The selected process is a risk-based test pyramid, not evidence that checks exist.
 Fast deterministic unit/contract tests are intended on each owning-repository PR.
 Shared portable fixtures are the cross-implementation oracle; each consumer runs
@@ -54,16 +58,16 @@ the previously supported pinned Shared revision only when claiming compatibility
   the latest stable Chromium only (`release-test-matrix`). Firefox, WebKit/Safari
   and PWA install/storage on other browsers are unverified. Playwright
   service-worker automation is Chromium-only.
-- **Android:** PR JVM tests, lint and Compose/instrumented smoke on the latest
-  Android emulator only. API 26 to 35, physical devices, background boundaries and
-  per-script real-device rendering are unverified and must be named as such.
+- **Android:** PR JVM/lint/instrumented smoke; release evidence covers API26,
+  current and API33/34 transfer boundaries plus physical devices and script
+  rendering. Latest-emulator smoke alone does not establish broad support.
 - **Release evidence:** state every platform, browser, API level and device that
   was not tested; never claim support beyond what was run, including the API 26
   minimum, App Links on devices and low-end performance.
-- **Performance:** The 550 ms p95 target includes 250 ms debounce, cold load and
-  memory in a scheduled/pre-release measured protocol on representative devices,
-  not a flaky per-PR gate. Do not substitute emulation or unit tests for device
-  evidence.
+- **Performance:** The 550 ms p95 target includes 250 ms debounce and selected-
+  script item I/O, with the index already loaded. Measure cold load/memory
+  separately on representative devices, not a flaky per-PR gate. Unit tests or
+  emulation are not physical-device evidence.
 - Required checks are branch-protection gates. Quarantine flaky tests only with
   a tracked owner and expiry. Release evidence records exact commands/results,
   pinned Shared and Library revisions, and unverified acceptance criteria.
@@ -90,15 +94,15 @@ pending. No application/linguistic/performance tests were run to select defaults
 | --- | --- |
 | Source/unit | Strict YAML 1.2/remark restricted grammar, closed fences, draft rules, persisted UUIDs and references, optional fields, source correction preservation, hex-ID/ASCII-slug filename behavior, stable registry IDs and append behavior. |
 | Ingestion integration | API pagination/quota/error fixtures, new-only imports, duplicate committed/pending work, no-change runs, review PR contents including assets/settings. |
-| Generated contracts | Draft/internal-provenance exclusion except explicitly public supplied Source Latin/status; old/new compatible data, groups/global-index consistency, all renderings/six profiles, anchors, stable library-added dates, generator-owned dates with >=7-day interval, deterministic JSON/gzip/SHA-256 reuse and common ZIP STORE members. |
-| Language processing | Pinned ISO/IAST/Hunterian/Baraha/ITRANS/HK Kannada fixtures, independent expected output, case/diacritic collisions, Tamil superscripts, separate Bengali/Assamese and native approximations. Source PR/tooling-fixture checks, actual variants only post-merge, global-only fixes and deployment blocked on full generation failure. Suitable/absent/partial/unsuitable Source Latin, public status but restricted eligibility, reliable alignment, no mixing/switching, samples before a recommendation/default. |
-| Search | AND substrings and bounded code-point OSA fragments, all-script/reviewed alternatives, differentiated metadata/lyric ranking, selected-script excerpts/highlights/verse navigation, approved five filter fields with OR/AND semantics but no tag/year filters. Explicit Load search consent, worker/IME/cancellation/stale-response behavior, 250 ms debounce and 550 ms end-to-end p95. Clear filters preserves query; errors/loading are not empty success. |
+| Generated contracts | Strict2020-12 producers/compatible consumers, no drafts/held/private data, all renderings/five profiles, snapshot-policy binding, ledger/no-op dates, deterministic hashes, thumbnail-free ZIPs up to100/32MiB and individually fetched oversized objects. |
+| Language processing | Five pinned profiles with independent expectations, Hunterian deferred, approved IAST/Tamil conventions/native losses and global-only post-merge generation. Raw Source Latin/status retained; suitable complete unaligned whole reading versus reviewed alignment required for indexing/helpers/anchors; no filling/silent switching. |
+| Search | Kannada/Latin descriptive fields, global common/compact aliases, metadata-first additive weights, complete candidate/OSA scan parity, no ID/date search. Bounded item I/O supplies selected-script excerpts inside550ms including250ms debounce; consent/IME/cancellation/errors/filter preservation remain required. |
 | UI/browser | Locale fallback/override, independent primary/helper-script preference, font persistence, aligned lines, Light/Dark/Warm and device/manual overrides, skippable preferences with unchanged defaults, PWA immediate online reading versus Android required preparation, no automatic download, unavailable previews, current-session query/filter/list/Explore-position restoration, focused recitation, screen-awake activation/release, direct URLs/base path, lazy player and playback errors. |
 | Personal library/transfer | Favorites; create/rename/duplicate/import warns about another list's name but allows confirmed reuse, no forced uniqueness/suffix or name-based overwrite/merge; reorder/confirmed deletion and independent repeated occurrences; persistence, recents/bookmarks; plain text/fallback labels; exact snapshot fields exclude lyrics/recitation resume/other personal state; round trips preserve order/repeats/text; preview and new-list-only save, no append/merge/replace; failed/cancelled operations preserve prior state; generic unresolved list/direct-link messages retain IDs/text without a special version-aware update action. |
 | Recitation continuity | Only the most recently recited list and exact occurrence resumes across restart/offline, including consecutive repeated songs. Continue is explicit, no automatic Recite entry, per-list positions or exact lyric scroll. Switching lists replaces the single position; practice progress is independent, transfer excludes resume state, snapshot changes preserve it. Removed list/entry explains unavailable exact resume and offers user choice; normal lyric availability/preparation gates remain. |
 | Static links and routing | No backend/server-database/hosted short-link dependency; local bounded decode; supported link-size boundary and file fallback without truncation; invalid/oversized/unsupported input cannot mutate lists; sender edits do not change prior snapshots; signed App Links host-root verification; installed/absent app, unverified/disabled handling, source-browser non-handoff and usable explicit app/browser fallbacks; first browser visit needs static shell. |
 | Learning/discovery | Verse navigation and local resume across scripts/restarts; changed/missing saved positions; optional learning labels with change/clear/filter/Practice actions; no automatic ability assessment; reviewed discovery groups and available candidates; newly added uses library date rather than upload date; favorite/add/practice entry points; no implied hide/reveal exercises. |
-| Offline | Complete thumbnail-free reading/search/scripts/assets after preparation; system-first fonts with necessary tested fallback shaping/coverage and no online font dependency; icons/metadata instead of images; progress/cancel/retry/remove; initial failure leaves no active library; invalid/mixed updates preserve old snapshot; personal state/user text preserved; eviction recovery; per-list readiness distinguishes unprepared/missing reference/download from intentional placeholders, including placeholder-only warnings. |
+| Offline | Complete thumbnail-free reading/search/policy/scripts/assets; system fonts only with explicit unsupported rendering/alternate choice, never fallback font downloads. Initial failures preserve no-active state, update failures retain active data; locks/fencing/readers/GC and degraded recovery verified. Personal state independent; placeholders never establish lyric readiness. |
 | Library lifecycle | Both clients retain the active downloaded version online/offline despite newer publication; pre-download PWA online requests stay compatible. Due dates never block downloaded use; late download does not extend them. Successful no-newer-compatible checks show truthful compatibility/publication status and suppress reminders for 3 days without date changes; failed checks do neither. Explicit resume revalidates same-version progress; corrupt/unavailable data explains restart, never partial/mixed activation or promised closed-browser downloading. Isolated item/index/font damage keeps verified capabilities usable with degraded readiness and same-version repair or explained replacement; no corrupt text/false empty search; total loss re-gates Android. |
 | Client compatibility | No newer publication versus newer incompatible content produces distinct honest status; latest-published is never claimed merely because no newer compatible version exists. Manual Android GitHub Releases or safe website-version guidance preserves existing compatible offline reading/personal data without forced upgrade, silent APK install or content replacement. Initial preparation offers a published compatible full snapshot if available, otherwise explains the client-update prerequisite. |
 | Android | API 26 and representative newer devices; no bundled lyric library; first-launch offline/download-cancel/storage/validation failure keeps lyric browsing/search/reading/practice gated but setup/settings/retry/list management accessible; preference skip or old onboarding flag cannot bypass gate; pending shared destinations survive required preparation without auto-saving; successful full download enables offline use; removal requires re-preparation with no bundled fallback; screen-awake/local-state/Back parity and independent content updates. |
@@ -151,6 +155,9 @@ immediately; include them and rapid typing, IME completion and cancellation in
 the fixture mix. A stale response must never count as the current query's update.
 Include reviewed Latin spelling alternatives, selected-script matching-line
 excerpts, and reliable highlight rendering in the query mix and measured update.
+Include bounded item-artifact reads for those excerpts: active local objects
+after preparation, online requests before PWA preparation. Do not stop timing
+at index results or show the wrong script to claim the target.
 Verify result navigation reaches the corresponding verse separately; do not
 present an index-only timing as proof that the full results UI meets the target.
 Record warmup, sample count, query/filter mix, device/OS/browser, online/offline
@@ -180,9 +187,9 @@ Use only test measurements; the no-user-analytics scope remains unchanged.
    built output. Keep canonical base configurable; no assumed old-URL redirects.
    Root service-worker routing must exclude unrelated projects/data requests,
    and code updates must not force activation/reload or replace active content.
-5. Keep API and signing secrets in protected secret storage. Select least-required
-   permissions for import PR creation, Pages deployment, and releases separately;
-   untrusted PR validation must not require signing/release credentials.
+5. Keep ingestion API credentials local and signing keys outside CI. Build
+   unsigned in CI, verify/sign locally, then use a protected signed-APK
+   verification/publication workflow. Untrusted PRs receive no release secrets.
 6. Publish compatible content independently from APKs. Use a separate manual or
    version-tagged workflow for signed APKs through GitHub Releases.
 7. Define and test deployment rollback, snapshot compatibility, and release
@@ -225,14 +232,14 @@ Use only test measurements; the no-user-analytics scope remains unchanged.
 - Compact/Normal/Relaxed onboarding/later controls and persistence across scripts,
   themes and reading modes offline; preserved lines/verse separation and tested
   narrow/wide reading columns under text scaling.
-- Six pinned Kannada Latin-profile fixtures, suitable/absent Source Latin,
+- Five pinned Kannada Latin-profile fixtures (Hunterian deferred), suitable/absent Source Latin,
   public unsuitable Source Latin/status with restricted eligibility, global-only
   generated fixes, source correction preservation, explicit unavailable behavior, helper/search
   correspondence and user-reviewed samples before a Latin recommendation/default.
-- Verification that new personal state remains local, survives snapshot
-  replacement/removal, and does not enter shared snapshots beyond approved fields.
-  Local data loss
-  on app/browser clear must not be described as covered by a full backup.
+- Distinct minimal-list/full-personal-backup round trips, one personal transaction,
+  failed/cancelled precommit preservation, postcommit locale-failure retry and
+  non-destructive newer-version refusal. Disclose Android personal-DB Auto Backup;
+  neither a missing backup nor a content snapshot protects personal-data loss.
 - No-library Android first launch, required explicit preparation, failure/cancel/
   removal gates, post-download offline reading and pending-link continuation;
   PWA on-demand online reading without required full download.
@@ -243,12 +250,14 @@ Use only test measurements; the no-user-analytics scope remains unchanged.
   isolated damage with verified unaffected use/degraded readiness, damaged-index
   error instead of empty results, same-version repair/full replacement and total
   loss recovery. No mixed versions or partial first activation.
-- Thumbnail-free package manifests and tested system-first/fallback font coverage
-  for all scripts. Record actual APK, full-library download, installed and update
+- Thumbnail-free reading ZIP transfers/manifests and tested system-font coverage
+  with explicit unsupported-rendering handling. Record actual APK/download/installed/update
   peak-storage sizes; estimates and approximately 2,500 songs are not size proof.
-  Include all six generated Latin profiles and suitable optional Source Latin in
+  Include all five generated Latin profiles and eligible optional Source Latin in
   the measured corpus; earlier illustrative estimates do not cover measured size.
 - Protected signing configuration and installable signed APK evidence, without
   exposing keys or credentials.
+- Restore/verify normal no-admin-bypass main protection in all four repositories;
+  current temporary admin direct-push permission is not a release configuration.
 - Remaining gaps, their impact, and explicit approval before calling a release
   ready. Failed, skipped, unavailable, and passed checks are distinct states.
