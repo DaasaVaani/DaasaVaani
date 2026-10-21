@@ -90,6 +90,12 @@ Saved-list journeys download/decompress the actual gzip, locally reopen links,
 compare every table before/after and verify stored rather than unsaved names.
 Controlled workers test post-encode revision refusal and cancellation; high-entropy
 valid snapshots exercise oversized-link refusal plus lossless file fallback.
+Controlled browser sharing/clipboard adapters compare the exact URL and gzip File
+against independent Node decompression, on previews and saved lists. They exercise
+copy/share denial, neutral cancellation, unsupported files/absent APIs, manual
+fallbacks, pending-confirmation dismissal, concurrent-save fencing and stale
+completion after unmount, with every personal table unchanged. These tests do not
+establish real OS sharing, receiving-app delivery or clipboard permission behavior.
 Open-path same-document navigation after saving/moving/exporting verifies current
 router-bound payload decoding without a reload; unsupported query suffixes remain
 invalid and all personal tables stay unchanged.

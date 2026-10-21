@@ -8,17 +8,150 @@ import type { ListSnapshot } from "../../src/list-transfer-types";
 const web = strictYaml(readFileSync(new URL("../../settings/web.yml", import.meta.url), "utf8"));
 const limits = strictYaml(readFileSync(new URL("../../shared/settings/personal-transfer.yml", import.meta.url), "utf8"));
 if (!web || typeof web !== "object" || !("databaseName" in web) || typeof web.databaseName !== "string" ||
+    !("listFileName" in web) || typeof web.listFileName !== "string" ||
     !limits || typeof limits !== "object" || !("maxLists" in limits) || typeof limits.maxLists !== "number" ||
     !("maxListNameCodePoints" in limits) || typeof limits.maxListNameCodePoints !== "number" ||
     !("maxEntryTextCodePoints" in limits) || typeof limits.maxEntryTextCodePoints !== "number") {
   throw new Error("Invalid list browser test configuration");
 }
-const databaseName = web.databaseName, maxLists = limits.maxLists;
+const databaseName = web.databaseName, fileName = web.listFileName, maxLists = limits.maxLists;
 const maxName = limits.maxListNameCodePoints, maxText = limits.maxEntryTextCodePoints;
 const snapshot: ListSnapshot = { format: "daasavaani-list", formatVersion: 1, name: "Straße", entries: [
   { kind: "item", videoId: "fixture_ref", fallback: "  User note  " },
   { kind: "placeholder", text: "<b>Plain text</b>" }, { kind: "item", videoId: "fixture_ref" },
 ] };
+declare global {
+  interface Window {
+    syntheticShares: { url?: string; files?: { name: string; type: string; bytes: number[] }[] }[];
+    syntheticCopies: string[];
+    syntheticShareMode: "success" | "cancel" | "denied" | "unsupported" | "pending";
+    finishSyntheticShare?: () => void;
+  }
+}
+async function platformAdapters(page: Page) {
+  await page.addInitScript(() => {
+    window.syntheticShares = []; window.syntheticCopies = []; window.syntheticShareMode = "success";
+    Object.defineProperty(navigator, "share", { configurable: true, value: async (data: ShareData) => {
+      if (window.syntheticShareMode === "cancel") throw new DOMException("Synthetic cancellation", "AbortError");
+      if (window.syntheticShareMode === "denied") throw new DOMException("Synthetic denial", "NotAllowedError");
+      if (window.syntheticShareMode === "pending") await new Promise<void>(resolve => { window.finishSyntheticShare = resolve; });
+      window.syntheticShares.push({ url: data.url, files: data.files && await Promise.all(data.files.map(async file => ({
+        name: file.name, type: file.type, bytes: [...new Uint8Array(await file.arrayBuffer())],
+      }))) });
+    } });
+    Object.defineProperty(navigator, "canShare", { configurable: true, value: () => window.syntheticShareMode !== "unsupported" });
+    Object.defineProperty(navigator, "clipboard", { configurable: true, value: { writeText: async (text: string) => {
+      if (window.syntheticShareMode === "denied") throw new DOMException("Synthetic denial", "NotAllowedError");
+      window.syntheticCopies.push(text);
+    } } });
+  });
+}
+test("explicit platform adapters copy and share exact minimal snapshots without personal writes or delivery claims", async ({ page }) => {
+  await platformAdapters(page); await upload(page);
+  const before = await records(page);
+  await page.getByRole("button", { name: "Create snapshot link", exact: true }).click();
+  const link = page.locator("input[readonly]"); await expect(link).toBeVisible();
+  const value = await link.inputValue();
+  await page.getByRole("button", { name: "Copy snapshot link", exact: true }).click();
+  await expect(page.getByRole("status")).toContainText("Snapshot link copied.");
+  expect(await page.evaluate(() => window.syntheticCopies)).toEqual([value]);
+  await page.getByRole("button", { name: "Share snapshot link", exact: true }).click();
+  await expect(page.getByRole("status")).toHaveText("Handed to the system sharing interface. Delivery is not confirmed.");
+  expect(await page.evaluate(() => window.syntheticShares)).toEqual([{ url: value }]);
+  await page.getByRole("button", { name: "Download list file", exact: true }).click();
+  await expect(page.getByRole("link", { name: "Download list file", exact: true })).toBeVisible();
+  await page.getByRole("button", { name: "Share list file", exact: true }).click();
+  await expect(page.getByRole("status")).toHaveText("Handed to the system sharing interface. Delivery is not confirmed.");
+  const shared = await page.evaluate(() => window.syntheticShares.at(-1)?.files);
+  expect(shared).toHaveLength(1);
+  expect(shared?.[0]).toMatchObject({ name: fileName, type: "application/gzip" });
+  expect(JSON.parse(gunzipSync(Buffer.from(shared?.[0]?.bytes ?? [])).toString("utf8"))).toEqual(snapshot);
+  expect(await records(page)).toEqual(before);
+  expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(true);
+});
+test("platform cancellation denial and unsupported files retain manual fallbacks and never save", async ({ page }) => {
+  await platformAdapters(page); await upload(page); const before = await records(page);
+  await page.getByRole("button", { name: "Create snapshot link", exact: true }).click();
+  const link = page.locator("input[readonly]"); await expect(link).toBeVisible(); const value = await link.inputValue();
+  await page.evaluate(() => { window.syntheticShareMode = "cancel"; });
+  await page.getByRole("button", { name: "Share snapshot link", exact: true }).click();
+  await expect(page.getByRole("status")).toHaveText("Sharing cancelled. Nothing was changed.");
+  await page.evaluate(() => { window.syntheticShareMode = "denied"; });
+  await page.getByRole("button", { name: "Copy snapshot link", exact: true }).click();
+  await expect(page.getByRole("alert")).toContainText("Use the displayed link or download the file instead.");
+  await page.getByRole("button", { name: "Share snapshot link", exact: true }).click();
+  await expect(page.getByRole("alert")).toContainText("Use the displayed link or download the file instead.");
+  await expect(link).toHaveValue(value);
+  await page.getByRole("button", { name: "Download list file", exact: true }).click();
+  await expect(page.getByRole("link", { name: "Download list file", exact: true })).toBeVisible();
+  await page.evaluate(() => { window.syntheticShareMode = "unsupported"; });
+  await page.getByRole("button", { name: "Share list file", exact: true }).click();
+  await expect(page.getByRole("alert")).toHaveText("This browser cannot share this file. Download the complete list file instead.");
+  const download = page.waitForEvent("download");
+  await page.getByRole("link", { name: "Download list file", exact: true }).click();
+  const downloaded = await download; const path = await downloaded.path();
+  if (!path) throw new Error("Missing complete fallback download");
+  expect(JSON.parse(gunzipSync(readFileSync(path)).toString("utf8"))).toEqual(snapshot);
+  expect(await page.evaluate(() => window.syntheticShares)).toEqual([]);
+  expect(await records(page)).toEqual(before);
+});
+test("platform sharing blocks concurrent save and stale completion cannot affect a replacement preview", async ({ page }) => {
+  await platformAdapters(page); await upload(page);
+  await page.getByRole("button", { name: "Create snapshot link", exact: true }).click();
+  await expect(page.locator("input[readonly]")).toBeVisible();
+  await page.evaluate(() => { window.syntheticShareMode = "pending"; });
+  await page.getByRole("button", { name: "Share snapshot link", exact: true }).click();
+  await expect(page.getByRole("button", { name: "Save to My Library", exact: true })).toBeDisabled();
+  await expect(page.getByRole("button", { name: "Create snapshot link", exact: true })).toBeDisabled();
+  await page.getByRole("link", { name: "Library", exact: true }).click();
+  await page.evaluate(() => window.finishSyntheticShare?.());
+  await expect(page.getByText("Handed to the system sharing interface. Delivery is not confirmed.", { exact: true })).toHaveCount(0);
+  await upload(page, { ...snapshot, name: "Replacement preview" });
+  await expect(page.getByRole("button", { name: "Save to My Library", exact: true })).toBeEnabled();
+  await expect(page.locator("input[readonly]")).toHaveCount(0);
+  expect((await records(page)).values.lists).toEqual([]);
+});
+test("platform sharing dismisses pending duplicate confirmation and saved snapshots use the same exact adapter", async ({ page }) => {
+  await platformAdapters(page); await upload(page);
+  await page.getByRole("button", { name: "Save to My Library", exact: true }).click();
+  await expect(page.getByText("Saved as an independent local list.", { exact: true })).toBeVisible();
+  const before = await records(page);
+  await page.getByRole("button", { name: "Create snapshot link", exact: true }).click();
+  await expect(page.locator("input[readonly]")).toBeVisible();
+  await page.getByRole("button", { name: "Save to My Library", exact: true }).click();
+  await expect(page.getByRole("button", { name: "Save with same name", exact: true })).toBeVisible();
+  await page.getByRole("button", { name: "Share snapshot link", exact: true }).click();
+  await expect(page.getByRole("status")).toContainText("Delivery is not confirmed.");
+  await expect(page.getByRole("button", { name: "Save with same name", exact: true })).toHaveCount(0);
+  await page.getByRole("link", { name: "Lists", exact: true }).click();
+  await page.getByRole("list", { name: "Lists", exact: true }).getByRole("button", { name: snapshot.name, exact: true }).click();
+  await page.getByRole("button", { name: "Download list file", exact: true }).click();
+  await expect(page.getByRole("link", { name: "Download list file", exact: true })).toBeVisible();
+  await page.getByRole("button", { name: "Share list file", exact: true }).click();
+  await expect(page.getByRole("status")).toContainText("Delivery is not confirmed.");
+  const bytes = await page.evaluate(() => window.syntheticShares.at(-1)?.files?.[0]?.bytes);
+  if (!bytes) throw new Error("Missing saved snapshot file handoff");
+  expect(JSON.parse(gunzipSync(Buffer.from(bytes)).toString("utf8"))).toEqual(snapshot);
+  expect(await records(page)).toEqual(before);
+});
+test("absent platform APIs keep selectable links and complete downloads available", async ({ page }) => {
+  await page.addInitScript(() => {
+    Object.defineProperty(navigator, "share", { configurable: true, value: undefined });
+    Object.defineProperty(navigator, "clipboard", { configurable: true, value: undefined });
+  });
+  await upload(page); const before = await records(page);
+  await page.getByRole("button", { name: "Create snapshot link", exact: true }).click();
+  const link = page.locator("input[readonly]"); await expect(link).toBeVisible();
+  const value = await link.inputValue(); await link.focus();
+  expect(await link.evaluate(input => input instanceof HTMLInputElement && input.selectionEnd !== null && input.selectionStart !== null
+    ? input.selectionEnd - input.selectionStart : -1)).toBe(value.length);
+  await expect(page.getByRole("button", { name: "Copy snapshot link", exact: true })).toHaveCount(0);
+  await expect(page.getByRole("button", { name: "Share snapshot link", exact: true })).toHaveCount(0);
+  await page.getByRole("button", { name: "Download list file", exact: true }).click();
+  await expect(page.getByRole("link", { name: "Download list file", exact: true })).toBeVisible();
+  await expect(page.getByRole("button", { name: "Share list file", exact: true })).toHaveCount(0);
+  expect(await records(page)).toEqual(before);
+});
 async function records(page: Page) {
   return page.evaluate(async name => {
     const database = await new Promise<IDBDatabase>((resolve, reject) => {

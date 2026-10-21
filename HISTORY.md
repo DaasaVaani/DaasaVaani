@@ -1,5 +1,30 @@
 # Documentation history
 
+## 2026-10-21: explicit browser snapshot sharing and copy
+
+- XFER-01/02/06/08 receive bounded Website adapter evidence, not native parity,
+  OS/receiving-app interoperability or release readiness. Reused the existing
+  immutable minimal snapshot outputs; no upload, personal write or new codec.
+- Adopted additive Shared UI revisionff0b5e0e309f2ebf7764f00f89e623739d9a4e00
+  only after13 local tests/hygiene/generation and hosted preflight39644345080/
+  main39644453635 passed.
+- Added explicit clipboard/link/file actions, capability checks, honest handoff/
+  cancellation/permission/unsupported feedback, unchanged manual fallbacks,
+  pending-confirmation dismissal and stale-completion fencing. Archived the
+  roadmap's preceding blanket pending "platform share adapters" limitation:
+  browser adapters exist; real sharing-surface evidence remains pending.
+- First incremental strict build rejected a DOM function-presence conditional;
+  changed to a runtime `typeof` capability check. A later browser-server startup
+  refusal exposed a test locator's generic element type; added an actual input
+  guard before checking selection. Neither failed check was counted as a pass.
+- Focused adapter validation initially passed12 of15 cases: three tests assumed
+  a previous successful-save link survived the intentional save-confirmation
+  reset. Switched those journeys to the persistent Lists navigation; all three
+  focused cases then passed, followed by full `npm run check`:24 unit tests,
+  strict TypeScript/Vite and all129 browser cases across the three viewports.
+  Actionlint1.7.12/ShellCheck0.11.0, six Markdown files' UTF8/whitespace/local
+  links and Git whitespace checks passed. The bundle-size advisory remains.
+
 ## 2026-10-21: catalog-aware personal lists and reader integration
 
 - Continued authorized Website slices while the owner separately requested
@@ -24,6 +49,16 @@
   no-prefetch catalog resolution, retry, repeated reader additions, stale-choice
   refusal and measured list-reader scroll/focus restoration. Existing workflow
   lint and Git whitespace checks passed; the main-chunk advisory remains visible.
+- Exact preflight39643821488 and main39644140388 completed required lint/web
+  jobs and Pages deployment forcb0fc7e6dc198259b75b0c040f0b21a8a884d3f6.
+  Managed39644139822 completed both Actions and JavaScript/TypeScript analyses.
+- Real public HTTPS desktop/Pixel7 journeys verified catalog-only known/unknown/
+  placeholder preview, no lyric fetch before explicit Read, saved-list return and
+  independently decompressed exact minimal gzip. The first probe incorrectly
+  omitted the return link's visible arrow from an exact accessible-name selector;
+  corrected the probe, not the product, before both live journeys passed.
+  Integrated-browser tooling timed out; standalone Playwright supplied the
+  actual browser checks instead.
 - Archived the preceding roadmap/coverage limitation "catalog resolution" was
   pending and "Lists do not yet resolve catalog details". Older architecture
   "No catalog details/lyrics are fetched" meant the preceding identifier-only

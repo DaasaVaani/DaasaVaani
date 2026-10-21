@@ -200,6 +200,17 @@ object-URL cleanup, lossless oversized-link file fallback and privacy warnings.
 Starting export cancels any pending save confirmation; decoding, saving and
 encoding controls cannot concurrently commit a pending confirmation. Export
 fetches no catalog details/lyrics and infers no readiness state.
+Generated immutable snapshots also offer explicit clipboard copy and system
+link/file sharing where the corresponding browser APIs exist. Share the complete
+HTTPS URL or the same generated gzip File used by the download, never a second
+projection or a backend upload. Check `canShare({files})` before file handoff;
+unsupported files, permission failures and user cancellation have explicit,
+distinct feedback. A resolved system request means handoff, not confirmed delivery.
+Keep selectable links/downloads available as fallbacks. Sharing/copying clears
+pending save confirmation and blocks concurrent save/encode actions. Source
+replacement/unmount invalidates asynchronous feedback without mutating personal
+data; the platform, not an in-page Cancel button, owns its sharing dialog.
+Controlled browser adapters verify these paths, not real OS/app interoperability.
 Catalog resolution uses a per-Publication map of the validated catalog's existing
 summary references: O(catalog size) construction, O(1) exact-ID lookup per list
 occurrence, no network/lyric reads. No publication means details are not yet

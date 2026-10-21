@@ -21,7 +21,7 @@ does not waive any validation gate.
 | P2 | Two-locale UI generation with committed web/Android resources | Reviewed five-Latin/nine-non-Latin tables, transliteration, technical grammar, plurals/escaping conformance |
 | P4 | Fixture gzip/hash/canonicalization/index producer; sampled independent OSA/candidate parity | Durable ledger/receipts, semantic dates, ZIP/planner, complete language/profile index and proof/capacity evidence |
 | P5 | Responsive online fixture reading/search, explicit consent, errors, direct routes, first-use browser locale/explicit override/themes and Library/Favorites session Back/Forward continuity | Full filters/discovery/script/helper/video/accessibility/platform journeys |
-| P5a | Transactional web favorites/preferences/lists, bounded worker preview/saved-list file/link export, confirmed import/basic management/independent occurrence editing, catalog-only reference details/explicit reading, reader-to-list addition and fixture v1 migration | Recents/bookmarks/learning/recitation, platform share adapters, native personal/transfer parity, full backups and production migrations |
+| P5a | Transactional web favorites/preferences/lists, bounded worker preview/saved-list file/link export, optional browser share/copy adapters with manual fallbacks, confirmed import/basic management/independent occurrence editing, catalog-only reference details/explicit reading, reader-to-list addition and fixture v1 migration | Recents/bookmarks/learning/recitation, real sharing-surface interoperability, native personal/transfer parity, full backups and production migrations |
 | P6 | No persistent offline snapshot implementation | Journals/atomic activation/resume/repair/reader-safe GC and service worker lifecycle |
 | P7 | Native fixture-only full preparation in memory, reading/search, core tests and connected reading test | Room personal state, durable preparation/recovery, typed navigation/DI, parity and device matrix |
 | P3/P8/P9 | Dependency-ordered Shared/fixture-publisher pins; full web fixture CI/Pages and native build/core/lint CI | Live-provider clarification, production ingestion/publication/signing, device CI and release readiness |
@@ -54,6 +54,11 @@ production migration coverage or native parity.
 Saved-list export rechecks its read revision after encoding and refuses concurrent
 changes without a write. Its gzip/link projection excludes local IDs/control,
 preferences and unsaved drafts; oversized links retain a complete file fallback.
+Optional browser platform APIs hand off exactly those generated links/files or
+copy the link after an explicit click. Unsupported APIs/files, cancellation and
+permission failures retain the manual fallbacks and never save a list. Adapter
+tests are not delivery confirmation or real OS/receiving-app interoperability;
+the XFER-08 platform matrix and signed App Links remain open.
 
 LIB-02/03/04/08/09/10 receive partial web management evidence: plain-text
 placeholder/reference entry forms, optional user fallback labels, independent
