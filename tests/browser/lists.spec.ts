@@ -439,6 +439,7 @@ test("entry input bounds, cancellation and cross-tab stale edits never partially
 test("entry changes do not repeat duplicate-name warnings but an actual rename still requires confirmation", async ({ page }) => {
   await page.goto("/#/lists"); await create(page, "Same"); await create(page, "SAME");
   await page.getByRole("button", { name: "Save with same name", exact: true }).click();
+  await expect(page.getByRole("list", { name: "Lists", exact: true }).getByRole("button", { name: "SAME", exact: true })).toBeVisible();
   await page.getByRole("list", { name: "Lists", exact: true }).getByRole("button", { name: "Same", exact: true }).click();
   await page.getByRole("button", { name: "Add library reference", exact: true }).click();
   const editor = page.getByRole("form", { name: "Edit entry", exact: true });

@@ -27,10 +27,13 @@ checks. Supported browsers offer explicit system sharing and clipboard copy;
 selectable links and complete downloads remain available as fallbacks. System
 handoff is not delivery confirmation. Available verified catalog titles resolve list references without fetching
 lyrics; explicit Read opens known entries, and readers can add independent
-occurrences to chosen lists. Native transfer and recitation remain incomplete.
+occurrences to chosen lists. Recitation remains incomplete.
 Shared generates the English/Kannada UI resources; Android has a native preparation/
 reading fixture demo with durable Room favorites/preferences and locale/theme
-controls. Production contracts, reviewed transliteration, persistent
+controls, strict local list-file/pasted-link preview and actual re-export.
+Native preview works before preparation but cannot yet save a durable list;
+verified App Links and real receiving-app delivery remain open.
+Production contracts, reviewed transliteration, persistent
 offline snapshots and the remaining product journeys are incomplete.
 Staged implementation is authorized; source migration and live API ingestion are not.
 

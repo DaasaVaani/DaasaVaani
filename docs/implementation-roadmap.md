@@ -21,9 +21,9 @@ does not waive any validation gate.
 | P2 | Two-locale UI generation with committed web/Android resources | Reviewed five-Latin/nine-non-Latin tables, transliteration, technical grammar, plurals/escaping conformance |
 | P4 | Fixture gzip/hash/canonicalization/index producer; sampled independent OSA/candidate parity | Durable ledger/receipts, semantic dates, ZIP/planner, complete language/profile index and proof/capacity evidence |
 | P5 | Responsive online fixture reading/search, explicit consent, errors, direct routes, first-use browser locale/explicit override/themes and Library/Favorites session Back/Forward continuity | Full filters/discovery/script/helper/video/accessibility/platform journeys |
-| P5a | Transactional web favorites/preferences/lists, bounded worker preview/saved-list file/link export, optional browser share/copy adapters with manual fallbacks, confirmed import/basic management/independent occurrence editing, catalog-only reference details/explicit reading, reader-to-list addition and fixture v1 migration | Recents/bookmarks/learning/recitation, real sharing-surface interoperability, native personal/transfer parity, full backups and production migrations |
+| P5a | Transactional web favorites/preferences/lists, bounded worker preview/saved-list file/link export, optional browser share/copy adapters with manual fallbacks, confirmed import/basic management/independent occurrence editing, catalog-only reference details/explicit reading, reader-to-list addition and fixture v1/v2 migration | Recents/bookmarks/learning/recitation, real sharing-surface interoperability, native durable lists/occurrences, full backups and production migrations |
 | P6 | No persistent offline snapshot implementation | Journals/atomic activation/resume/repair/reader-safe GC and service worker lifecycle |
-| P7 | Native fixture-only full preparation in memory, reading/search, durable Room favorites/preferences with locale/theme controls, core and connected tests | Native lists/transfers/backups, durable preparation/recovery, typed navigation/DI, full parity and device matrix |
+| P7 | Native fixture-only full preparation in memory, reading/search, durable Room favorites/preferences with locale/theme controls, strict bounded list-file/pasted-link preview/re-export before preparation, core and connected tests | Native durable lists/occurrences/backups, signed App Links/receiving-app matrix, durable preparation/recovery, typed navigation/DI and full parity/device matrix |
 | P3/P8/P9 | Dependency-ordered Shared/fixture-publisher pins; full web fixture CI/Pages and native build/core/lint CI | Live-provider clarification, production ingestion/publication/signing, device CI and release readiness |
 
 The fixture capability is deliberately named `fixture-catalog-v1`; all UIs label
@@ -63,6 +63,14 @@ copy the link after an explicit click. Unsupported APIs/files, cancellation and
 permission failures retain the manual fallbacks and never save a list. Adapter
 tests are not delivery confirmation or real OS/receiving-app interoperability;
 the XFER-08 platform matrix and signed App Links remain open.
+Android's bounded native codec has independent Node/zlib vectors and strict
+actual-ceiling rejection, plus connected preview/re-export evidence. It displays
+catalog known/pending/unavailable states without guessing matches and does not
+save a list. Failed/cancelled provider writes can leave an incomplete selected
+destination; the warning preserves this distinction from unchanged personal data.
+Native durable lists also require a version-pinned portable full casefold and
+canonical-normalization resource/strategy; platform-dependent lowercase/ICU
+substitution is not approved as cross-platform matching conformance.
 
 LIB-02/03/04/08/09/10 receive partial web management evidence: plain-text
 placeholder/reference entry forms, optional user fallback labels, independent

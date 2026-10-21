@@ -43,6 +43,32 @@ descriptor without automatic HTTP gzip decoding or a long-held static descriptor
 handle. Publishing immutable fixture objects must not trigger automatic reader
 reloads. Actual deployed hosting still requires byte/hash and browser validation.
 
+## Fixture settings consumption and remaining gates
+
+The [portable configuration contract](https://github.com/DaasaVaani/shared/blob/main/docs/implementation-specification.md#3-declarative-configuration-contract)
+owns the complete production inventory obligation. This table identifies current
+Website consumption, not an assertion that every selected product setting exists.
+Initial values and exact field bounds belong only in the linked owning files.
+
+| Owner/source and keys | Current application and validation | Compatibility/open work |
+| --- | --- | --- |
+| [Web settings/schema](../settings/web.schema.json): `base`, `descriptorUrl`, `canonicalBaseUrl`, `listLinkPath`, `listFileName` | Strict build-time settings; static assets/artifact entry and minimal-list URL/file projection | Public route/origin changes require old-link/hosting review; published artifacts remain fixture-only |
+| [Web settings](../settings/web.yml): `transferChunkBytes`, `listCompressionLevel` | Byte allocation/compression controls passed to the dedicated codec worker; schema and actual-ceiling codec tests | Encoding choices do not narrow accepted valid input or change decoded/text limits |
+| [Web settings](../settings/web.yml): `databaseName` | Build-time Dexie/native IndexedDB identity | Changing it is not a migration; it would strand the prior database and requires explicit compatibility handling |
+| [Web settings](../settings/web.yml): `fontFamily`, `readerFontSize`, `space`, `contentWidth`, `readerWidth`, `themes` | Typed CSS tokens, system fonts, three palettes and measured contrast checks | Personal font/density/helper/script settings and physical-device/font conformance remain incomplete |
+| [Web settings](../settings/web.yml): `demoPort`, `demoViewports` | Development server and desktop/mobile demo tooling, not a runtime user preference | Supported-browser/device acceptance is broader than configured demo viewports |
+| [Portable defaults/schema](../shared/schemas/ui-defaults.schema.json) | Build-time locale/theme defaults and allowed choices; first supported browser locale, explicit persisted override, independent device appearance | Canonical `lyricScript` remains the fixture invariant, not an implemented selectable transliteration profile |
+| [Personal-transfer settings/schema](../shared/schemas/personal-transfer-settings.schema.json) | Build-time favorite/list/occurrence/text/logical-byte and encoded/decoded/link bounds; generated list schemas and transactional/codec tests | Recents/bookmark/learning/backup bounds are declared but their complete features and protocols are not implemented |
+| [Publication-safety settings/schema](../shared/schemas/publication-policy-settings.schema.json) | Strict build-time required fields, safe byte counts, platform-bounded request milliseconds and implemented required capabilities; artifact fetch/decoder checks | Untrusted remote data cannot raise these limits; this is not the full production publication/offline policy |
+| [Search settings](../shared/settings/search.yml) | Publisher emits a policy artifact; Website uses its verified snapshot-bound rules, not newer source settings | Full reviewed profiles/aliases/technical grammar, filters and excerpt conformance remain open |
+| [Fixture-tool settings](../settings/tooling.yml) | Strict helper validation of repository/full revision/local checkout; a local path override never waives exact clean revision validation | Independent producer/consumer pins; no production ingestion or source migration authorization |
+
+Native owned settings and current limitations are documented in the
+[Android guide](https://github.com/DaasaVaani/AndroidApp/blob/main/README.md).
+Portable Unicode casefold/normalization data, the remaining production settings/
+schemas and lifecycle budgets must be completed before claiming full declarative
+settings or cross-platform matching conformance.
+
 ## Runtime boundaries
 
 - React/strict TypeScript/Vite static PWA/hash routes; Kotlin/Compose/Material3

@@ -20,6 +20,7 @@ interface PersonalLimits {
 }
 declare const __PERSONAL_LIMITS__: PersonalLimits;
 declare const __BOUNDS__: {
+  formatVersion: 1;
   maxDescriptorBytes: number; maxManifestEncodedBytes: number; maxManifestDecodedBytes: number;
   maxItemEncodedBytes: number; maxItemDecodedBytes: number; maxPolicyEncodedBytes: number;
   maxPolicyDecodedBytes: number; maxIndexEncodedBytes: number; maxIndexDecodedBytes: number;

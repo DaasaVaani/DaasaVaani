@@ -118,8 +118,10 @@ Read, retry without personal writes, and no catalog title in saved/exported data
 List-origin reading retains selected editor context, measured scroll and exact
 focus through return/Back/Forward. Reader-to-list choices are explicit and
 revision-bound, preserve repetitions and refuse concurrent-tab stale writes.
-Native interoperability and complete offline-shell/platform
-behavior remain unimplemented.
+Native codec vectors and connected preview/re-export checks are documented in
+the [Android guide](https://github.com/DaasaVaani/AndroidApp/blob/main/README.md).
+They do not establish durable native list saves, signed App Links, real receiving-
+app/provider interoperability or complete offline-shell/platform behavior.
 Tests include actual 9MiB encoded, 8MiB decoded and 2,048-character complete-link
 boundaries, not only reduced test limits. Highly compressible valid data is not
 rejected by an invented ratio cap. The build emits third-party license notices.
@@ -197,7 +199,7 @@ IDs or a release acceptance declaration.
 | I18N-01/02/03, SET-04 | Matching two-locale resources; web first-use ordered browser-language selection, configured fallback, persisted four-mode appearance with contrast/media checks; native durable locale/theme preferences; canonical text remains independent | Complete script/personal preferences, device/font matrix and full localization conformance pending |
 | LIB-01/02/03/04/08/09/10/11 | Web favorites/lists, independent occurrences/plain text, duplicate-name confirmation, management/manual replacement, catalog-only details/explicit reading, reader-to-list addition and non-destructive fixture v1/v2 migration; native Room favorites/preferences | Recitation/offline/production migrations and native durable lists/occurrences remain incomplete |
 | UX-13 | In-session Library/Favorites context and list-origin selected editor state, Back/Forward/reader return with measured scroll/focus; removed-result/direct-reader/reload coverage | No persistent search history; filters/Explore, offline and Android continuity pending |
-| XFER-01/02/03/04/05/06/08 | Bounded web worker codecs, preview/saved-list export, static links, transactional new-list-only save, catalog-only details, browser share/copy adapters, cancellation/errors, no-write and stale-confirmation/post-encode checks | Real sharing-surface delivery, native round trips, verified App Links and full backups incomplete |
+| XFER-01/02/03/04/05/06/08 | Bounded web worker/native codecs with independent vectors, web preview/saved-list export and transactional save, native file/pasted-link preview/re-export, catalog-only details, browser share/copy adapters, cancellation/errors/no-write checks | Real sharing-surface delivery, native durable saves/occurrences, verified App Links and full backups incomplete |
 | SET-01/02 | Owned settings/schema guards, Shared policy binding and immutable clean fixture-tool pin | Complete production settings inventory, language/protocol/backup contracts and all compatibility fixtures pending |
 | QUAL-01/02/03 | Semantic browser controls, keyboard focus entrypoint, standalone canonical reading and no video/tracking dependencies | Full keyboard/screen-reader/contrast/scaling/platform journeys remain unverified; no formal conformance claim |
 

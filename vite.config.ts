@@ -10,6 +10,7 @@ import Ajv2020 from "ajv/dist/2020";
 import schema from "./settings/web.schema.json" with { type: "json" };
 import personalSchema from "./shared/schemas/personal-transfer-settings.schema.json" with { type: "json" };
 import defaultsSchema from "./shared/schemas/ui-defaults.schema.json" with { type: "json" };
+import publicationSettingsSchema from "./shared/schemas/publication-policy-settings.schema.json" with { type: "json" };
 
 const config = strictYaml(readFileSync(new URL("./settings/web.yml", import.meta.url), "utf8"));
 const bounds = strictYaml(readFileSync(new URL("./shared/settings/publication-policy.yml", import.meta.url), "utf8"));
@@ -26,10 +27,8 @@ const validatePersonal = new Ajv2020({ strict: true }).compile<typeof __TRANSFER
 if (!validatePersonal(personal)) throw new Error("Invalid portable personal limits: " + JSON.stringify(validatePersonal.errors));
 const canonical = new URL(config.canonicalBaseUrl);
 if (canonical.protocol !== "https:" || canonical.username || canonical.password || canonical.search || canonical.hash) throw new Error("Invalid canonical Website URL");
-if (!bounds || typeof bounds !== "object" || !("supportedRequiredCapabilities" in bounds) ||
-  !Array.isArray(bounds.supportedRequiredCapabilities) || bounds.supportedRequiredCapabilities.some(value => typeof value !== "string") ||
-  Object.entries(bounds).some(([key, value]) =>
-  key !== "supportedRequiredCapabilities" && (!Number.isSafeInteger(value) || Number(value) <= 0))) throw new Error("Invalid publication safety settings");
+const validatePublicationSettings = new Ajv2020({ strict: true }).compile<typeof __BOUNDS__>(publicationSettingsSchema);
+if (!validatePublicationSettings(bounds)) throw new Error("Invalid publication safety settings: " + JSON.stringify(validatePublicationSettings.errors));
 const fixturePrefix = new URL(".", new URL(config.descriptorUrl, "http://localhost")).pathname;
 const descriptorPath = new URL(config.descriptorUrl, "http://localhost").pathname;
 const fixtureDirectory = fileURLToPath(new URL("public" + fixturePrefix, import.meta.url));

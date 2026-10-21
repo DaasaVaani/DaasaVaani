@@ -1,5 +1,41 @@
 # Documentation history
 
+## 2026-10-21: strict publication-settings adoption and native preview evidence
+
+- SET-01/02 audit traced current Website settings to their build/runtime
+  consumers and recorded remaining production/native/Unicode inventory gates.
+  Replaced a hand-written publication guard that admitted missing fields,
+  unknown numeric keys and future versions with the strict Shared schema.
+  No configured value or fixture-publisher pin changed.
+- Sharedb6423e0cb7780312469f0652fcb4cee5e2e6c14d was independently
+  adopted only after15 tests/deterministic generation,42-file hygiene,
+  generated/schema drift, strict5 GitHub YAML files/actionlint/ShellCheck/
+  whitespace and exact preflight39660329233/main39660412788 passed.
+  Timeout ceiling/+1 and unsupported capability declarations have negative
+  fixtures; safe structural bounds are not measured platform capacity.
+- Android published native preview/re-export mainc810c66e21faff7876753e93de5403cc76fda823
+  with independent Sharedadd95cb8f9beadc0f1250d73d710b1f656d4ca37.
+  Agent reported `npm run config` plus complete core/debug+release builds,
+  both lints and connected gate:14 core/16 API36 tests, zero failures/skips;
+  app JVM tests have no sources. Hygiene/actionlint/ShellCheck/YAML/Markdown/
+  whitespace passed and the prepared emulator demo was restored.
+  Exact required preflight39659011076/main39659386990 jobs were directly
+  verified successful for that SHA. Native codec vectors/preview are not
+  durable Save, verified App Links or real provider/recipient delivery.
+- Native durable-list follow-up stopped before edits: no portable versioned
+  full casefold/canonical-normalization data was available in its pinned Shared.
+  No platform-dependent lowercase/ICU fallback or false parity was introduced.
+- First complete consumer check passed30 units and149 of150 browser cases:
+  the duplicate-name journey selected the already-visible first list before the
+  second creation's observer snapshot arrived, correctly receiving a stale fence
+  refusal. Its setup now awaits the newly committed second list's visible row
+  before capturing the first list; no sleep/retry or stale-write bypass was added.
+- The exact repaired journey passed30 stress cases (ten per configured
+  viewport), followed by full `npm run check`:30 units, strict TypeScript/Vite
+  and150 browser cases. Six changed Markdown files' UTF8/whitespace/fences/
+  local links/anchors, all153 requirement identities and actionlint/ShellCheck/
+  Git whitespace passed. Existing bundle-size advisory remains.
+
 ## 2026-10-21: persistent Website appearance parity and v3 migration
 
 - UX-11/SET-04/I18N-01/QUAL-06 receive bounded Website evidence for Light/Dark/
@@ -31,6 +67,20 @@
 - Replaced stale validation-table statements that native Room favorites/
   preferences and browser share adapters were absent. Their bounded current
   evidence is now distinguished from pending native lists/real delivery.
+- Published64e2b145c433c0257bdd628c16c60f9ad0f6dce6 after exact
+  preflight39658385686/main39658946021 including Pages and managed
+  39658947181's two analyses passed. Live public HTTPS desktop/Pixel7 checks
+  confirmed configured Light default under dark media, Follow device changes
+  with every personal table unchanged, Warm persistence and independent
+  Kannada UI/canonical reading; saved both appearance screenshots.
+- Changed Markdown UTF8/whitespace/fences/local links/anchors and all153
+  unique requirement IDs passed; actionlint/ShellCheck and Git whitespace
+  checks passed. A scratch requirement counter initially omitted I18N's
+  digit-bearing prefix; corrected that validator, not the unchanged requirements.
+- Removed six exact-tip, main-contained validation branches with no open PR:
+  Shared search-pagination-ui/native-list-preview-ui/ui-appearance-defaults/
+  native-provider-feedback and Website list-platform-sharing/search-pagination.
+  No unrelated/unmerged branch or worktree data was removed.
 
 ## 2026-10-21: reachable complete browser result pages
 
