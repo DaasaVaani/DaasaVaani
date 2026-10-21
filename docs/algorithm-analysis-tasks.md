@@ -93,7 +93,7 @@ silent truncation, false success or weaker validation.
   duplicate-name confirmation and revision/epoch checks. Native codec
   interoperability and signed-link sharing remain incomplete.
 - ALG-15: fixture web-list writes have deterministic complete-envelope UTF8
-  accounting, atomic collection/identity checks, non-destructive v1 migration and
+  accounting, atomic collection/identity checks, non-destructive v1/v2 migration and
   stale revision/epoch refusal. Actual configured byte/collection boundaries have
   executable coverage. Full recoverable backup/replacement is not implemented.
 - ALG-05/06/08-13: complete algorithms are not implemented. Basic verified online
@@ -415,7 +415,7 @@ source migration, live ingestion or automatic updates to reviewed items.
 
 ### ALG-14: Bounded list encoding and decoding
 
-Web saved-list export uses the [fixture personal protocol](architecture.md#web-fixture-personal-storage-v2):
+Web saved-list export uses the [fixture personal protocol](architecture.md#web-fixture-personal-storage-v3):
 one validated read transaction, minimal allowlist projection, bounded worker
 encoding, then epoch/revision recheck before exposing the independent snapshot.
 This supplies partial stable-read/no-write/cancellation evidence, not native
@@ -444,7 +444,7 @@ round trips, platform share interoperability or full-backup exportability.
 
 ### ALG-15: Recoverable backup replacement and capacity accounting
 
-The [web fixture storage protocol](architecture.md#web-fixture-personal-storage-v2)
+The [web fixture storage protocol](architecture.md#web-fixture-personal-storage-v3)
 supplies partial executable accounting/migration/fencing evidence only. It is not
 the full-backup format and does not establish backup exportability or replacement.
 

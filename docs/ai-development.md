@@ -42,6 +42,10 @@ demonstrations do not close remaining production contracts or prove full readine
   independent; first-use UI follows supported browser preferences with configured
   fallback, and explicit stored override wins. Uncertain lyrics held, corrections
   and identities preserved.
+- Website appearance uses persisted Light/Dark/Warm/Follow device, strict
+  non-destructive fixture personal v1/v2-to-v3 migration and color-only system
+  updates. Portable defaults/allowed choices and owned palette settings remain
+  authoritative; no full offline-shell/device/font coverage is inferred.
 - Shared owns portable contracts/settings/fixtures and UI catalogs/generator/
   committed resources. Library owns source/assets/registries/ingestion/publisher.
   Consumers query published artifacts and pin Shared independently.

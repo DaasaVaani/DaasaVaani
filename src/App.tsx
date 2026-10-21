@@ -190,9 +190,16 @@ export default function App() {
   const [personalReady, setPersonalReady] = useState(false);
   const [store, setStore] = useState<PersonalStore>();
   const [personal, setPersonal] = useState<Personal>(browserDefaultPersonal);
+  const [deviceDark, setDeviceDark] = useState(() => matchMedia("(prefers-color-scheme: dark)").matches);
   const [error, setError] = useState("");
   const [attempt, setAttempt] = useState(0);
   const labels = messages[personal.language];
+  useEffect(() => {
+    const media = matchMedia("(prefers-color-scheme: dark)");
+    const changed = () => setDeviceDark(media.matches);
+    changed(); media.addEventListener("change", changed);
+    return () => media.removeEventListener("change", changed);
+  }, []);
   useEffect(() => {
     const controller = new AbortController();
     setError("");
@@ -218,10 +225,13 @@ export default function App() {
     root.lang = personal.language;
     document.title = labels.appName;
     root.style.setProperty("--font", __WEB_CONFIG__.fontFamily);
-    for (const [name, value] of Object.entries(__WEB_CONFIG__.themes[personal.theme])) root.style.setProperty(`--${name}`, value);
+    const theme = personal.theme === "device" ? deviceDark ? "dark" : "light" : personal.theme;
+    root.dataset.theme = theme;
+    root.style.colorScheme = theme === "dark" ? "dark" : "light";
+    for (const [name, value] of Object.entries(__WEB_CONFIG__.themes[theme])) root.style.setProperty(`--${name}`, value);
     for (const [name, value] of Object.entries({ space: __WEB_CONFIG__.space, "reader-font": __WEB_CONFIG__.readerFontSize,
       "content-width": __WEB_CONFIG__.contentWidth, "reader-width": __WEB_CONFIG__.readerWidth })) root.style.setProperty(`--${name}`, `${value}px`);
-  }, [personal.language, personal.theme]);
+  }, [personal.language, personal.theme, deviceDark]);
   async function change(mutator: (state: Personal) => Personal) {
     try { setPersonal(await updatePersonal(mutator)); }
     catch (reason) { setError(errorText(reason)); }
@@ -266,7 +276,8 @@ export default function App() {
           </fieldset>
           <fieldset><legend>{labels.appearance}</legend>
             {__WEB_CONFIG__.uiThemes.map(theme => <button key={theme} className={styles.secondary}
-              aria-pressed={personal.theme === theme} onClick={() => void change(state => ({ ...state, theme }))}>{labels[theme]}</button>)}
+              aria-pressed={personal.theme === theme} onClick={() => void change(state => ({ ...state, theme }))}>
+              {theme === "device" ? labels.followDevice : labels[theme]}</button>)}
           </fieldset>
           </>}
           <ListPreview labels={labels} personal={store} publication={publication} />

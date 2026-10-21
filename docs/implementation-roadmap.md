@@ -52,7 +52,7 @@ Settings/preview/list management remain available when the Library endpoint fail
 Saving requires an explicit action after preview and creates a new independent
 list only. Duplicate names require confirmation; revision/epoch changes require
 renewed review. No lyric is fetched by transfer or saving, and no offline readiness
-or signed native App Links is claimed. The [current storage protocol](architecture.md#web-fixture-personal-storage-v2)
+or signed native App Links is claimed. The [current storage protocol](architecture.md#web-fixture-personal-storage-v3)
 does not establish full-backup exportability, complete list/recitation journeys,
 production migration coverage or native parity.
 Saved-list export rechecks its read revision after encoding and refuses concurrent
@@ -75,6 +75,13 @@ from generic unavailable references/placeholders without guessing matches.
 Only explicit Read requests a known lyric. Readers add fresh independent occurrences
 to an explicitly chosen list using the captured revision; no catalog title is
 stored as a fallback or exported. Recitation remains incomplete.
+
+UX-11 and SET-04 receive partial Website evidence for persisted Light/Dark/Warm/
+Follow device selection. System-color changes do not write personal data, and
+explicit choices/locale/canonical text stay independent. Strict v1/v2-to-v3
+migrations preserve favorites/lists/identities and create a fresh writer fence;
+future/invalid schemas remain non-destructive refusals. Palette contrast tests
+do not establish full physical-device/font/offline-shell accessibility evidence.
 
 ## Delivery sequence
 

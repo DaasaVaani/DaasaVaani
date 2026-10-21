@@ -1,6 +1,6 @@
 import { describe, expect, test } from "vitest";
 import {
-  defaultPersonal, editEntry, exportListSnapshot, jsonBytes, listNameKey, listSnapshot, moveEntry, newControl, newList, nextRevision, parseStore, removeEntry,
+  defaultPersonal, editEntry, exportListSnapshot, jsonBytes, listNameKey, listSnapshot, migratePersonalV1, migrateStoreV2, moveEntry, newControl, newList, nextRevision, parseStore, removeEntry,
   PersonalError, saveRecord, storageBytes, validatePersonal, validateStore, type PersonalStore,
 } from "./personal-model";
 import type { ListSnapshot } from "./list-transfer-types";
@@ -18,6 +18,43 @@ function code(action: () => unknown, expected: string) {
   }
 }
 describe("transactional personal model", () => {
+  test("v2 migration preserves every personal/list/occurrence value and creates a fresh v3 fence without mutating input", () => {
+    const control = { ...newControl(), formatVersion: 2, revision: 7 };
+    const personal = { ...defaultPersonal(), favorites: ["fixture_ref"] }, lists = [newList(snapshot), newList(snapshot)];
+    const before = structuredClone({ control, personal, lists });
+    const migrated = migrateStoreV2([control], [personal], lists);
+    expect(migrated.personal).toEqual(personal); expect(migrated.lists).toEqual(lists);
+    expect(migrated.control).toMatchObject({ id: "state", formatVersion: 3, revision: 0 });
+    expect(migrated.control.epoch).not.toBe(control.epoch);
+    expect(parseStore([migrated.control], [personal], migrated.lists)).toEqual(migrated);
+    code(() => exportListSnapshot(migrated, lists[0]!.id, control), "stale");
+    expect({ control, personal, lists }).toEqual(before);
+  });
+  test("legacy migrations refuse malformed headers and new-mode values mislabeled as older schemas", () => {
+    const control = { ...newControl(), formatVersion: 2 }, personal = defaultPersonal();
+    expect(migratePersonalV1([personal]).personal).toEqual(personal);
+    for (const theme of ["warm", "device", "unknown"]) {
+      code(() => migratePersonalV1([{ ...personal, theme }]), "invalid");
+      code(() => migrateStoreV2([control], [{ ...personal, theme }], []), "invalid");
+    }
+    code(() => migrateStoreV2([], [personal], []), "invalid");
+    code(() => migrateStoreV2([control, control], [personal], []), "invalid");
+    code(() => migrateStoreV2([{ ...control, ignored: true }], [personal], []), "invalid");
+    code(() => migrateStoreV2([{ ...control, revision: -1 }], [personal], []), "invalid");
+    code(() => migrateStoreV2([{ ...control, formatVersion: 3 }], [personal], []), "invalid");
+    code(() => parseStore([control], [personal], []), "invalid");
+  });
+  test("all declared theme tokens are valid v3 personal values and exact accounting includes the longer device token", () => {
+    const personal = defaultPersonal(); personal.theme = "light";
+    const state = { ...empty(), personal }, bytes = storageBytes(state);
+    for (const theme of __WEB_CONFIG__.uiThemes) {
+      expect(() => validatePersonal({ ...personal, theme })).not.toThrow();
+    }
+    const device = { ...state, personal: { ...personal, theme: "device" as const } };
+    expect(storageBytes(device)).toBe(bytes + 1);
+    code(() => validateStore(device, { ...__PERSONAL_LIMITS__, maxPersonalStoredBytes: bytes }), "capacity");
+    code(() => validatePersonal({ ...personal, theme: "unknown" }), "invalid");
+  });
   test("first-use language follows the first supported browser preference and configured fallback without changing canonical text settings", () => {
     expect(defaultPersonal(["fr-FR", "kn-IN", "en-US"]).language).toBe("kn");
     expect(defaultPersonal(["en-GB", "kn"]).language).toBe("en");

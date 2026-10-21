@@ -5,12 +5,12 @@ import type { ListSnapshot } from "./list-transfer-types";
 import { caseFold } from "unicode-case-folding";
 
 export interface Personal {
-  id: "personal"; favorites: string[]; language: "en" | "kn"; theme: "light" | "dark";
+  id: "personal"; favorites: string[]; language: "en" | "kn"; theme: WebConfig["defaultTheme"];
 }
 export type ListEntry = ListSnapshot["entries"][number] & { id: string };
 export interface ListRecord { id: string; name: string; entries: ListEntry[] }
 export interface Revision { epoch: string; revision: number }
-export interface Control extends Revision { id: "state"; formatVersion: 2 }
+export interface Control extends Revision { id: "state"; formatVersion: 3 }
 export interface PersonalStore { control: Control; personal?: Personal; lists: ListRecord[] }
 export type PersonalErrorCode = "invalid" | "listInvalid" | "capacity" | "stale" | "duplicate";
 export class PersonalError extends Error {
@@ -42,18 +42,19 @@ export function validatePersonal(value: unknown, limits = __PERSONAL_LIMITS__): 
       !Array.isArray(value.favorites) || Object.keys(value.favorites).length !== value.favorites.length ||
       Array.from(value.favorites).some(id => typeof id !== "string" || !/^[A-Za-z0-9_-]{1,128}$/.test(id)) ||
       new Set(value.favorites).size !== value.favorites.length ||
-      (value.language !== "en" && value.language !== "kn") || (value.theme !== "light" && value.theme !== "dark")) {
+      (value.language !== "en" && value.language !== "kn") ||
+      (value.theme !== "light" && value.theme !== "dark" && value.theme !== "warm" && value.theme !== "device")) {
     throw new PersonalError("invalid");
   }
   if (value.favorites.length > limits.maxFavorites) throw new PersonalError("capacity");
 }
 export function newControl(): Control {
-  return { id: "state", formatVersion: 2, epoch: crypto.randomUUID(), revision: 0 };
+  return { id: "state", formatVersion: 3, epoch: crypto.randomUUID(), revision: 0 };
 }
 export function parseStore(controls: unknown[], personal: unknown[], lists: unknown[]): PersonalStore {
   const control = controls[0];
   if (controls.length !== 1 || !object(control) || !keys(control, ["id", "formatVersion", "epoch", "revision"]) ||
-      control.id !== "state" || control.formatVersion !== 2 || typeof control.epoch !== "string" || !uuid.test(control.epoch) ||
+      control.id !== "state" || control.formatVersion !== 3 || typeof control.epoch !== "string" || !uuid.test(control.epoch) ||
       typeof control.revision !== "number" || !Number.isSafeInteger(control.revision) || control.revision < 0 ||
       personal.length > 1) throw new PersonalError("invalid");
   const preferences = personal[0];
@@ -64,11 +65,27 @@ export function parseStore(controls: unknown[], personal: unknown[], lists: unkn
     records.push(list);
   }
   const state: PersonalStore = {
-    control: { id: "state", formatVersion: 2, epoch: control.epoch, revision: control.revision },
+    control: { id: "state", formatVersion: 3, epoch: control.epoch, revision: control.revision },
     personal: preferences, lists: records,
   };
   validateStore(state);
   return state;
+}
+function legacyPreferences(personal: unknown[]) {
+  for (const value of personal) {
+    if (!object(value) || (value.theme !== "light" && value.theme !== "dark")) throw new PersonalError("invalid");
+  }
+}
+export function migratePersonalV1(personal: unknown[]): PersonalStore {
+  legacyPreferences(personal);
+  return parseStore([newControl()], personal, []);
+}
+export function migrateStoreV2(controls: unknown[], personal: unknown[], lists: unknown[]): PersonalStore {
+  const control = controls[0];
+  if (controls.length !== 1 || !object(control) || control.formatVersion !== 2) throw new PersonalError("invalid");
+  legacyPreferences(personal);
+  const validated = parseStore([{ ...control, formatVersion: 3 }], personal, lists);
+  return { ...validated, control: newControl() };
 }
 export function listSnapshot(record: ListRecord): ListSnapshot {
   return { format: "daasavaani-list", formatVersion: 1, name: record.name,
@@ -122,8 +139,8 @@ export function jsonBytes(value: unknown, limit = Number.MAX_SAFE_INTEGER): numb
 export function storageBytes(state: PersonalStore, limit = Number.MAX_SAFE_INTEGER): number {
   const personal = state.personal;
   return jsonBytes({
-    format: "fixture-personal-storage", formatVersion: 2,
-    control: { id: "state", formatVersion: 2, epoch: state.control.epoch, revision: state.control.revision },
+    format: "fixture-personal-storage", formatVersion: 3,
+    control: { id: "state", formatVersion: 3, epoch: state.control.epoch, revision: state.control.revision },
     personal: personal ? [{ id: "personal", favorites: personal.favorites, language: personal.language, theme: personal.theme }] : [],
     lists: [...state.lists].sort((a, b) => a.id < b.id ? -1 : a.id > b.id ? 1 : 0).map(list => ({
       id: list.id, name: list.name, entries: list.entries.map(entry => entry.kind === "item"

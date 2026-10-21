@@ -55,6 +55,13 @@ consent, actual search/reading, preference/favorite persistence and corrupt-arti
 errors. First-use locale cases exercise ordered supported/regional browser
 preferences, unsupported fallback, an empty preference list, explicit saved
 override/reload and independent theme/canonical Kannada behavior.
+Appearance journeys exercise actual media changes, persisted Warm/Follow device,
+configured palettes and independent Kannada UI/canonical text. Pure checks enforce
+at least4.5:1 normal text/accent contrast on configured reading surfaces and3:1
+interactive-boundary contrast. Native10/20-to30 database cases preserve all rows/
+identities, refresh the local fence and roll back invalid legacy data/schema;
+future40 refusal and stale already-open clients stay non-destructive. Media
+changes compare every personal table/header/index without automatic writes.
 Session-continuity journeys verify query/results, restored keyboard focus
 and measured scroll position through Back/Forward and reader return, no repeated
 index download, separate Library/Favorites searches, removed favorites, direct
@@ -187,10 +194,10 @@ IDs or a release acceptance declaration.
 | DATA-02/07/08 | Library tests preserve LF/CRLF text/UUIDs, reject malformed/duplicate lines and exclude held synthetic items | Fixture schema only; full production fields, filenames, verses/alignment and authoring/migration incomplete |
 | SEARCH-12/13 | Sampled independent substring/full-matrix oracle, counted-gram candidates, native core checks and real browser search | Ordinary fixture text only; reviewed profiles/aliases/markers, exhaustive proof and complete native parity pending |
 | PLAT-01/05 | Real React and Compose apps; built-site browser journeys at desktop/mobile/320px and one native API36 reading journey | PWA installation, complete routes/layout/interaction modes and supported-platform/device matrix pending |
-| I18N-01/02/03, SET-04 | Matching two-locale resources; web first-use ordered browser-language selection, configured fallback and explicit locale/theme persistence without changing canonical text | Native first-use/preference parity, complete script/personal preferences and full localization conformance pending |
-| LIB-01/02/03/04/08/09/10/11 | Web favorites/lists, independent occurrences/plain text, duplicate-name confirmation, management/manual replacement, catalog-only details/explicit reading, reader-to-list addition and fixture v1 migration | Recitation/offline/production migrations and Android Room personal state absent |
+| I18N-01/02/03, SET-04 | Matching two-locale resources; web first-use ordered browser-language selection, configured fallback, persisted four-mode appearance with contrast/media checks; native durable locale/theme preferences; canonical text remains independent | Complete script/personal preferences, device/font matrix and full localization conformance pending |
+| LIB-01/02/03/04/08/09/10/11 | Web favorites/lists, independent occurrences/plain text, duplicate-name confirmation, management/manual replacement, catalog-only details/explicit reading, reader-to-list addition and non-destructive fixture v1/v2 migration; native Room favorites/preferences | Recitation/offline/production migrations and native durable lists/occurrences remain incomplete |
 | UX-13 | In-session Library/Favorites context and list-origin selected editor state, Back/Forward/reader return with measured scroll/focus; removed-result/direct-reader/reload coverage | No persistent search history; filters/Explore, offline and Android continuity pending |
-| XFER-01/02/03/04/05/06/08 | Bounded worker codecs, preview/saved-list export, static links, transactional new-list-only save, catalog-only details, cancellation/errors, no-write and stale-confirmation/post-encode checks | Platform share adapters, native round trips, verified App Links and full backups incomplete |
+| XFER-01/02/03/04/05/06/08 | Bounded web worker codecs, preview/saved-list export, static links, transactional new-list-only save, catalog-only details, browser share/copy adapters, cancellation/errors, no-write and stale-confirmation/post-encode checks | Real sharing-surface delivery, native round trips, verified App Links and full backups incomplete |
 | SET-01/02 | Owned settings/schema guards, Shared policy binding and immutable clean fixture-tool pin | Complete production settings inventory, language/protocol/backup contracts and all compatibility fixtures pending |
 | QUAL-01/02/03 | Semantic browser controls, keyboard focus entrypoint, standalone canonical reading and no video/tracking dependencies | Full keyboard/screen-reader/contrast/scaling/platform journeys remain unverified; no formal conformance claim |
 

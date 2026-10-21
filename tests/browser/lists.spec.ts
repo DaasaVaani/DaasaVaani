@@ -15,6 +15,16 @@ if (!web || typeof web !== "object" || !("databaseName" in web) || typeof web.da
   throw new Error("Invalid list browser test configuration");
 }
 const databaseName = web.databaseName, fileName = web.listFileName, maxLists = limits.maxLists;
+function background(theme: string) {
+  if (!web || typeof web !== "object" || !("themes" in web) || !web.themes || typeof web.themes !== "object") {
+    throw new Error("Missing configured palettes");
+  }
+  const value: unknown = Object.entries(web.themes).find(([key]) => key === theme)?.[1];
+  if (!value || typeof value !== "object" || !("background" in value) || typeof value.background !== "string") {
+    throw new Error("Invalid configured theme background");
+  }
+  return value.background;
+}
 const maxName = limits.maxListNameCodePoints, maxText = limits.maxEntryTextCodePoints;
 const snapshot: ListSnapshot = { format: "daasavaani-list", formatVersion: 1, name: "Straße", entries: [
   { kind: "item", videoId: "fixture_ref", fallback: "  User note  " },
@@ -161,20 +171,24 @@ async function records(page: Page) {
     });
     try {
       const values: Record<string, unknown[]> = {};
+      const layout: Record<string, { keyPath: string | string[] | null; autoIncrement: boolean; indexes: string[] }> = {};
       for (const store of database.objectStoreNames) values[store] = await new Promise<unknown[]>((resolve, reject) => {
-        const request = database.transaction(store).objectStore(store).getAll();
+        const object = database.transaction(store).objectStore(store);
+        layout[store] = { keyPath: object.keyPath, autoIncrement: object.autoIncrement, indexes: [...object.indexNames] };
+        const request = object.getAll();
         request.onsuccess = () => resolve(request.result); request.onerror = () => reject(request.error);
       });
-      return { version: database.version, values };
+      return { version: database.version, values, layout };
     } finally { database.close(); }
   }, databaseName);
 }
 const listIdentities = (value: unknown) => JSON.stringify(value).match(/[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}/g) ?? [];
-async function upload(page: Page, value = snapshot) {
+async function upload(page: Page, value = snapshot, canSave = true) {
   await page.goto("/#/settings");
   await page.getByLabel("Choose a list file").setInputFiles({ name: "synthetic.gz", mimeType: "application/gzip", buffer: gzipSync(JSON.stringify(value)) });
   await expect(page.getByRole("heading", { name: value.name, exact: true })).toBeVisible();
-  await expect(page.getByRole("button", { name: "Save to My Library", exact: true })).toBeEnabled();
+  const save = page.getByRole("button", { name: "Save to My Library", exact: true });
+  if (canSave) await expect(save).toBeEnabled(); else await expect(save).toBeDisabled();
 }
 async function create(page: Page, name: string) {
   const form = page.getByRole("form", { name: "Create empty list", exact: true });
@@ -191,7 +205,7 @@ async function seedLegacy(page: Page, value: unknown, version = 10) {
       const request = indexedDB.open(input.name, input.version);
       request.onupgradeneeded = () => {
         request.result.createObjectStore("personal", { keyPath: "id" });
-        if (input.version > 20) request.result.createObjectStore("future", { keyPath: "id" });
+        if (input.version > 30) request.result.createObjectStore("future", { keyPath: "id" });
       };
       request.onsuccess = () => resolve(request.result); request.onerror = () => reject(request.error);
     });
@@ -207,6 +221,102 @@ async function seedLegacy(page: Page, value: unknown, version = 10) {
     } finally { database.close(); }
   }, { name: databaseName, value, version });
   await page.unroute("**/personal-fixture-seed");
+}
+async function seedVersion2(page: Page, theme = "dark", unexpectedIndex = false) {
+  await page.route("**/personal-v2-seed", route => route.fulfill({ contentType: "text/html",
+    body: "<!doctype html><title>Synthetic personal v2 fixture</title>" }));
+  await page.goto("/personal-v2-seed");
+  await page.evaluate(async input => {
+    const db = await new Promise<IDBDatabase>((resolve, reject) => {
+      const request = indexedDB.open(input.name, 20);
+      request.onupgradeneeded = () => {
+        request.result.createObjectStore("personal", { keyPath: "id" });
+        request.result.createObjectStore("control", { keyPath: "id" });
+        const lists = request.result.createObjectStore("lists", { keyPath: "id" });
+        if (input.unexpectedIndex) lists.createIndex("unexpected", "name");
+      };
+      request.onsuccess = () => resolve(request.result); request.onerror = () => reject(request.error);
+    });
+    try {
+      await new Promise<void>((resolve, reject) => {
+        const tx = db.transaction(["control", "personal", "lists"], "readwrite");
+        tx.objectStore("control").put({ id: "state", formatVersion: 2, revision: 7,
+          epoch: "00000000-0000-4000-8000-000000000001" });
+        tx.objectStore("personal").put({ id: "personal", favorites: ["fixture-one"], language: "en", theme: input.theme });
+        tx.objectStore("lists").put({ id: "00000000-0000-4000-8000-000000000002", name: "Synthetic v2 list", entries: [
+          { id: "00000000-0000-4000-8000-000000000003", kind: "item", videoId: "fixture-one", fallback: "  Preserve this  " },
+          { id: "00000000-0000-4000-8000-000000000004", kind: "placeholder", text: "<b>Keep literal</b>" },
+          { id: "00000000-0000-4000-8000-000000000005", kind: "item", videoId: "fixture-one" },
+        ] });
+        tx.oncomplete = () => resolve(); tx.onerror = () => reject(tx.error); tx.onabort = () => reject(tx.error);
+      });
+    } finally { db.close(); }
+  }, { name: databaseName, theme, unexpectedIndex });
+  await page.unroute("**/personal-v2-seed");
+}
+test("appearance follows device changes only when chosen and preserves every personal table without automatic writes", async ({ page }) => {
+  await page.emulateMedia({ colorScheme: "dark" }); await page.goto("/#/settings");
+  const root = page.locator("html");
+  await expect(root).toHaveAttribute("data-theme", "light");
+  await page.getByRole("button", { name: "Follow device", exact: true }).click();
+  await expect(root).toHaveAttribute("data-theme", "dark");
+  await expect(page.getByRole("button", { name: "Follow device", exact: true })).toHaveAttribute("aria-pressed", "true");
+  expect(await root.evaluate(element => getComputedStyle(element).getPropertyValue("--background").trim())).toBe(background("dark"));
+  const following = await records(page);
+  await page.emulateMedia({ colorScheme: "light" }); await expect(root).toHaveAttribute("data-theme", "light");
+  expect(await root.evaluate(element => getComputedStyle(element).getPropertyValue("--background").trim())).toBe(background("light"));
+  expect(await records(page)).toEqual(following);
+  await page.emulateMedia({ colorScheme: "dark" }); await expect(root).toHaveAttribute("data-theme", "dark");
+  expect(await records(page)).toEqual(following);
+  await page.reload(); await expect(root).toHaveAttribute("data-theme", "dark");
+  await expect(page.getByRole("button", { name: "Follow device", exact: true })).toHaveAttribute("aria-pressed", "true");
+  await page.getByRole("button", { name: "Warm", exact: true }).click();
+  await expect(root).toHaveAttribute("data-theme", "warm");
+  expect(await root.evaluate(element => getComputedStyle(element).getPropertyValue("--background").trim())).toBe(background("warm"));
+  const warm = await records(page);
+  await page.emulateMedia({ colorScheme: "light" }); await expect(root).toHaveAttribute("data-theme", "warm");
+  expect(await records(page)).toEqual(warm);
+  await page.reload(); await expect(root).toHaveAttribute("data-theme", "warm");
+  await page.getByRole("button", { name: "ಕನ್ನಡ", exact: true }).click();
+  await expect(root).toHaveAttribute("lang", "kn"); await expect(root).toHaveAttribute("data-theme", "warm");
+  await page.goto("/#/item/fixture-one");
+  await expect(page.getByText("ರಾಮ ಕೃಷ್ಣ", { exact: true })).toBeVisible();
+  await expect(root).toHaveAttribute("data-theme", "warm");
+});
+test("v2 migration retains every favorite list and occurrence while fencing old revisions before new appearance writes", async ({ page }) => {
+  await seedVersion2(page); const before = await records(page);
+  expect(before.version).toBe(20);
+  await page.goto("/#/settings");
+  await expect(page.getByRole("button", { name: "Dark", exact: true })).toHaveAttribute("aria-pressed", "true");
+  const migrated = await records(page);
+  expect(migrated.version).toBe(30);
+  expect(migrated.values.personal).toEqual(before.values.personal); expect(migrated.values.lists).toEqual(before.values.lists);
+  expect(migrated.layout).toEqual(before.layout);
+  expect(migrated.values.control).toMatchObject([{ id: "state", formatVersion: 3, revision: 0 }]);
+  expect(JSON.stringify(migrated.values.control)).not.toContain("00000000-0000-4000-8000-000000000001");
+  await page.getByRole("button", { name: "Warm", exact: true }).click();
+  await expect(page.locator("html")).toHaveAttribute("data-theme", "warm");
+  const changed = await records(page);
+  expect(changed.values.lists).toEqual(before.values.lists);
+  expect(changed.values.personal).toMatchObject([{ favorites: ["fixture-one"], language: "en", theme: "warm" }]);
+  expect(changed.values.control).toMatchObject([{ revision: 1 }]);
+  await page.reload(); await expect(page.getByRole("button", { name: "Warm", exact: true })).toHaveAttribute("aria-pressed", "true");
+  await page.getByRole("link", { name: "Lists", exact: true }).click();
+  await page.getByRole("list", { name: "Lists", exact: true }).getByRole("button", { name: "Synthetic v2 list", exact: true }).click();
+  await expect(page.locator("main ol > li")).toHaveCount(3);
+  expect(await records(page)).toEqual(changed);
+});
+for (const example of [{ name: "invalid v2 mode", theme: "warm", index: false },
+  { name: "unexpected v2 index", theme: "dark", index: true }]) {
+  test(`v2 migration refusal preserves the complete database for ${example.name}`, async ({ page }) => {
+    await seedVersion2(page, example.theme, example.index); const before = await records(page);
+    await page.goto("/#/settings");
+    await expect(page.getByRole("alert")).toContainText("Invalid personal database record");
+    expect(await records(page)).toEqual(before);
+    await upload(page, snapshot, false);
+    await expect(page.getByRole("button", { name: "Save to My Library", exact: true })).toBeDisabled();
+    expect(await records(page)).toEqual(before);
+  });
 }
 test("confirmed import persists plain text and repeated independent occurrences without the Library endpoint", async ({ page }) => {
   await page.route("**/demo/latest.json", route => route.abort());
@@ -616,7 +726,7 @@ test("v1 migration preserves favorites and preferences", async ({ page }) => {
   await expect(page.locator("html")).toHaveAttribute("lang", "kn");
   await expect(page.getByRole("heading", { name: "ಪಟ್ಟಿಗಳು", exact: true })).toBeVisible();
   const after = await records(page);
-  expect(after.version).toBe(20); expect(after.values.personal).toEqual([value]);
+  expect(after.version).toBe(30); expect(after.values.personal).toEqual([value]);
   expect(after.values.lists).toEqual([]); expect(after.values.control).toHaveLength(1);
 });
 test("invalid legacy migration rolls back the schema and refuses personal writes", async ({ page }) => {
@@ -632,7 +742,7 @@ test("invalid legacy migration rolls back the schema and refuses personal writes
   expect(await records(page)).toEqual(before);
 });
 test("newer personal schemas are refused without deleting unfamiliar stores", async ({ page }) => {
-  await seedLegacy(page, { id: "personal", favorites: [], language: "en", theme: "light" }, 30);
+  await seedLegacy(page, { id: "personal", favorites: [], language: "en", theme: "light" }, 40);
   const before = await records(page);
   await page.goto("/#/settings");
   await expect(page.getByRole("alert")).toContainText("newer personal database schema");
@@ -646,7 +756,7 @@ test("an already-open old client cannot commit a pending confirmation into a fut
   await expect(page.getByRole("button", { name: "Save with same name", exact: true })).toBeVisible();
   await page.evaluate(async name => {
     const database = await new Promise<IDBDatabase>((resolve, reject) => {
-      const request = indexedDB.open(name, 30);
+      const request = indexedDB.open(name, 40);
       request.onupgradeneeded = () => request.result.createObjectStore("future", { keyPath: "id" }).put({ id: "synthetic-future" });
       request.onsuccess = () => resolve(request.result); request.onerror = () => reject(request.error);
     });

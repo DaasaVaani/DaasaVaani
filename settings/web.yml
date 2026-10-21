@@ -23,7 +23,7 @@ themes:
     text: "#242e29"
     muted: "#57645c"
     accent: "#285642"
-    border: "#d6dcd0"
+    border: "#7b877c"
     highlight: "#eee7d2"
   dark:
     background: "#17221d"
@@ -31,5 +31,13 @@ themes:
     text: "#f0f0e6"
     muted: "#bdc8bd"
     accent: "#a8d3b5"
-    border: "#405448"
+    border: "#768b7c"
     highlight: "#3c4130"
+  warm:
+    background: "#f4ead8"
+    surface: "#fff8e9"
+    text: "#382e25"
+    muted: "#695744"
+    accent: "#75502c"
+    border: "#8b765d"
+    highlight: "#e8d6b4"

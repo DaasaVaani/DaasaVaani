@@ -9,6 +9,9 @@ publisher, with explicit indexed-search consent, canonical Kannada reading,
 transactional favorites and independent interface-language/theme preferences.
 First use follows the first supported browser-language preference, falling back
 to configured English; an explicit saved language overrides browser preferences.
+Light, Dark, Warm and Follow device appearance choices persist locally. System
+light/dark changes affect only Follow device, without changing personal records,
+UI language or canonical text.
 Library/Favorites searches and result positions survive in-session reading and
 Back/Forward navigation, without persistent search history.
 Loaded search results expose every ranked match through explicit configured-size

@@ -1,13 +1,15 @@
 interface WebConfig {
   formatVersion: 1; base: string; descriptorUrl: string; demoPort: number;
   canonicalBaseUrl: string; listLinkPath: string; listFileName: string; transferChunkBytes: number; listCompressionLevel: number;
-  defaultUiLanguage: "en" | "kn"; defaultTheme: "light" | "dark";
+  defaultUiLanguage: "en" | "kn"; defaultTheme: "light" | "dark" | "warm" | "device";
   databaseName: string; maxFavorites: number; fontFamily: string;
   readerFontSize: number; space: number; contentWidth: number; readerWidth: number;
   uiLanguages: ("en" | "kn")[];
-  uiThemes: ("light" | "dark")[];
+  uiThemes: ("light" | "dark" | "warm" | "device")[];
   demoViewports: { desktop: { width: number; height: number }; mobile: { width: number; height: number } };
-  themes: Record<"light" | "dark", Record<string, string>>;
+  themes: Record<"light" | "dark" | "warm", {
+    background: string; surface: string; text: string; muted: string; accent: string; border: string; highlight: string;
+  }>;
 }
 declare const __WEB_CONFIG__: WebConfig;
 declare const __TRANSFER_LIMITS__: { maxListEncodedBytes: number; maxListDecodedBytes: number; maxSharedUrlAscii: number };

@@ -1,5 +1,37 @@
 # Documentation history
 
+## 2026-10-21: persistent Website appearance parity and v3 migration
+
+- UX-11/SET-04/I18N-01/QUAL-06 receive bounded Website evidence for Light/Dark/
+  Warm/Follow device. Initial theme remains configured Light; system changes
+  affect only the explicit `device` mode and do not write personal data.
+- Adopted Shared4a01aea65d884fa8a48861123e4eebc7468ec23f only after14 tests,
+  deterministic generation,41-file hygiene/strict YAML/drift/whitespace and
+  exact preflight39655710221/main39655798431 passed. Used the new defaults
+  schema rather than extending hand-written duplicated setting guards.
+- Archived the preceding current protocol: native IndexedDB20/control and
+  complete logical envelope formatVersion2, Light/Dark-only personal themes,
+  and the v1 native10-to20 upgrade. Current native30 accepts and atomically
+  validates native10/20 migration inputs, preserves all personal/list/occurrence
+  values and refreshes a v2 writer's local epoch/revision before new-mode writes.
+  No full backup or downgrade/reset format was introduced.
+- Archived Light border#d6dcd0 and Dark border#405448. Raised interactive
+  boundary contrast and added the configured Warm palette; numeric text/accent/
+  highlight/boundary checks cover all palettes, not a physical font/device audit.
+- Incremental personal-model validation passed14 tests. Browser build then
+  exposed a test helper's missing unknown-object guard, which was fixed without
+  casts. Initial focused browser validation passed18 of21: a previously future
+  test still opened native30, now the current schema. Advanced that test to40
+  so it actually exercises future-version refusal, not an unchanged current DB.
+  Focused rerun passed17 model/palette unit tests and all21 browser cases.
+- Full `npm run check` passed30 unit tests, strict TypeScript/Vite and all150
+  browser cases across desktop, Pixel7 and320px against a fresh fixture build.
+  The existing bundle-size advisory remains; no production font/performance/
+  accessibility certification or complete offline lifecycle is implied.
+- Replaced stale validation-table statements that native Room favorites/
+  preferences and browser share adapters were absent. Their bounded current
+  evidence is now distinguished from pending native lists/real delivery.
+
 ## 2026-10-21: reachable complete browser result pages
 
 - SEARCH-01/07/12 and UX-13 receive additional fixture evidence. Found the
@@ -30,6 +62,11 @@
   and main39652054401 were directly verified successful for that SHA.
   Native demo was restored. Archived the roadmap's blanket pending "Room personal
   state": only favorites/preferences are durable, not list/backup/offline parity.
+- Revisionb584ec8359cee2903ce20387004b042971818fa2 passed exact
+  preflight39653541250/main39653864937 including Pages deployment and
+  managed39653865086's two analyses. Real public desktop/Pixel7 journeys
+  confirmed search/reading/Back behavior; public data remains three synthetic
+  items, while complete20/40/41 paging uses independently hashed test artifacts.
 
 ## 2026-10-21: explicit browser snapshot sharing and copy
 

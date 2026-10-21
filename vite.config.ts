@@ -9,19 +9,18 @@ import { strictYaml } from "./shared/tools/generate-catalog.mjs";
 import Ajv2020 from "ajv/dist/2020";
 import schema from "./settings/web.schema.json" with { type: "json" };
 import personalSchema from "./shared/schemas/personal-transfer-settings.schema.json" with { type: "json" };
+import defaultsSchema from "./shared/schemas/ui-defaults.schema.json" with { type: "json" };
 
 const config = strictYaml(readFileSync(new URL("./settings/web.yml", import.meta.url), "utf8"));
 const bounds = strictYaml(readFileSync(new URL("./shared/settings/publication-policy.yml", import.meta.url), "utf8"));
 const validate = new Ajv2020({ strict: true }).compile<Omit<WebConfig, "defaultUiLanguage" | "defaultTheme" | "uiLanguages" | "uiThemes" | "maxFavorites">>(schema);
 if (!validate(config)) throw new Error("Invalid web settings: " + JSON.stringify(validate.errors));
 const defaults = strictYaml(readFileSync(new URL("./shared/settings/defaults.yml", import.meta.url), "utf8"));
-if (!defaults || typeof defaults !== "object" || !("uiLanguage" in defaults) ||
-    !["en", "kn"].includes(String(defaults.uiLanguage)) || !("theme" in defaults) ||
-    !["light", "dark"].includes(String(defaults.theme)) || !("supportedUiLanguages" in defaults) ||
-    !Array.isArray(defaults.supportedUiLanguages) || defaults.supportedUiLanguages.some(language => !["en", "kn"].includes(language)) ||
-    !defaults.supportedUiLanguages.includes(defaults.uiLanguage) || !("supportedThemes" in defaults) ||
-    !Array.isArray(defaults.supportedThemes) || defaults.supportedThemes.some(theme => !["light", "dark"].includes(theme)) ||
-    !defaults.supportedThemes.includes(defaults.theme)) throw new Error("Invalid portable defaults");
+const validateDefaults = new Ajv2020({ strict: true }).compile<{
+  uiLanguage: WebConfig["defaultUiLanguage"]; theme: WebConfig["defaultTheme"];
+  supportedUiLanguages: WebConfig["uiLanguages"]; supportedThemes: WebConfig["uiThemes"];
+}>(defaultsSchema);
+if (!validateDefaults(defaults)) throw new Error("Invalid portable defaults: " + JSON.stringify(validateDefaults.errors));
 const personal = strictYaml(readFileSync(new URL("./shared/settings/personal-transfer.yml", import.meta.url), "utf8"));
 const validatePersonal = new Ajv2020({ strict: true }).compile<typeof __TRANSFER_LIMITS__ & PersonalLimits>(personalSchema);
 if (!validatePersonal(personal)) throw new Error("Invalid portable personal limits: " + JSON.stringify(validatePersonal.errors));

@@ -124,7 +124,7 @@ Personal values never enter repository settings; payloads cannot override limits
 - Root /open/ hash links, narrow signed Android association and browser fallback;
   no forced routing or claim that installation guarantees handoff.
 
-## Web fixture personal storage v2
+## Web fixture personal storage v3
 
 This is the executable fixture-client protocol for favorites/preferences and
 logical lists, not the full production personal/backup contract. The
@@ -135,16 +135,21 @@ owns list/occurrence fields. All three tables share the configured personal DB:
 | --- | --- |
 | `personal` | Zero or one `{id:"personal", favorites, language, theme}`; absent row means first supported browser language plus validated configured defaults |
 | `lists` | Independently identified Shared list records; entry array order is authoritative |
-| `control` | Exactly one `{id:"state", formatVersion:2, epoch, revision}`; fresh local UUIDv4 epoch and nonnegative safe-integer revision |
+| `control` | Exactly one `{id:"state", formatVersion:3, epoch, revision}`; fresh local UUIDv4 epoch and nonnegative safe-integer revision |
 
 ### Opening and migration
 
-Native IndexedDB version20 is the fixture v2 schema; version10 is the supported
-Dexie v1 predecessor. Open at the exact native version **before** opening Dexie,
+Native IndexedDB version30 is the fixture v3 schema. Supported migration inputs
+are native version10 (personal-only v1) and version20 (three-table v2).
+Open at the exact native version **before** opening Dexie,
 which can otherwise retry a newer version and patch missing schema parts.
 Native upgrade creates only the specified stores/header, validates legacy
 preferences/favorites and aggregate capacity before success, and retains the
-legacy personal row unchanged. Any failure aborts the entire schema transaction.
+legacy personal row unchanged. Version20 migration validates the exact stores,
+indexes, complete rows and old Light/Dark-only preference domain before replacing
+only the control row with a fresh v3 epoch/revision0; lists, occurrence identities
+and personal values stay unchanged. New theme tokens in an older-labeled schema
+are invalid, not silently accepted. Any failure aborts the entire schema transaction.
 New initialization creates metadata only, not a personal preference or list row.
 For an absent preference row, inspect `navigator.languages` in preference order
 (or `navigator.language` if empty), matching each case-insensitive primary
@@ -155,6 +160,15 @@ mutation, not an automatic initialization write. A stored language always wins
 over browser preferences. UI selection never changes canonical Kannada, lyric
 script or theme. The pure model accepts preference tags explicitly; only the
 browser adapter reads navigator values.
+
+V3 preferences accept `light`, `dark`, `warm` and `device`; `device` follows the
+current browser light/dark media preference. Explicit modes ignore system changes;
+stored mode selection survives reload and remains independent of UI locale and
+canonical lyrics. Media changes update colors only, never a personal row/revision.
+The configured initial theme remains Light, not implicit Follow device.
+Owned web settings define all three palettes; portable defaults/allowed choices
+use Shared's strict UI-defaults schema. Text/accent/highlight and interactive
+boundary contrast are executable numeric checks, not font/device-matrix proof.
 
 Reject future/unknown versions, extra/missing stores, unexpected indexes/keypaths,
 invalid rows, duplicate identities and invalid capacities; do not delete, reset,
@@ -240,7 +254,7 @@ same-document navigation from a saved list must decode the newly selected link,
 not depend on a reload or unrelated personal-state render.
 
 The exact logical accounting envelope, serialized as compact UTF8 JSON without
-BOM, is `{format:"fixture-personal-storage",formatVersion:2,control,personal,lists}`.
+BOM, is `{format:"fixture-personal-storage",formatVersion:3,control,personal,lists}`.
 Key order is the order shown; header keys follow the table above. `personal` is
 an empty array or one row with keys `id,favorites,language,theme`. `lists` is sorted
 by ASCII UUID; row keys are `id,name,entries`. Each entry uses `id,kind,videoId`

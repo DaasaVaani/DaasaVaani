@@ -1,6 +1,6 @@
 import Dexie, { liveQuery, type Transaction } from "dexie";
 import {
-  defaultPersonal, exportListSnapshot, newControl, nextRevision, parseStore, PersonalError, saveRecord, validatePersonal, validateStore,
+  defaultPersonal, exportListSnapshot, migratePersonalV1, migrateStoreV2, nextRevision, parseStore, PersonalError, saveRecord, validatePersonal, validateStore,
   type ListRecord, type Personal, type PersonalStore, type Revision,
 } from "./personal-model";
 export type { Personal, PersonalStore } from "./personal-model";
@@ -9,7 +9,8 @@ export const browserDefaultPersonal = () => defaultPersonal(navigator.languages.
 const db = new Dexie(__WEB_CONFIG__.databaseName);
 db.version(1).stores({ personal: "id" });
 db.version(2).stores({ personal: "id", lists: "id", control: "id" });
-const nativeVersion = 20;
+db.version(3).stores({ personal: "id", lists: "id", control: "id" });
+const nativeVersion = 30;
 const newerSchema = () => new Error("A newer personal database schema is present. Use a compatible app; existing data was not changed.");
 function inspectNative(): Promise<IDBDatabase> {
   return new Promise((resolve, reject) => {
@@ -26,14 +27,34 @@ function inspectNative(): Promise<IDBDatabase> {
       if (!transaction) { reject(new PersonalError("invalid")); return; }
       const abort = (reason: unknown) => { upgradeFailure = reason; transaction.abort(); };
       if (stopped) { transaction.abort(); return; }
+      if (event.oldVersion === 20) {
+        const expected = ["control", "lists", "personal"], names = [...database.objectStoreNames];
+        if (names.length !== expected.length || expected.some(name => !names.includes(name)) || names.some(name => {
+          const store = transaction.objectStore(name);
+          return store.keyPath !== "id" || store.autoIncrement || store.indexNames.length !== 0;
+        })) { abort(new PersonalError("invalid")); return; }
+        const rows = { control: transaction.objectStore("control").getAll(),
+          personal: transaction.objectStore("personal").getAll(), lists: transaction.objectStore("lists").getAll() };
+        let pending = Object.keys(rows).length;
+        for (const request of Object.values(rows)) {
+          request.onerror = () => abort(request.error);
+          request.onsuccess = () => {
+            if (--pending !== 0) return;
+            try {
+              const state = migrateStoreV2(rows.control.result, rows.personal.result, rows.lists.result);
+              transaction.objectStore("control").put(state.control);
+            } catch (reason) { abort(reason); }
+          };
+        }
+        return;
+      }
       if (event.oldVersion !== 0 && event.oldVersion !== 10) { abort(new PersonalError("invalid")); return; }
       function initialize(legacy: unknown[]) {
         try {
-          const header = newControl();
-          parseStore([header], legacy, []);
+          const state = migratePersonalV1(legacy);
           if (event.oldVersion === 0) database.createObjectStore("personal", { keyPath: "id" });
           database.createObjectStore("lists", { keyPath: "id" });
-          database.createObjectStore("control", { keyPath: "id" }).put(header);
+          database.createObjectStore("control", { keyPath: "id" }).put(state.control);
         } catch (reason) { abort(reason); }
       }
       if (event.oldVersion === 0) initialize([]);
