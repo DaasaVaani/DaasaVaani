@@ -17,6 +17,9 @@
 Staged implementation is authorized. The current fixture-only milestone is not
 full production design closure or release readiness. Consult the roadmap for
 actual coverage and remaining gates; guides do not prove provider permission.
+The approved [lyric identity and optional media contract](https://github.com/DaasaVaani/shared/blob/main/docs/lyric-identity.md)
+defines the video-independent target and legacy compatibility. Current executable
+fixtures remain unchanged; source migration is not authorized.
 
 ## Owners
 

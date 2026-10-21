@@ -23,6 +23,15 @@ are independent; clients consume artifacts, never source Git.
 
 ## Data flow
 
+The approved [lyric identity contract](https://github.com/DaasaVaani/shared/blob/main/docs/lyric-identity.md)
+adds an owner-supplied text-authoring/review path independent of provider API
+ingestion. Production lookup/routes/search/personal references use permanent
+lyric UUIDs; reviewed images/videos are optional associations, not identity.
+Target minimal-list v2 distinguishes lyric and preserved legacy references.
+The contract owns the complete staged rollout/acceptance obligations; executable
+fixtures and the current personal-storage protocol below remain unchanged.
+No source/personal migration or automatic legacy mapping is authorized now.
+
 ```text
 manual local API -> proposed Library source/assets/settings -> review PR
 -> post-merge global conversion/index/package -> full validation

@@ -4,6 +4,11 @@ Hari Dasa Sahitya discovery, reading, practice and recitation through a responsi
 static PWA and a separate native Android app.
 
 **Status: initial fixture-only implementation; not a production release.**
+The approved [lyric identity and optional media contract](https://github.com/DaasaVaani/shared/blob/main/docs/lyric-identity.md)
+defines permanent lyric UUIDs and text-only publication without YouTube/images.
+That target is not yet implemented; current fixture identifiers/formats are
+unchanged, and source import/migration remains unauthorized.
+
 The responsive React Website reads hash-verified artifacts from the Library fixture
 publisher, with explicit indexed-search consent, canonical Kannada reading,
 transactional favorites and independent interface-language/theme preferences.

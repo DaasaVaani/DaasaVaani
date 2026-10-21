@@ -38,6 +38,10 @@ demonstrations do not close remaining production contracts or prove full readine
 
 ## Non-negotiable boundaries
 
+- Follow the approved [lyric identity contract](https://github.com/DaasaVaani/shared/blob/main/docs/lyric-identity.md):
+  production lyric UUIDs are independent of optional videos/images. Keep current
+  fixture/v1 semantics intact; no fake video IDs, inferred matches or source/
+  personal migrations without separate authorization.
 - Kannada canonical; transliterate never translate. UI locale and lyric script
   independent; first-use UI follows supported browser preferences with configured
   fallback, and explicit stored override wins. Uncertain lyrics held, corrections

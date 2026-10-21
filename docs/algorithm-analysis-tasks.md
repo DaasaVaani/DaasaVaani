@@ -53,7 +53,7 @@ Past alternatives, review chronology and validation outcomes belong only in
 | S15, S18 B, S19 B, S20-S21, S27 B | Same-platform full backups, native font units, gzip files, explicit personal-data bounds, preview revision checks and fresh local fencing; Android system backup remains best effort | Exact personal schema, bounded staging/accounting and crash/concurrency tests |
 | S16, S22 | Retain published readers within the initial supported release line; UTC millisecond instants, at least 168 hours before recommendation and 72-hour successful-check suppression | Decoder/migration fixtures, capability table and clock-anomaly handling |
 | S38 | All numeric PERF-01 to PERF-04 targets are best-effort goals, not hard implementation/release gates | Report actual latency/LCP/INP/CLS and regressions; no benchmark pass claimed |
-| S43 C-end, S44-S47 | One canonical Kannada fence; reviewed verse UUID/end-line metadata; code-point Source Latin ranges and complete alignment before anchored features; grouped frontmatter; opaque URL-safe video IDs of 1-128 characters | Exact source schemas, authoring diagnostics and language tables |
+| S43 C-end, S44-S47 | One canonical Kannada fence; reviewed verse UUID/end-line metadata; code-point Source Latin ranges and complete alignment before anchored features; grouped frontmatter; permanent lyric UUID with optional reviewed media and distinct legacy references | Exact source schemas, authoring diagnostics, identity adapters and language tables |
 | S42 | Native dependency/toolchain manifests, catalogs, wrappers and lockfiles are an explicit exception to settings-only ownership | Keep one authoritative pin, not a duplicated settings value |
 | S48 B | Generated renderings use target-script decimal digits, Latin ASCII, without changing numeric value/verse identity; canonical source remains unchanged | Complete reviewed digit tables and independent expectations |
 | S49-S51 | Search-only ignore ZWJ/ZWNJ strictly between Kannada virama and a reviewed Kannada consonant; common/compact ASCII branches fold A-Z only; ordinary letter/mark/decimal runs plus reviewed technical grammar | Exact context/category/version tables, staged pipeline, control rejection and cross-client fixtures |
@@ -202,7 +202,8 @@ evidence is not established.
   tags/form/category 40, context labels 20, context description 10 and lyrics 5.
   Sum the best field weight per distinct query term; repeated occurrences,
   aliases and renderings do not inflate it. After field totals compare worst
-  term edit count, then total term edits, then ASCII video ID. Term quality
+  term edit count, then total term edits, then ASCII canonical lyric ID. Existing
+  fixture indexes retain their versioned legacy identity semantics. Term quality
   comes from the same winning-weight field, without a whole-word/prefix bonus.
 - **Analysis needed:** formalize score/evidence records and safe execution of
   AND evidence spread across fields/lines, and safe filter/top-page execution
@@ -509,7 +510,7 @@ validation must be settled before implementation.
 ### MED-01: Restricted source grammar and diagnostics
 
 - **Requirements:** DATA-02/03/07/08, CI-01/02.
-- **Approved source direction:** root format/video identity with grouped
+- **Approved source direction:** root format/permanent lyric UUID identity with grouped
   `public`, `provenance` and `review` frontmatter; source-only evidence is not
   automatically confidential in a public source repository. Use one canonical
   Kannada fence and `public.verses` records containing persistent verse UUIDs
@@ -517,9 +518,10 @@ validation must be settled before implementation.
   marks. A single pipe can occur inside a line and never implies a new line or
   full verse. Authoring tools may propose boundaries for human review; the
   publisher uses persisted declarations, not newly inferred boundaries.
-  Initial video IDs are opaque case-preserved ASCII letters/digits/underscore/
-  hyphen strings of length 1-128; source URL and ID must agree. Offline imports
-  preserve well-formed unresolved IDs without network existence claims.
+  Follow the [lyric identity contract](https://github.com/DaasaVaani/shared/blob/main/docs/lyric-identity.md)
+  for `<lyricId>.md`, owner-supplied provenance, optional reviewed media and typed
+  legacy references. No fake video IDs, inferred matches or automatic source
+  migration. Offline imports preserve unresolved IDs without existence claims.
 - **Analysis needed:** define a deterministic AST-validation pass over the
   selected Markdown/YAML parsers: allowed nodes, required sections, closed
   fences, UUID uniqueness and reference checks. Separate legitimate incomplete/

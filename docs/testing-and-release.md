@@ -238,6 +238,13 @@ than silently selecting a different revision.
 
 ## Required implementation test matrix
 
+The [approved lyric identity contract](https://github.com/DaasaVaani/shared/blob/main/docs/lyric-identity.md#7-required-acceptance-evidence)
+adds target acceptance obligations: text-only publication/reading, unchanged
+personal and line/verse identities after media additions/removals, typed v1/v2
+legacy compatibility and no inferred mapping/source mutation. These suites are
+not implemented by documentation approval; current fixture checks do not prove
+that target. Source/record migrations require separate explicit authorization.
+
 Use [requirements acceptance scenarios](requirements.md) and
 [Shared traceability](https://github.com/DaasaVaani/shared/blob/main/docs/implementation-specification.md#14-requirement-and-verification-traceability).
 The [algorithm inventory](algorithm-analysis-tasks.md) defines proof/fixture work.

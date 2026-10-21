@@ -1,5 +1,34 @@
 # Documentation history
 
+## 2026-10-22: confirmed video-independent lyric identity
+
+- Owner confirmed the proposed permanent lyric UUIDv4 model, optional reviewed
+  zero-or-more videos/images, media-independent owner-supplied text eligibility
+  and stable favorites/list/bookmark references. Documented the authoritative
+  Shared contract, target minimal-list v2 with typed lyric/legacy entries,
+  unchanged v1 semantics, compatibility, rollout and acceptance obligations.
+  No runtime/schema/type/codec, Shared pin, source file or personal record changed.
+  Source import/ID assignment/renaming/migration remain separately unauthorized.
+- Archived the preceding product requirements: Item meant one YouTube video
+  identified by video ID; DATA-01/02 required one keyed source/file per video;
+  DATA-04 traced every record to a video; video URL/ID, channel and upload date
+  were mandatory source information. LIB-02 treated each performance as separate
+  video identity; LIB-10 prohibited video-ID deduplication; UX-07 canonical links
+  were video-based; SEARCH-03's final tie-break and publication flow used video
+  identity. Current fixture/v1 implementations still retain their legacy rules,
+  but the approved production target no longer requires media or a Latin slug.
+- Preserved153 requirement IDs while changing the approved identity meaning;
+  existing thumbnail-missing/readability and source-review safeguards remain.
+  The selected IDE fixture text/source was not altered.
+- The preceding strict-settings consumerc778eee9692352576af9d934dc35357c6cccdd15
+  passed full30 unit/150 browser checks, exact preflight39661691970/
+  main39662183657 including Pages and managed39662186525. Those checks do
+  not prove the new lyric-identity target, which remains documentation only.
+- Documentation batch `npm run check` passed30 unit tests, strict TypeScript/
+  Vite build and all150 browser cases against fresh synthetic artifacts.
+  The bundle-size advisory remains. These unchanged fixture suites are not
+  target lyric-ID/optional-media/v2 migration acceptance evidence.
+
 ## 2026-10-21: strict publication-settings adoption and native preview evidence
 
 - SET-01/02 audit traced current Website settings to their build/runtime

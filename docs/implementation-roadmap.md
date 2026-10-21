@@ -6,6 +6,11 @@ Use [requirements](requirements.md), [current design](design-decisions.md),
 [Shared specification](https://github.com/DaasaVaani/shared/blob/main/docs/implementation-specification.md).
 No source migration or live API ingestion is authorized. Remaining production
 gates must close before their owning slices; no phase is globally complete.
+The approved [lyric identity and optional media contract](https://github.com/DaasaVaani/shared/blob/main/docs/lyric-identity.md)
+is the target for P1/P4/P5a/P7: text-only lyric publication, permanent UUID lookup,
+typed references and versioned legacy-preserving transfers. Schemas/adapters/
+consumers remain unimplemented. Follow its Shared-first rollout; contract
+approval alone does not authorize source import, renaming or personal migration.
 
 Publication requires exact main checks, successful deployment and live HTTPS
 verification. A preflight pass or main push alone is not deployment evidence.

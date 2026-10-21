@@ -14,7 +14,7 @@ archive of questionnaires, alternatives, changes and dated observations.
 | Clients | Kotlin/Compose/Material3 API26+, app -> pure Kotlin core; React/strict TypeScript/Vite static PWA/hash routes |
 | Platform libraries | Android ViewModels/Coroutines/Koin compiler DSL/Navigation3/OkHttp/serialization; web React state/Dexie/React Aria/CSS Modules/native Fetch/search worker |
 | Ownership | Four independent repositories; Shared contracts/fixtures/settings/UI generator/resources; Library sources/ingestion/publisher; independent consumer pins |
-| Source | Flat per-video Markdown, grouped YAML, one canonical fence, stable line UUIDs/verse UUID end-line references, original literal layout, valid drafts/holds excluded |
+| Source | Permanent lyric UUIDv4, flat `<lyricId>.md`, grouped provenance/review YAML, one canonical fence, stable lyric-scoped line/verse IDs; optional reviewed images/zero-or-more videos; valid drafts/holds excluded |
 | Language | Kannada canonical, transliteration only, five Latin/nine non-Latin variants, global rules, reviewed Source Latin eligibility/alignment, target-script digits/Latin ASCII |
 | Configuration | Product knobs in owned strict YAML settings; native dependency/toolchain manifests/locks are the explicit pin exception |
 | Search | Kannada/Latin AND substrings/code-point OSA; one global counted1/2/3-gram candidate index plus exact verification/scan oracle; profile-aware normalization |
@@ -31,6 +31,11 @@ archive of questionnaires, alternatives, changes and dated observations.
 | Ingestion | Manual local full uploads scan/reconciliation/source PR; first API access blocked pending provider clarification |
 | Releases | Full applicable checks before finalization/push; unsigned CI/local signing/protected verification; normal PR/check protection restored before release |
 | Performance | All numerical search/LCP/INP/CLS targets best effort; correctness/accessibility/cancellation/integrity/safety remain mandatory |
+
+The [approved lyric identity contract](https://github.com/DaasaVaani/shared/blob/main/docs/lyric-identity.md)
+owns typed lyric/legacy references, target minimal-list v2, text-only publication
+eligibility and staged compatibility. This is not implemented in the current
+fixture/v1 formats and does not authorize source or personal-data migration.
 
 ## Current readiness gates
 
