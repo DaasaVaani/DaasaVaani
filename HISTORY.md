@@ -1,5 +1,30 @@
 # Documentation history
 
+## 2026-10-21: verified personal-list and first-use publication
+
+- Final behavior revisionc1dbc8361095dad95d7b8dcbd06957d80b376606 passed
+  exact preflight39636526499 and main39636788578: Workflow lint, Fixture web
+  build and tests, and Pages deployment all completed successfully. Managed
+  run39636789555 completed both Actions and JavaScript/TypeScript analyses.
+- Final-tree `npm run check` passed23 unit tests, strict TypeScript/Vite build
+  and all99 browser cases over desktop, Pixel7 and320px. Actionlint1.7.12 with
+  ShellCheck0.11.0, six changed Markdown files' UTF8/whitespace/fences/local
+  links/anchors, all153 unchanged requirement identities and staged whitespace
+  checks passed. The existing main-chunk advisory was not hidden.
+- Standalone Playwright Chromium against public HTTPS passed desktop and Pixel7:
+  explicit list Save, independent placeholder edit/move, preserved focus,
+  actual gzip download compared with Node zlib, and the exact same-document
+  exported-link round trip that previously failed. Public kn-IN first-use and
+  explicit English override/reload also passed. Temporary contexts were closed.
+- Captured current public synthetic-list desktop/mobile screenshots in the
+  session artifacts. They are fixture demonstrations, not reviewed content,
+  full accessibility evidence, native parity or release readiness.
+- Website's committed and checked-out Shared gitlink both matched published
+  `db5c49bd9e2dc830f4364862c3e4464584c0c3af`, with clean checkouts.
+  Library/Android worktrees and their independent Shared pins were unchanged.
+  Removed only known main-contained validation branches after required main
+  checks; unmerged work/open-PR branches were preserved.
+
 ## 2026-10-21: browser first-use UI language
 
 - Implemented I18N-02 for the web fixture client: select the first supported
