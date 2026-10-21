@@ -101,7 +101,13 @@ Personal values never enter repository settings; payloads cannot override limits
   deterministic additive ranking and bounded selected-script item excerpts.
   Explicit unprepared index consent; cancellation/stale/IME correctness mandatory.
 - Website Library/Favorites views stay mounted but hidden outside their routes,
-  retaining independent process-local query/index/result state. History-entry
+  retaining independent process-local query/index/result/page state. A loaded
+  policy's `pageSize` bounds each additional page, not the complete result set.
+  Explicit Show more preserves ranking/repetitions and focuses the first newly
+  revealed Read link. Query/policy changes reset to the first page; returning from
+  reading retains expanded pages. Exact catalog-map lookup projects each hit in
+  O(1), rather than scanning the catalog per hit. A failed worker clears stale
+  hits and shows the error, not a successful no-matches message. History-entry
   scroll/focus records and a per-browsing-route fallback support return navigation;
   weak focus references do not retain detached reader DOM. Removed targets fall
   back to the main content and a valid clamped scroll position. Reader return

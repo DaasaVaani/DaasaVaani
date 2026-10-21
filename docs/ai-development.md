@@ -27,10 +27,10 @@ demonstrations do not close remaining production contracts or prove full readine
 
 | Surface | Current capability |
 | --- | --- |
-| Website | Responsive fixture reader/search, browsing/list-reader continuity, favorites/preferences, worker preview/saved-list exports with optional browser share/copy adapters, transactional lists/occurrence editing, truthful catalog resolution and explicit reader-to-list addition |
+| Website | Responsive fixture reader/complete paged search, browsing/list-reader continuity, favorites/preferences, worker preview/saved-list exports with optional browser share/copy adapters, transactional lists/occurrence editing, truthful catalog resolution and explicit reader-to-list addition |
 | Shared | Fixture/minimal-list/logical-list-record contracts, portable settings, deterministic catalog generator and committed web/Android UI resources |
 | Library | Strict fixture Markdown/settings parsing, deterministic hash-addressed gzip publication and counted-gram index |
-| Android | Native Compose fixture preparation/reading/search, pure Kotlin core, debug APK/JVM/lint/emulator checks |
+| Android | Native Compose fixture preparation/reading/search, durable Room favorites/preferences and locale/theme controls, pure Kotlin core, debug APK/JVM/lint/emulator checks |
 | Website library/ | Absent; reviewed sources belong only to Library |
 | Website settings/ | Web schema/settings; portable defaults and bounds consumed from Shared |
 | Tooling | Exact npm lockfiles and Gradle wrapper/version catalog; use the current command registry |

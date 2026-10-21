@@ -58,7 +58,13 @@ override/reload and independent theme/canonical Kannada behavior.
 Session-continuity journeys verify query/results, restored keyboard focus
 and measured scroll position through Back/Forward and reader return, no repeated
 index download, separate Library/Favorites searches, removed favorites, direct
-reader fallback and reset on reload. `npm run demo` publishes only synthetic fixture artifacts and serves the
+reader fallback and reset on reload. Pagination journeys serve independently
+hashed synthetic catalog/item/policy/index artifacts at the actual configured
+page, two-page and two-page-plus-one sizes. They cover complete ranked reachability,
+keyboard/new-page focus, independent Favorites paging, reader Back/Forward,
+query reset and worker-error recovery without stale cards or false no-results.
+These synthetic fixtures are not a production language/corpus benchmark.
+`npm run demo` publishes only synthetic fixture artifacts and serves the
 local Website at the configured settings/web.yml port. It is not a production
 Library deployment or a source migration.
 The fixture tool repository/revision/default checkout path are centralized in
@@ -127,7 +133,10 @@ npm run config
 
 App-level JVM tests currently have no sources; the pure core has executable JVM
 tests. The connected test launches the actual Compose app, requires preparation,
-downloads/verifies the served fixtures and opens canonical text. The Website demo
+downloads/verifies the served fixtures and opens canonical text. The native
+suite also covers the durable Room personal foundation and locale/theme controls;
+see the [native validation guide](https://github.com/DaasaVaani/AndroidApp/blob/main/README.md)
+for its owning scenarios and current limitations. The Website demo
 must run at the endpoint configured in Android settings. API26/other devices,
 release signing and complete Android parity are not established.
 Native CI builds all debug/release variants and runs core/JVM/lint checks; the

@@ -11,6 +11,9 @@ First use follows the first supported browser-language preference, falling back
 to configured English; an explicit saved language overrides browser preferences.
 Library/Favorites searches and result positions survive in-session reading and
 Back/Forward navigation, without persistent search history.
+Loaded search results expose every ranked match through explicit configured-size
+pages; Show more focuses the first newly revealed result and retains the expanded
+context through in-session reading.
 Settings can preview bounded list files/links locally, re-export snapshots and
 explicitly save new independent lists. Lists supports creation, rename,
 duplication and confirmed deletion, with repeated occurrences and duplicate-name
@@ -23,7 +26,8 @@ handoff is not delivery confirmation. Available verified catalog titles resolve 
 lyrics; explicit Read opens known entries, and readers can add independent
 occurrences to chosen lists. Native transfer and recitation remain incomplete.
 Shared generates the English/Kannada UI resources; Android has a native preparation/
-reading fixture demo. Production contracts, reviewed transliteration, persistent
+reading fixture demo with durable Room favorites/preferences and locale/theme
+controls. Production contracts, reviewed transliteration, persistent
 offline snapshots and the remaining product journeys are incomplete.
 Staged implementation is authorized; source migration and live API ingestion are not.
 

@@ -1,5 +1,36 @@
 # Documentation history
 
+## 2026-10-21: reachable complete browser result pages
+
+- SEARCH-01/07/12 and UX-13 receive additional fixture evidence. Found the
+  Browser view sliced matching results to one configured page with no way to
+  reach later hits. Added explicit complete ranked pagination, count feedback,
+  first-new-result keyboard focus, query reset and retained reader-return pages.
+  Reused Publication's exact-ID map instead of a catalog scan per hit.
+- Worker errors now remove stale result cards and do not also claim a successful
+  no-matches search. Complete production profile/filter/excerpt/offline/native
+  search conformance remains open; no full requirement closure is implied.
+- Adopted Shared9bc4c4a14db60681dca2803d536e835f99f35955 after13 local
+  tests/generation/hygiene/strict YAML and exact preflight39652252965/
+  main39652342488 passed. Android retains its independently selected91d3310 pin.
+- A focused run exposed Node ESM's extension requirement for the test-only AJV
+  import; corrected the import and JSON attribute without installing anything.
+  All nine focused cases passed against independently hashed synthetic artifacts
+  using the actual20/40/41-result boundaries, including independent Favorites,
+  keyboard/history focus, query reset and worker-failure recovery.
+- Full `npm run check` passed24 unit tests, strict TypeScript/Vite and all138
+  browser cases. Synthetic line identities are unique across the expanded
+  fixture; the permitted canonical test text is not linguistic/release proof.
+- Parallel Android main0214139e6419c2d2ecd25461de63f713fb99a7e9 independently
+  pinned Shared91d33100fce2f2bb7f1ea98a5ebc566fcf1690b5 after upstream
+  preflight39650044785/main39650129581. The native agent reported
+  `npm run config`, complete core/debug+release builds, both lints and
+  `connectedDebugAndroidTest` passing4 core/15 API36 device tests, with no
+  failures/skips; app JVM tests have no sources. Exact native preflight39651208545
+  and main39652054401 were directly verified successful for that SHA.
+  Native demo was restored. Archived the roadmap's blanket pending "Room personal
+  state": only favorites/preferences are durable, not list/backup/offline parity.
+
 ## 2026-10-21: explicit browser snapshot sharing and copy
 
 - XFER-01/02/06/08 receive bounded Website adapter evidence, not native parity,
@@ -24,6 +55,13 @@
   strict TypeScript/Vite and all129 browser cases across the three viewports.
   Actionlint1.7.12/ShellCheck0.11.0, six Markdown files' UTF8/whitespace/local
   links and Git whitespace checks passed. The bundle-size advisory remains.
+- Revision0ec1127cd4f471754e8b4c911b04ea0304373710 passed exact
+  preflight39650690878 and main39651089339 including Pages deployment.
+  Managed39651089746 passed both required analyses. Live HTTPS desktop and
+  Pixel7 tests used the actual clipboard APIs with isolated granted browser
+  permissions, compared copied bytes with the generated link and confirmed all
+  personal tables unchanged. Captured desktop/mobile screenshots; real OS file/
+  link sharing and recipient delivery remain unverified, not claimed successful.
 
 ## 2026-10-21: catalog-aware personal lists and reader integration
 

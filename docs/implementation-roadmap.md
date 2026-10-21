@@ -23,7 +23,7 @@ does not waive any validation gate.
 | P5 | Responsive online fixture reading/search, explicit consent, errors, direct routes, first-use browser locale/explicit override/themes and Library/Favorites session Back/Forward continuity | Full filters/discovery/script/helper/video/accessibility/platform journeys |
 | P5a | Transactional web favorites/preferences/lists, bounded worker preview/saved-list file/link export, optional browser share/copy adapters with manual fallbacks, confirmed import/basic management/independent occurrence editing, catalog-only reference details/explicit reading, reader-to-list addition and fixture v1 migration | Recents/bookmarks/learning/recitation, real sharing-surface interoperability, native personal/transfer parity, full backups and production migrations |
 | P6 | No persistent offline snapshot implementation | Journals/atomic activation/resume/repair/reader-safe GC and service worker lifecycle |
-| P7 | Native fixture-only full preparation in memory, reading/search, core tests and connected reading test | Room personal state, durable preparation/recovery, typed navigation/DI, parity and device matrix |
+| P7 | Native fixture-only full preparation in memory, reading/search, durable Room favorites/preferences with locale/theme controls, core and connected tests | Native lists/transfers/backups, durable preparation/recovery, typed navigation/DI, full parity and device matrix |
 | P3/P8/P9 | Dependency-ordered Shared/fixture-publisher pins; full web fixture CI/Pages and native build/core/lint CI | Live-provider clarification, production ingestion/publication/signing, device CI and release readiness |
 
 The fixture capability is deliberately named `fixture-catalog-v1`; all UIs label
@@ -38,6 +38,10 @@ Back/Forward and the reader return link restore the originating context and
 available scroll/focus; removed favorites fall back to the current valid results.
 Reloading discards browsing state and requires search consent again. This is not
 persistent search history, Explore continuity or Android/offline parity.
+Loaded search/browse results expose all matches through explicit policy-sized
+pages, preserve the expanded page on reader return and reset it when the query
+changes. Configured first/second/final-page boundary journeys cover keyboard focus,
+completeness and worker-failure recovery without a false no-results state.
 List-origin reading retains the selected list, unsaved editor state and available
 focus/scroll through return/Back/Forward in the same session; reload resets selection.
 

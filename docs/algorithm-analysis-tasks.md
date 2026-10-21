@@ -78,6 +78,9 @@ silent truncation, false success or weaker validation.
   enumerated substring/full-matrix oracle. This is not exhaustive completeness
   proof or reviewed technical/profile/joiner conformance. Native parity coverage
   is limited; there is no capacity/benchmark result.
+  Browser projection reuses the per-publication exact-ID map in O(hits), rather
+  than scanning the catalog for each hit. Explicit policy-sized UI pages expose
+  the complete computed ranking; paging does not truncate the engine's hit set.
 - ALG-07: fixture-only safe-integer canonical JSON, deterministic gzip/hash objects
   and policy binding exist. Tests cover LF/CRLF identity, strict parsing, repeated
   grams and byte/hash reproducibility. The production semantic ledger, receipts,

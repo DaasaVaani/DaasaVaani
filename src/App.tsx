@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useId, useRef, useState } from "react";
 import { HashRouter, NavLink, Link, Route, Routes, useLocation, useNavigate, useParams, useSearchParams } from "react-router-dom";
 import messages from "../shared/generated/web/ui.json";
 import type { FixtureItem, SearchIndex, SearchPolicy } from "../shared/types/publication";
@@ -96,10 +96,14 @@ function Library({ publication, labels, personal, favoritesOnly }: {
   const [forced, setForced] = useState<string | null>(null);
   const [prepared, setPrepared] = useState<{ index: SearchIndex; policy: SearchPolicy }>();
   const [hits, setHits] = useState<Hit[]>([]);
+  const [pages, setPages] = useState(1);
+  const nextPageFocus = useRef<string | undefined>(undefined);
+  const resultsId = useId();
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState("");
   const controller = useRef<AbortController | null>(null);
   useEffect(() => () => controller.current?.abort(), []);
+  useEffect(() => { setPages(1); nextPageFocus.current = undefined; }, [query, prepared]);
   useEffect(() => {
     if (!prepared || composing) return;
     if (!query.trim()) { setHits([]); setBusy(false); setError(""); return; }
@@ -114,7 +118,7 @@ function Library({ publication, labels, personal, favoritesOnly }: {
         if (event.data.error) { setError(event.data.error); setHits([]); }
         else { setError(""); setHits(event.data.hits ?? []); }
       };
-      worker.onerror = event => { if (active) { setError(event.message || "Search worker failed"); setBusy(false); } };
+      worker.onerror = event => { if (active) { setError(event.message || "Search worker failed"); setHits([]); setBusy(false); } };
       worker.postMessage({ id: 1, query, ...prepared });
     }, forced === query ? 0 : prepared.policy.debounceMs);
     return () => { active = false; clearTimeout(timer); worker?.terminate(); };
@@ -132,10 +136,10 @@ function Library({ publication, labels, personal, favoritesOnly }: {
   const matching = new Map(hits.map(hit => [hit.itemId, hit]));
   const searching = Boolean(prepared && query.trim());
   let entries = searching
-    ? hits.map(hit => publication.manifest.catalog.find(item => item.videoId === hit.itemId)).filter(value => value !== undefined)
+    ? hits.map(hit => publication.summary(hit.itemId)).filter(value => value !== undefined)
     : publication.manifest.catalog;
   if (favoritesOnly) entries = entries.filter(item => personal.favorites.includes(item.videoId));
-  const shown = entries.slice(0, prepared?.policy.pageSize ?? publication.manifest.catalog.length);
+  const shown = entries.slice(0, (prepared?.policy.pageSize ?? publication.manifest.catalog.length) * pages);
   return <>
     <section className={styles.hero}>
       <p className={styles.eyebrow}>{labels.ready}</p>
@@ -153,7 +157,7 @@ function Library({ publication, labels, personal, favoritesOnly }: {
       </form>}
       {error && <p role="alert" className={styles.error}>{error}</p>}
     </section>
-    <section className={styles.grid} aria-label={favoritesOnly ? labels.favorites : labels.library} aria-busy={busy}>
+    <section id={resultsId} className={styles.grid} aria-label={favoritesOnly ? labels.favorites : labels.library} aria-busy={busy}>
       {shown.map((item, position) => {
         const line = matching.get(item.videoId)?.lineIds[0];
         return <article className={styles.card} key={item.videoId}>
@@ -163,14 +167,21 @@ function Library({ publication, labels, personal, favoritesOnly }: {
           <p className={styles.muted}>{item.description}</p>
           <div className={styles.tags}>{item.tags.map(tag => <span key={tag}>{tag}</span>)}</div>
           <Link className={styles.readLink} state={{ browseFrom: favoritesOnly ? "/favorites" : "/" }}
+            ref={node => { if (node && nextPageFocus.current === item.videoId) { node.focus(); nextPageFocus.current = undefined; } }}
             onClick={event => event.currentTarget.focus({ preventScroll: true })}
             to={`/item/${encodeURIComponent(item.videoId)}${line ? "?line=" + encodeURIComponent(line) : ""}`}>
             {labels.open}<span aria-hidden="true"> ↗</span>
           </Link>
         </article>;
       })}
-      {!shown.length && !busy && <p role="status">{favoritesOnly && !searching ? labels.emptyFavorites : labels.noResults}</p>}
+      {!shown.length && !busy && !error && <p role="status">{favoritesOnly && !searching ? labels.emptyFavorites : labels.noResults}</p>}
     </section>
+    {prepared && entries.length > prepared.policy.pageSize && <div>
+      {!busy && <p role="status">{labels.resultCount.replace("{shown}", String(shown.length)).replace("{total}", String(entries.length))}</p>}
+      {shown.length < entries.length && <button disabled={busy} aria-controls={resultsId} onClick={() => {
+        nextPageFocus.current = entries[shown.length]?.videoId; setPages(value => value + 1);
+      }}>{labels.showMoreResults}</button>}
+    </div>}
   </>;
 }
 
