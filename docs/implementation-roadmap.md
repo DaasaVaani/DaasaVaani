@@ -7,6 +7,11 @@ Use [requirements](requirements.md), [current design](design-decisions.md),
 No source migration or live API ingestion is authorized. Remaining production
 gates must close before their owning slices; no phase is globally complete.
 
+Publication requires exact main checks, successful deployment and live HTTPS
+verification. A preflight pass or main push alone is not deployment evidence.
+The [guarded manual-main recovery](maintenance.md#current-operating-policy)
+does not waive any validation gate.
+
 ## Current implementation coverage
 
 | Surface | Available | Still incomplete |
@@ -16,7 +21,7 @@ gates must close before their owning slices; no phase is globally complete.
 | P2 | Two-locale UI generation with committed web/Android resources | Reviewed five-Latin/nine-non-Latin tables, transliteration, technical grammar, plurals/escaping conformance |
 | P4 | Fixture gzip/hash/canonicalization/index producer; sampled independent OSA/candidate parity | Durable ledger/receipts, semantic dates, ZIP/planner, complete language/profile index and proof/capacity evidence |
 | P5 | Responsive online fixture reading/search, explicit consent, errors, direct routes, locale/themes and Library/Favorites session Back/Forward continuity | Full filters/discovery/script/helper/video/accessibility/platform journeys |
-| P5a | Transactional web favorites/preferences/lists, bounded worker preview/re-export, confirmed new-list-only import, duplicate-name warning, creation/rename/duplication/deletion and tested fixture v1 migration | Occurrence add/edit/reorder/remove/replacement, recents/bookmarks/learning/recitation, saved-list export UI, native transfer parity, full backups and production migrations |
+| P5a | Transactional web favorites/preferences/lists, bounded worker preview/re-export, confirmed new-list-only import, duplicate-name warning, creation/rename/duplication/deletion, independent occurrence add/edit/reorder/remove/manual replacement and fixture v1 migration | Recents/bookmarks/learning/recitation, saved-list export UI, catalog resolution, native transfer parity, full backups and production migrations |
 | P6 | No persistent offline snapshot implementation | Journals/atomic activation/resume/repair/reader-safe GC and service worker lifecycle |
 | P7 | Native fixture-only full preparation in memory, reading/search, core tests and connected reading test | Room personal state, durable preparation/recovery, typed navigation/DI, parity and device matrix |
 | P3/P8/P9 | Dependency-ordered Shared/fixture-publisher pins; full web fixture CI/Pages and native build/core/lint CI | Live-provider clarification, production ingestion/publication/signing, device CI and release readiness |
@@ -44,6 +49,13 @@ renewed review. No lyric is fetched by transfer or saving, and no offline readin
 or signed native App Links is claimed. The [current storage protocol](architecture.md#web-fixture-personal-storage-v2)
 does not establish full-backup exportability, complete list/recitation journeys,
 production migration coverage or native parity.
+
+LIB-02/03/04/08/09/10 receive partial web management evidence: plain-text
+placeholder/reference entry forms, optional user fallback labels, independent
+ordered occurrence identities, explicit replacement and no-write invalid/stale/
+cancel paths. Replacement preserves position and identity; the form initially
+offers the user's placeholder text as an editable fallback, never a guessed
+catalog title. Lists do not yet resolve catalog details or offer recitation.
 
 ## Delivery sequence
 

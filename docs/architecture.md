@@ -152,6 +152,12 @@ only the intended record and header. Failure rolls back all writes. Creation/
 import/duplication allocates fresh cryptographic UUIDv4 list/occurrence IDs;
 rename retains identities. List and occurrence UUID sets are checked independently
 across the database, preserving repeated references/text and unresolved IDs.
+Occurrence edits, moves and explicit placeholder-to-reference replacement retain
+the occurrence UUID and authoritative array position except for the requested
+move. Removal affects exactly that occurrence; addition allocates a fresh UUID.
+Operations copy the ordered array in O(n); the transaction still validates the
+entire personal state/accounting before committing. A committed mutation returns
+its new revision so subsequent local edits use the same atomic result.
 
 Create/import/rename/duplicate warns on another name's NFC + full default Unicode
 case-folded + NFC key. The dependency/Unicode data is pinned by the package
@@ -160,6 +166,13 @@ remain byte-for-byte unchanged. Confirmed reuse still creates independent lists.
 The confirmation captures epoch/revision; another tab's mutation forces renewed
 review, even if a confirmation was already visible. Live queries refresh
 personal views across tabs; they do not overwrite a captured edit/confirmation.
+Entry-only edits of a previously confirmed duplicate name do not ask again;
+an actual name change still applies the warning. Entry forms render user text
+literally, preserve spaces/code points, and remove an optional fallback only when
+its field is explicitly empty. Placeholder replacement initially carries its
+user-written text into the visible editable fallback field. It never infers an
+item match or fills a catalog title. Focus follows the affected occurrence after
+save/move/removal and returns to the list heading when no occurrence remains.
 
 The exact logical accounting envelope, serialized as compact UTF8 JSON without
 BOM, is `{format:"fixture-personal-storage",formatVersion:2,control,personal,lists}`.

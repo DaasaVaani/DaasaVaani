@@ -35,6 +35,7 @@ async function records(page: Page) {
     } finally { database.close(); }
   }, databaseName);
 }
+const listIdentities = (value: unknown) => JSON.stringify(value).match(/[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}/g) ?? [];
 async function upload(page: Page, value = snapshot) {
   await page.goto("/#/settings");
   await page.getByLabel("Choose a list file").setInputFiles({ name: "synthetic.gz", mimeType: "application/gzip", buffer: gzipSync(JSON.stringify(value)) });
@@ -83,12 +84,13 @@ test("confirmed import persists plain text and repeated independent occurrences 
   await expect(page.getByText("Saved as an independent local list.", { exact: true })).toBeVisible();
   const saved = await records(page);
   expect(saved.values.lists).toHaveLength(1);
-  const ids = JSON.stringify(saved.values.lists).match(/[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}/g) ?? [];
+  const ids = listIdentities(saved.values.lists);
   expect(ids).toHaveLength(4); expect(new Set(ids).size).toBe(4);
   await page.getByRole("link", { name: "View saved lists", exact: true }).click();
   await page.getByRole("list", { name: "Lists", exact: true }).getByRole("button", { name: snapshot.name, exact: true }).click();
   await expect(page.locator("main ol > li")).toHaveCount(3);
-  await expect(page.locator("main ol > li").nth(1)).toHaveText("Intentional placeholder: <b>Plain text</b>");
+  await expect(page.locator("main ol > li").nth(1).locator(":scope > span").nth(1)).toHaveText("<b>Plain text</b>");
+  await expect(page.getByText("Lyrics unavailable in DaasaVaani.", { exact: true })).toBeVisible();
   await page.reload();
   await expect(page.getByRole("list", { name: "Lists", exact: true }).getByRole("button", { name: snapshot.name, exact: true })).toBeVisible();
   expect(await records(page)).toEqual(saved);
@@ -117,6 +119,89 @@ test("duplicate-name cancellation is no-write and a changed revision requires re
   await expect.poll(async () => (await records(page)).values.lists?.length).toBe(3);
   await other.reload();
   await expect(other.getByRole("list", { name: "Lists", exact: true }).getByRole("button")).toHaveCount(3);
+});
+test("occurrence editing, movement, manual replacement and removal retain IDs, text, repetitions and persisted order", async ({ page }) => {
+  await upload(page);
+  await page.getByRole("button", { name: "Save to My Library", exact: true }).click();
+  await page.getByRole("link", { name: "View saved lists", exact: true }).click();
+  const choose = () => page.getByRole("list", { name: "Lists", exact: true }).getByRole("button", { name: snapshot.name, exact: true }).click();
+  await choose();
+  const before = await records(page), ids = listIdentities(before.values.lists);
+  const editor = page.getByRole("form", { name: "Edit entry", exact: true });
+  await page.getByRole("button", { name: "Add placeholder", exact: true }).click();
+  await editor.getByLabel("Placeholder text", { exact: true }).fill("<b>Plain text</b>");
+  await editor.getByRole("button", { name: "Save entry", exact: true }).click();
+  await expect(page.locator("main ol > li")).toHaveCount(4);
+  const added = listIdentities((await records(page)).values.lists);
+  expect(added.slice(0, 4)).toEqual(ids); expect(new Set(added).size).toBe(5);
+  await page.getByRole("group", { name: "Entry 4 of 4", exact: true }).getByRole("button", { name: "Move up", exact: true }).click();
+  await expect.poll(async () => listIdentities((await records(page)).values.lists)).toEqual([ids[0], ids[1], ids[2], added[4], ids[3]]);
+  await expect(page.getByRole("group", { name: "Entry 3 of 4", exact: true })).toBeFocused();
+  await page.getByRole("group", { name: "Entry 2 of 4", exact: true }).getByRole("button", { name: "Replace with library reference", exact: true }).click();
+  await expect(editor.getByLabel("User fallback label (optional; leave empty to remove)", { exact: true })).toHaveValue("<b>Plain text</b>");
+  await editor.getByLabel("Library video identifier", { exact: true }).fill("replacement_ref");
+  await editor.getByLabel("User fallback label (optional; leave empty to remove)", { exact: true }).fill("  Replacement label  ");
+  await editor.getByRole("button", { name: "Save entry", exact: true }).click();
+  await expect(page.locator("main ol > li").nth(1).locator("code")).toHaveText("replacement_ref");
+  expect(listIdentities((await records(page)).values.lists)).toEqual([ids[0], ids[1], ids[2], added[4], ids[3]]);
+  await page.getByRole("group", { name: "Entry 1 of 4", exact: true }).getByRole("button", { name: "Remove this occurrence", exact: true }).click();
+  await expect(page.locator("main ol > li")).toHaveCount(3);
+  const saved = await records(page);
+  expect(listIdentities(saved.values.lists)).toEqual([ids[0], ids[2], added[4], ids[3]]);
+  expect(saved.values.lists).toMatchObject([{ entries: [
+    { kind: "item", videoId: "replacement_ref", fallback: "  Replacement label  " },
+    { kind: "placeholder", text: "<b>Plain text</b>" }, { kind: "item", videoId: "fixture_ref" },
+  ] }]);
+  expect(saved.values.personal).toEqual(before.values.personal);
+  await expect(page.locator("main b")).toHaveCount(0);
+  await page.reload(); await choose();
+  expect(await records(page)).toEqual(saved);
+});
+test("entry input bounds, cancellation and cross-tab stale edits never partially mutate personal data", async ({ page, context }) => {
+  await page.goto("/#/lists"); await create(page, "Editing");
+  const choose = () => page.getByRole("list", { name: "Lists", exact: true }).getByRole("button", { name: "Editing", exact: true }).click();
+  await choose(); const before = await records(page);
+  const editor = page.getByRole("form", { name: "Edit entry", exact: true });
+  await page.getByRole("button", { name: "Add placeholder", exact: true }).click();
+  await editor.getByLabel("Placeholder text", { exact: true }).fill("😀".repeat(maxText + 1));
+  await editor.getByRole("button", { name: "Save entry", exact: true }).click();
+  await expect(page.getByRole("alert")).toContainText("List name or entry is invalid");
+  expect(await records(page)).toEqual(before);
+  await editor.getByLabel("Placeholder text", { exact: true }).fill("😀".repeat(maxText));
+  await editor.getByRole("button", { name: "Save entry", exact: true }).click();
+  await expect(page.locator("main ol > li")).toHaveCount(1);
+  expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(true);
+  await page.getByRole("button", { name: "Edit entry", exact: true }).click();
+  await editor.getByLabel("Placeholder text", { exact: true }).fill("Cancelled");
+  const saved = await records(page);
+  await editor.getByRole("button", { name: "Cancel", exact: true }).click();
+  expect(await records(page)).toEqual(saved);
+  await page.getByRole("button", { name: "Edit entry", exact: true }).click();
+  await editor.getByLabel("Placeholder text", { exact: true }).fill("Draft");
+  const other = await context.newPage(); await other.goto("/#/lists"); await create(other, "Other");
+  await expect(other.getByRole("list", { name: "Lists", exact: true }).getByRole("button", { name: "Other", exact: true })).toBeVisible();
+  const changed = await records(page);
+  await editor.getByRole("button", { name: "Save entry", exact: true }).click();
+  await expect(page.getByRole("alert")).toContainText("Personal data changed.");
+  expect(await records(page)).toEqual(changed);
+});
+test("entry changes do not repeat duplicate-name warnings but an actual rename still requires confirmation", async ({ page }) => {
+  await page.goto("/#/lists"); await create(page, "Same"); await create(page, "SAME");
+  await page.getByRole("button", { name: "Save with same name", exact: true }).click();
+  await page.getByRole("list", { name: "Lists", exact: true }).getByRole("button", { name: "Same", exact: true }).click();
+  await page.getByRole("button", { name: "Add library reference", exact: true }).click();
+  const editor = page.getByRole("form", { name: "Edit entry", exact: true });
+  await editor.getByLabel("Library video identifier", { exact: true }).fill("fixture_ref");
+  await editor.getByRole("button", { name: "Save entry", exact: true }).click();
+  await expect(page.locator("main ol > li")).toHaveCount(1);
+  await expect(page.getByRole("button", { name: "Save with same name", exact: true })).toHaveCount(0);
+  const before = await records(page);
+  const rename = page.getByRole("form", { name: "Rename list", exact: true });
+  await rename.getByLabel("List name", { exact: true }).fill("same");
+  await rename.getByRole("button", { name: "Rename list", exact: true }).click();
+  await expect(page.getByRole("button", { name: "Save with same name", exact: true })).toBeVisible();
+  await page.getByRole("button", { name: "Cancel", exact: true }).click();
+  expect(await records(page)).toEqual(before);
 });
 test("rename, independent duplication and confirmed deletion preserve unrelated lists", async ({ page }) => {
   await upload(page);

@@ -18,6 +18,7 @@ export function useListSave(labels: Labels, onSaved?: (record: ListRecord) => vo
   const [error, setError] = useState("");
   const [busy, setBusy] = useState(false);
   const [saved, setSaved] = useState(false);
+  const [updated, setUpdated] = useState(false);
   function reset() { setPending(undefined); setError(""); setSaved(false); }
   async function run(make: () => ListRecord, expected: Revision, existing = false, confirmed = false) {
     reset(); setBusy(true);
@@ -30,13 +31,13 @@ export function useListSave(labels: Labels, onSaved?: (record: ListRecord) => vo
         }
         throw reason;
       }
-      setSaved(true); onSaved?.(record);
+      setUpdated(existing); setSaved(true); onSaved?.(record);
     } catch (reason) { setError(personalMessage(reason, labels)); }
     finally { setBusy(false); }
   }
   const feedback = <>
     {error && <p role="alert">{error}</p>}
-    {saved && <p role="status">{labels.listSaved}</p>}
+    {saved && <p role="status">{updated ? labels.listUpdated : labels.listSaved}</p>}
     {pending && <section aria-label={labels.duplicateName}>
       <p>{labels.duplicateName}</p>
       <button disabled={busy} onClick={() => void run(() => pending.record, pending.expected, pending.existing, true)}>{labels.confirmDuplicate}</button>

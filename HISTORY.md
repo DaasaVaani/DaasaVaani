@@ -1,5 +1,60 @@
 # Documentation history
 
+## 2026-10-21: independent web list occurrences
+
+- The owner approved an explicit main-only manual deployment recovery mode
+  after missing push-triggered runs and inconsistent hosted status blocked
+  publication verification. It defaults off, retains both required jobs and
+  never deploys validation branches. Archived the preceding push-only rule:
+  manual dispatch was a preflight fallback and never deployed, even on main.
+- Started the next authorized batch after publishing the transactional-import
+  commit. Added independent reference/placeholder creation, editing, movement,
+  removal and explicit placeholder-to-reference replacement, retaining UUIDs
+  and all unaffected positions/repetitions.
+- Reused the existing three-table transaction and revision fence. Mutations
+  return the committed revision; entry-only changes do not repeat a duplicate-name
+  warning, while actual renames still require confirmation.
+- Added configured code-point hints, plain-text inputs, explicit optional-fallback
+  clearing and focus restoration to the affected occurrence/list heading.
+  Placeholder text initially remains visible as an editable replacement fallback.
+- Archived the preceding README/roadmap limitations: "occurrence editing" and
+  "Occurrence add/edit/reorder/remove/replacement" were unimplemented. The prior
+  history's per-occurrence limitation describes that earlier slice. Catalog
+  resolution, saved-list export UI, recitation, native parity and full backups
+  remain open and are not claimed complete.
+- Focused `node .\node_modules\vitest\vitest.mjs run src\personal-model.test.ts`
+  passed9 model tests, including the actual10,000-occurrence ceiling. The new
+  full build/browser suite had not run at that point: Shared remained pinned
+  to1950aa6 pending unambiguous upstream publication verification.
+- The preceding Website batch is main commit
+  `c8db1d376955420e44bfa52d783cfb38086a6a68`. Exact manual
+  preflight39623026877 passed Workflow lint and Fixture web build and tests.
+  Initially no main push/deployment run registered, and the live public page showed
+  the older preview-only UI. No deployment or live Save success was claimed.
+- Shared occurrence catalog56f2cc2 passed local13 tests and its preflight;
+  main39623446372 reported its sole actual job completed successfully while the
+  workflow aggregate remained in progress. Standard/no-cache/attempt REST reads
+  did not resolve the inconsistency. `gh run cancel` refused it as completed;
+  `gh run rerun` refused it as already running. Neither operation provided a
+  replacement validation pass. Stopped only the local polling helpers, not any
+  actual hosted job, existing demo server, browser or emulator.
+- Final Shared revisiondb5c49bd9e2dc830f4364862c3e4464584c0c3af passed
+  preflight39629593372 and main39629667448 before Website pin adoption.
+  Its complete13-test/generation,40-file hygiene,5-file strict Node YAML,
+  generated drift and whitespace checks passed.
+- The delayed preceding Website main run39625625268 subsequently passed both
+  required jobs and Pages deployment. Managed run39625511671 also completed both
+  Actions and JavaScript/TypeScript analyses successfully; cancelled earlier runs
+  were not counted. The recovery mode remains an approved guarded fallback.
+- `npm run check` then passed20 unit tests, TypeScript/Vite and all72 browser
+  cases for the occurrence UI. Added a subsequent static workflow-invariant test
+  to retain explicit-main/default-off/dependency/upload guards; the final full
+  `npm run check` passed21 unit tests, TypeScript/Vite and all72 browser cases.
+- Standalone public desktop and Pixel7 Chromium verified the deployed preceding
+  batch over real HTTPS: explicit Save, reload persistence, duplicate cancellation,
+  rename and deletion cancellation. Isolated synthetic browser contexts were
+  closed after verification; no native parity or full-backup claim was made.
+
 ## 2026-10-21: transactional web list import and storage
 
 - Continued autonomous batches under the owner's direct-main authorization.

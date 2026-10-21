@@ -2,6 +2,12 @@ name: Repository checks
 
 on:
   workflow_dispatch:
+    inputs:
+      deploy_main:
+        description: Deploy validated main (explicit recovery only)
+        type: boolean
+        required: false
+        default: false
   pull_request:
   push:
     branches:
@@ -76,14 +82,14 @@ jobs:
           DAASAVAANI_FIXTURE_PUBLISHER_ROOT: ${{ github.workspace }}/.fixture-publisher
         run: npm run check
       - name: Upload validated fixture-only website
-        if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+        if: github.ref == 'refs/heads/main' && (github.event_name == 'push' || (github.event_name == 'workflow_dispatch' && inputs.deploy_main))
         uses: actions/upload-pages-artifact@56afc609e74202658d3ffba0e8f6dda462b719fa # v3
         with:
           path: dist
 
   deploy:
     name: Deploy validated fixture demo
-    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    if: github.ref == 'refs/heads/main' && (github.event_name == 'push' || (github.event_name == 'workflow_dispatch' && inputs.deploy_main))
     needs: [workflow-lint, web-app]
     permissions:
       contents: read

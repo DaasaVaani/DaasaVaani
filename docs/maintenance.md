@@ -22,8 +22,18 @@ review against the intended no-mandatory-second-reviewer release policy.
 For owner-authorized direct-main implementation publication, `validation/**`
 branches run the Website/Shared required checks before the same exact commit is
 pushed to main. If a Website validation push does not schedule a run, dispatch
-the Repository checks workflow at that exact branch explicitly; manual validation
-never deploys Pages. Main alone deploys the website. Delete a temporary validation
+the Repository checks workflow at that exact branch explicitly. Manual dispatch
+defaults to validation only. Only `main` can deploy; a manual main run additionally
+requires the explicit `deploy_main=true` recovery input. Both lint and the complete
+web build/test job must pass in the same workflow before upload/deployment.
+Validation branches cannot deploy even if that input is supplied.
+
+For an authorized missing-main-trigger recovery, run
+`gh workflow run validate.yml --ref main -f deploy_main=true` from Website.
+Verify the resulting exact head SHA, both required job conclusions, deployment
+and live HTTPS output; dispatch itself is not a pass. This grants no permission
+to deploy an old artifact, omit a check or publish unvalidated content.
+Delete a temporary validation
 branch only after main contains it and main checks pass; never treat the admin
 exception as permission to omit a check or as release authorization.
 

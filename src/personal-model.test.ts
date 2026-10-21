@@ -1,6 +1,6 @@
 import { describe, expect, test } from "vitest";
 import {
-  defaultPersonal, jsonBytes, listNameKey, listSnapshot, newControl, newList, nextRevision, parseStore,
+  defaultPersonal, editEntry, jsonBytes, listNameKey, listSnapshot, moveEntry, newControl, newList, nextRevision, parseStore, removeEntry,
   PersonalError, saveRecord, storageBytes, validatePersonal, validateStore, type PersonalStore,
 } from "./personal-model";
 import type { ListSnapshot } from "./list-transfer-types";
@@ -18,6 +18,40 @@ function code(action: () => unknown, expected: string) {
   }
 }
 describe("transactional personal model", () => {
+  test("entry edits, moves, manual replacements and removals preserve independent identities and never mutate the source", () => {
+    const record = newList(snapshot), before = structuredClone(record);
+    const first = record.entries[0], placeholder = record.entries[1], last = record.entries[2];
+    if (!first || !placeholder || !last) throw new Error("Missing occurrence fixture");
+    const edited = editEntry(record, placeholder.id, { kind: "placeholder", text: "  Edited  " });
+    expect(edited.entries[1]).toEqual({ id: placeholder.id, kind: "placeholder", text: "  Edited  " });
+    const moved = moveEntry(edited, placeholder.id, -1);
+    expect(moved.entries.map(entry => entry.id)).toEqual([placeholder.id, first.id, last.id]);
+    const replaced = editEntry(moved, placeholder.id, { kind: "item", videoId: "replacement", fallback: "  Edited  " });
+    expect(replaced.entries[0]).toEqual({ id: placeholder.id, kind: "item", videoId: "replacement", fallback: "  Edited  " });
+    const removed = removeEntry(replaced, first.id);
+    expect(removed.entries.map(entry => entry.id)).toEqual([placeholder.id, last.id]);
+    expect(removed.entries[1]).toEqual(last);
+    const added = editEntry(editEntry(removed, undefined, { kind: "placeholder", text: "Repeat" }), undefined, { kind: "placeholder", text: "Repeat" });
+    expect(new Set(added.entries.map(entry => entry.id)).size).toBe(4);
+    expect(record).toEqual(before);
+    code(() => editEntry(record, placeholder.id, { kind: "placeholder", text: "" }), "listInvalid");
+    code(() => editEntry(record, "missing", { kind: "placeholder", text: "Text" }), "stale");
+    code(() => removeEntry(record, "missing"), "stale");
+    code(() => moveEntry(record, first.id, -1), "listInvalid");
+    expect(record).toEqual(before);
+  });
+  test("entry mutations accept the actual per-list ceiling and do not rewarn for an unchanged previously confirmed duplicate name", () => {
+    const record = newList(snapshot, "Straße"), other = newList(snapshot, "STRASSE");
+    const state = { ...empty(), lists: [record, other] };
+    const changed = editEntry(record, undefined, { kind: "placeholder", text: "Extra" });
+    expect(() => saveRecord(state, changed, state.control, true)).not.toThrow();
+    code(() => saveRecord(state, { ...changed, name: "strasse" }, state.control, true), "duplicate");
+    const full = { ...record, entries: Array.from({ length: __PERSONAL_LIMITS__.maxEntriesPerList },
+      () => ({ id: crypto.randomUUID(), kind: "placeholder" as const, text: "Repeat" })) };
+    expect(() => validateStore({ ...empty(), lists: [full] })).not.toThrow();
+    code(() => editEntry(full, undefined, { kind: "placeholder", text: "Repeat" }), "capacity");
+    expect(full.entries).toHaveLength(__PERSONAL_LIMITS__.maxEntriesPerList);
+  });
   test("new independent identities and minimal export preserve every ordered occurrence and user character", () => {
     const first = newList(snapshot), second = newList(snapshot);
     expect(listSnapshot(first)).toEqual(snapshot);

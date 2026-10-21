@@ -123,12 +123,13 @@ export async function updatePersonal(change: (value: Personal) => Personal): Pro
     return value;
   });
 }
-export async function saveList(record: ListRecord, expected: Revision, existing = false, confirmDuplicate = false): Promise<void> {
+export async function saveList(record: ListRecord, expected: Revision, existing = false, confirmDuplicate = false): Promise<Revision> {
   await ready();
   return db.transaction("rw", personal, lists, control, async transaction => {
     const next = saveRecord(await stored(transaction), record, expected, existing, confirmDuplicate);
     await lists.put(record);
     await control.put(next.control);
+    return next.control;
   });
 }
 export async function deleteList(id: string, expected: Revision): Promise<void> {

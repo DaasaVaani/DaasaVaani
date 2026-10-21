@@ -78,6 +78,32 @@ export function newList(snapshot: ListSnapshot, name = snapshot.name): ListRecor
   if (!validList(record)) throw new PersonalError("listInvalid");
   return record;
 }
+function entryIndex(record: ListRecord, id: string): number {
+  const index = record.entries.findIndex(entry => entry.id === id);
+  if (index < 0) throw new PersonalError("stale");
+  return index;
+}
+export function editEntry(record: ListRecord, id: string | undefined, value: ListSnapshot["entries"][number]): ListRecord {
+  const index = id === undefined ? record.entries.length : entryIndex(record, id);
+  if (id === undefined && record.entries.length >= __PERSONAL_LIMITS__.maxEntriesPerList) throw new PersonalError("capacity");
+  const entries = [...record.entries];
+  entries.splice(index, id === undefined ? 0 : 1, { ...value, id: id ?? crypto.randomUUID() });
+  const next = { ...record, entries };
+  if (!validList(next)) throw new PersonalError("listInvalid");
+  return next;
+}
+export function moveEntry(record: ListRecord, id: string, direction: -1 | 1): ListRecord {
+  const index = entryIndex(record, id), target = index + direction, entry = record.entries[index];
+  if (!entry || target < 0 || target >= record.entries.length) throw new PersonalError("listInvalid");
+  const entries = [...record.entries];
+  entries.splice(index, 1); entries.splice(target, 0, entry);
+  return { ...record, entries };
+}
+export function removeEntry(record: ListRecord, id: string): ListRecord {
+  const index = entryIndex(record, id), entries = [...record.entries];
+  entries.splice(index, 1);
+  return { ...record, entries };
+}
 export function jsonBytes(value: unknown, limit = Number.MAX_SAFE_INTEGER): number {
   const text = JSON.stringify(value);
   if (text === undefined) throw new PersonalError("invalid");
@@ -128,10 +154,12 @@ export function nextRevision(state: PersonalStore, expected: Revision): Personal
 export const listNameKey = (name: string) => caseFold(name.normalize("NFC")).normalize("NFC");
 export function saveRecord(state: PersonalStore, record: ListRecord, expected: Revision, existing: boolean, confirmDuplicate = false): PersonalStore {
   if (!validList(record)) throw new PersonalError("listInvalid");
-  if (state.lists.some(list => list.id === record.id) !== existing) throw new PersonalError("invalid");
+  const previous = state.lists.find(list => list.id === record.id);
+  if (Boolean(previous) !== existing) throw new PersonalError("invalid");
   const next = nextRevision(state, expected);
   const name = listNameKey(record.name);
-  if (!confirmDuplicate && state.lists.some(list => list.id !== record.id && listNameKey(list.name) === name)) {
+  if (!confirmDuplicate && (!previous || previous.name !== record.name) &&
+      state.lists.some(list => list.id !== record.id && listNameKey(list.name) === name)) {
     throw new PersonalError("duplicate");
   }
   next.lists = existing ? state.lists.map(list => list.id === record.id ? record : list) : [...state.lists, record];

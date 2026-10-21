@@ -27,7 +27,7 @@ demonstrations do not close remaining production contracts or prove full readine
 
 | Surface | Current capability |
 | --- | --- |
-| Website | Responsive fixture reader/search, session browsing continuity, favorites/preferences, worker list preview/re-export and transactional confirmed import/basic list management |
+| Website | Responsive fixture reader/search, session browsing continuity, favorites/preferences, worker list preview/re-export, transactional confirmed import/list management and independent occurrence editing |
 | Shared | Fixture/minimal-list/logical-list-record contracts, portable settings, deterministic catalog generator and committed web/Android UI resources |
 | Library | Strict fixture Markdown/settings parsing, deterministic hash-addressed gzip publication and counted-gram index |
 | Android | Native Compose fixture preparation/reading/search, pure Kotlin core, debug APK/JVM/lint/emulator checks |
