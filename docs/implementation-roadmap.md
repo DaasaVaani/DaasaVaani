@@ -15,7 +15,7 @@ gates must close before their owning slices; no phase is globally complete.
 | P1 | Fixture-only strict YAML/Markdown/identity/hold validation and item schema | Full production source/settings/registry/verse/alignment schemas and diagnostics |
 | P2 | Two-locale UI generation with committed web/Android resources | Reviewed five-Latin/nine-non-Latin tables, transliteration, technical grammar, plurals/escaping conformance |
 | P4 | Fixture gzip/hash/canonicalization/index producer; sampled independent OSA/candidate parity | Durable ledger/receipts, semantic dates, ZIP/planner, complete language/profile index and proof/capacity evidence |
-| P5 | Responsive online fixture reading/search, explicit consent, errors, direct routes, locale/themes | Full filters/discovery/script/helper/video/accessibility/platform journeys |
+| P5 | Responsive online fixture reading/search, explicit consent, errors, direct routes, locale/themes and Library/Favorites session Back/Forward continuity | Full filters/discovery/script/helper/video/accessibility/platform journeys |
 | P5a | Transactional web favorites/preferences in one Dexie database | Lists/recents/bookmarks/learning/recitation, transfers, full backups and migrations |
 | P6 | No persistent offline snapshot implementation | Journals/atomic activation/resume/repair/reader-safe GC and service worker lifecycle |
 | P7 | Native fixture-only full preparation in memory, reading/search, core tests and connected reading test | Room personal state, durable preparation/recovery, typed navigation/DI, parity and device matrix |
@@ -26,6 +26,13 @@ synthetic records and unavailable features. Android bundles no lyrics and requir
 explicit complete fixture preparation before reading; in-memory preparation is
 not a persistent offline snapshot. Requirement families receive partial evidence,
 not blanket completed IDs. No release or full153-requirement completion is claimed.
+
+Website UX-13 coverage retains separate Library/Favorites searches, verified
+indexes and result sets in memory while reading or visiting Settings. Browser
+Back/Forward and the reader return link restore the originating context and
+available scroll/focus; removed favorites fall back to the current valid results.
+Reloading discards browsing state and requires search consent again. This is not
+persistent search history, list/Explore continuity or Android/offline parity.
 
 ## Delivery sequence
 

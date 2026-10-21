@@ -1,5 +1,38 @@
 # Documentation history
 
+## 2026-10-21: website browsing-continuity slice
+
+- The owner subsequently authorized pushing this slice and continuing the next
+  implementation tasks. Main requires a reviewed PR and the Workflow lint check;
+  publication uses a feature branch and normal review, not an admin bypass.
+- The owner asked to continue the authorized implementation. Scoped the next
+  change to UX-13 website fixture continuity, without new product decisions,
+  dependencies, Shared pins, production content or provider access.
+- Retained separate mounted Library/Favorites views and their session query,
+  verified index and results. Added process-local history scroll/focus restoration,
+  weak focus references, reader-origin return and valid direct-reader fallback.
+  No browsing history was added to personal storage or URL query parameters.
+- Archived contradictory requirements wording: section18 said "This interim
+  documentation does not authorize implementation" and required "overall final
+  approval before implementation", despite the authorized staged implementation
+  described at the top. Replaced these with applicable production gates before
+  their owning slices; preserved all requirement IDs and unresolved scope.
+- The initial full check passed4 unit and18 browser tests but failed3 new
+  continuity cases because their assertion expected a lyric line in a metadata
+  card. Corrected the assertion to the existing synthetic metadata, not the UI.
+  A focused `npm run test:e2e -- --grep "session search"` invocation lost its grep
+  flag in the Windows npm wrapper and selected no tests; direct
+  `node .\node_modules\@playwright\test\cli.js test --grep 'session search'`
+  then passed all3 targeted cases.
+- Final `npm run check`: passed4 unit tests, the fresh fixture publication and
+  TypeScript/Vite production build, and all21 browser journeys across desktop,
+  Pixel7 and320px. The existing >500kB bundle advisory remained unsuppressed.
+  Documentation checks covered all7 affected Markdown files, local links/anchors,
+  fences, UTF8/newlines/whitespace and all153 unchanged requirement identities.
+  `git --no-pager diff --check` and `git --no-pager diff --cached --check` passed.
+  No Android/Shared/Library code or pins changed; their suites were not rerun for
+  this website-only slice. No commit or push was made.
+
 ## 2026-10-21: validated initial cross-platform fixture milestone
 
 - The owner authorized implementing the recommended staged plan without further

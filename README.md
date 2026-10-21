@@ -7,6 +7,8 @@ static PWA and a separate native Android app.
 The responsive React Website reads hash-verified artifacts from the Library fixture
 publisher, with explicit indexed-search consent, canonical Kannada reading,
 transactional favorites and independent interface-language/theme preferences.
+Library/Favorites searches and result positions survive in-session reading and
+Back/Forward navigation, without persistent search history.
 Shared generates the English/Kannada UI resources; Android has a native preparation/
 reading fixture demo. Production contracts, reviewed transliteration, persistent
 offline snapshots and the remaining product journeys are incomplete.

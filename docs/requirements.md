@@ -704,9 +704,11 @@ common JSON/gzip/ZIP/SHA-256 publication, platform storage/network/navigation/UI
 libraries, localization, global prebuilt search, worker execution and normal
 shell-update lifecycle also have selected directions.
 
-**Overall final design approval remains pending.** This interim documentation
-does not authorize implementation or claim that a complete coding-ready
-specification or any acceptance evidence exists. Outstanding work includes:
+**Overall production design closure remains pending; staged implementation is
+authorized.** The fixture milestone provides only the partial evidence mapped in
+[testing and release](testing-and-release.md#partial-requirement-evidence), not a
+complete coding-ready production specification or full acceptance. Outstanding
+work includes:
 
 - Compatible pinned toolchain/dependencies, package manager/workspace/locks and
   actual bootstrap/build/test commands.
@@ -741,6 +743,7 @@ specification or any acceptance evidence exists. Outstanding work includes:
   verification, permissions, safe code/content compatibility, release/rollback
   procedures and actual APK/download/installed/update peak-storage evidence.
 
-Resolve the applicable [architecture gates](architecture.md), review the
-consolidated design and obtain overall final approval before implementation.
-These remaining decisions must preserve the requirements above.
+Resolve the applicable [architecture gates](architecture.md) before each owning
+production slice; staged fixture work does not waive them. Significant unresolved
+choices still need approval. These remaining decisions must preserve the
+requirements above.

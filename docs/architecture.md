@@ -70,6 +70,13 @@ reloads. Actual deployed hosting still requires byte/hash and browser validation
 - Global publisher-built counted q-gram index with exact AND/OSA verification,
   deterministic additive ranking and bounded selected-script item excerpts.
   Explicit unprepared index consent; cancellation/stale/IME correctness mandatory.
+- Website Library/Favorites views stay mounted but hidden outside their routes,
+  retaining independent process-local query/index/result state. History-entry
+  scroll/focus records and a per-browsing-route fallback support return navigation;
+  weak focus references do not retain detached reader DOM. Removed targets fall
+  back to the main content and a valid clamped scroll position. Reader return
+  follows its internal origin; directly opened readers return to Library.
+  No query/history is written to personal storage or URLs; reload resets it.
 - Workbox shell resources separate from content. Normal worker activation,
   notify/no forced reload or skipWaiting; preserve active reading/personal state.
 - Root /open/ hash links, narrow signed Android association and browser fallback;

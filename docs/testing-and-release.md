@@ -52,7 +52,10 @@ Browser tests require the clean Library revision in settings/tooling.yml with `n
 the installed Playwright Chromium (`npx playwright install chromium` if missing).
 The configured suite exercises desktop, Pixel7 and320px layouts, explicit index
 consent, actual search/reading, preference/favorite persistence and corrupt-artifact
-errors. `npm run demo` publishes only synthetic fixture artifacts and serves the
+errors. Session-continuity journeys verify query/results, restored keyboard focus
+and measured scroll position through Back/Forward and reader return, no repeated
+index download, separate Library/Favorites searches, removed favorites, direct
+reader fallback and reset on reload. `npm run demo` publishes only synthetic fixture artifacts and serves the
 local Website at the configured settings/web.yml port. It is not a production
 Library deployment or a source migration.
 The fixture tool repository/revision/default checkout path are centralized in
@@ -130,6 +133,7 @@ IDs or a release acceptance declaration.
 | PLAT-01/05 | Real React and Compose apps; built-site browser journeys at desktop/mobile/320px and one native API36 reading journey | PWA installation, complete routes/layout/interaction modes and supported-platform/device matrix pending |
 | I18N-01, SET-04 | Matching two-locale generated UI resources; web locale/theme persistence without changing canonical text | Browser/device first-use selection, complete script/personal preferences and native preference parity pending |
 | LIB-01/04 | Web favorite toggle/reload persistence and explicit corrupt-personal-record error without overwriting stored data | Lists/offline/future migrations and Android Room personal state absent |
+| UX-13 | In-session Library/Favorites query/results/index retention, Back/Forward and reader return with measured scroll/focus restoration; removed-result/direct-reader/reload coverage | No persistent search history; filters, list/Explore, offline and Android continuity pending |
 | SET-01/02 | Owned settings/schema guards, Shared policy binding and immutable clean fixture-tool pin | Complete production settings inventory, language/protocol/backup contracts and all compatibility fixtures pending |
 | QUAL-01/02/03 | Semantic browser controls, keyboard focus entrypoint, standalone canonical reading and no video/tracking dependencies | Full keyboard/screen-reader/contrast/scaling/platform journeys remain unverified; no formal conformance claim |
 

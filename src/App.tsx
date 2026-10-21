@@ -1,10 +1,11 @@
 import { useEffect, useRef, useState } from "react";
-import { HashRouter, NavLink, Link, Route, Routes, useParams, useSearchParams } from "react-router-dom";
+import { HashRouter, NavLink, Link, Route, Routes, useLocation, useNavigate, useParams, useSearchParams } from "react-router-dom";
 import messages from "../shared/generated/web/ui.json";
 import type { FixtureItem, SearchIndex, SearchPolicy } from "../shared/types/publication";
 import { Publication, loadPublication } from "./artifacts";
 import { readPersonal, updatePersonal, type Personal } from "./personal";
 import type { Hit } from "./search";
+import { NavigationContinuity } from "./navigation";
 import styles from "./App.module.css";
 
 type Labels = typeof messages.en;
@@ -13,6 +14,11 @@ interface ReaderProps { publication: Publication; labels: Labels; personal: Pers
 
 function Reader({ publication, labels, personal, toggle }: ReaderProps) {
   const { id } = useParams();
+  const location = useLocation();
+  const navigate = useNavigate();
+  const state: unknown = location.state;
+  const origin = state && typeof state === "object" && "browseFrom" in state ? state.browseFrom : undefined;
+  const fromBrowsing = origin === "/" || origin === "/favorites";
   const [params] = useSearchParams();
   const [item, setItem] = useState<FixtureItem>();
   const [error, setError] = useState("");
@@ -32,7 +38,13 @@ function Reader({ publication, labels, personal, toggle }: ReaderProps) {
     if (item && lineId) document.getElementById(lineId)?.scrollIntoView({ block: "center" });
   }, [item, lineId]);
   return <section className={styles.reader}>
-    <Link to="/" className={styles.back}>← {labels.back}</Link>
+    <Link to={fromBrowsing ? origin : "/"} className={styles.back}
+      onClick={event => {
+        if (fromBrowsing && event.button === 0 && !event.metaKey && !event.ctrlKey && !event.shiftKey && !event.altKey) {
+          event.preventDefault();
+          navigate(-1);
+        }
+      }}>← {fromBrowsing && origin === "/favorites" ? labels.favorites : labels.back}</Link>
     {error && <p role="alert" className={styles.error}>{error}</p>}
     {!item && !error && <p role="status">{labels.loading}</p>}
     {item && <>
@@ -49,6 +61,14 @@ function Reader({ publication, labels, personal, toggle }: ReaderProps) {
       <p className={styles.muted}>{item.description}</p>
     </>}
   </section>;
+}
+
+function BrowsingSession(props: {
+  publication: Publication; labels: Labels; personal: Personal; favoritesOnly: boolean;
+}) {
+  const location = useLocation();
+  const active = location.pathname === (props.favoritesOnly ? "/favorites" : "/");
+  return <div hidden={!active}><Library {...props} /></div>;
 }
 
 function Library({ publication, labels, personal, favoritesOnly }: {
@@ -125,7 +145,9 @@ function Library({ publication, labels, personal, favoritesOnly }: {
           <h2 lang="kn">{item.title}</h2>
           <p className={styles.muted}>{item.description}</p>
           <div className={styles.tags}>{item.tags.map(tag => <span key={tag}>{tag}</span>)}</div>
-          <Link className={styles.readLink} to={`/item/${encodeURIComponent(item.videoId)}${line ? "?line=" + encodeURIComponent(line) : ""}`}>
+          <Link className={styles.readLink} state={{ browseFrom: favoritesOnly ? "/favorites" : "/" }}
+            onClick={event => event.currentTarget.focus({ preventScroll: true })}
+            to={`/item/${encodeURIComponent(item.videoId)}${line ? "?line=" + encodeURIComponent(line) : ""}`}>
             {labels.open}<span aria-hidden="true"> ↗</span>
           </Link>
         </article>;
@@ -166,6 +188,7 @@ export default function App() {
   const toggle = (id: string) => { void change(state => ({ ...state, favorites: state.favorites.includes(id)
     ? state.favorites.filter(value => value !== id) : [...state.favorites, id] })); };
   return <HashRouter>
+    <NavigationContinuity />
     <a className={styles.skip} href="#content" onClick={event => {
       event.preventDefault(); document.getElementById("content")?.focus();
     }}>{labels.skipToContent}</a>
@@ -181,9 +204,12 @@ export default function App() {
       {error && <section className={styles.error} role="alert"><h2>{labels.error}</h2><p>{error}</p>
         <button onClick={() => setAttempt(value => value + 1)}>{labels.retry}</button></section>}
       {!publication && !error && <p role="status">{labels.loading}</p>}
-      {publication && <Routes>
-        <Route path="/" element={<Library key="all" publication={publication} labels={labels} personal={personal} favoritesOnly={false} />} />
-        <Route path="/favorites" element={<Library key="favorites" publication={publication} labels={labels} personal={personal} favoritesOnly />} />
+      {publication && <>
+        <BrowsingSession key={`all-${attempt}`} publication={publication} labels={labels} personal={personal} favoritesOnly={false} />
+        <BrowsingSession key={`favorites-${attempt}`} publication={publication} labels={labels} personal={personal} favoritesOnly />
+        <Routes>
+        <Route path="/" element={null} />
+        <Route path="/favorites" element={null} />
         <Route path="/item/:id" element={<Reader publication={publication} labels={labels} personal={personal} toggle={toggle} />} />
         <Route path="/settings" element={<section className={styles.reader}><h1>{labels.settings}</h1>
           <fieldset><legend>{labels.language}</legend>
@@ -197,7 +223,7 @@ export default function App() {
           </fieldset>
         </section>} />
         <Route path="*" element={<p role="alert">{labels.unknownRoute} <Link to="/">{labels.back}</Link></p>} />
-      </Routes>}
+      </Routes></>}
       <footer className={styles.footer}>{labels.unavailableFeatures}</footer>
     </main>
   </HashRouter>;
