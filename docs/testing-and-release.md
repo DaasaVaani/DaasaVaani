@@ -74,6 +74,39 @@ tracked paths: include new documentation deliberately and preserve unrelated sta
 | Unit/contract/integration/browser/device suites | Unavailable; runners/implementations required |
 | Performance/capacity harness | Unavailable; implemented clients/corpus required |
 
+## Shared submodule updates
+
+Consumers pin Shared independently. Updating Shared does not by itself update
+Website, Android or Library; update only the consumers authorized for the change.
+For an authorized coordinated update, use this publication order:
+
+1. Finish and fully validate Shared, commit it, push it to its origin and wait
+   for its required CI to pass. Select that exact published, validated commit;
+   do not reference a local-only commit or an unvalidated branch tip.
+2. In each affected consumer, preserve unrelated work, ensure the Shared checkout
+   is clean, fetch Shared and check out the selected full SHA in detached HEAD
+   mode. Do not automatically track the newest main revision. Verify the checkout
+   matches the intended SHA and review the changes since that consumer's old pin.
+3. Validate each consumer against that exact checkout using all applicable builds,
+   tests and documentation checks. While bootstraps have no app tooling, also run
+   `python shared\tools\check_repository.py` from each consumer and check the
+   pinned Markdown links/fences. A documentation-only Shared update plus gitlink
+   metadata may use the documentation-only exception; executable Shared changes
+   still require their actual dependent conformance/build/test evidence.
+4. Stage the consumer's `shared` gitlink and directly related documentation/history,
+   verify the staged gitlink SHA, and rerun checks invalidated by final edits.
+   Commit and push the consumers only after the Shared publication gate passes.
+   Independent consumer commits/pushes may run in parallel; Shared comes first.
+5. Verify each remote consumer main contains the intended mode-160000 gitlink,
+   its local submodule matches that pin without modifications, and its CI passes.
+   A fresh recursive checkout must resolve the pinned Shared commit from origin.
+
+Record exact Shared/consumer revisions, commands/results and limitations only in
+each affected HISTORY. Existing clones activate committed pins with
+`git submodule update --init --recursive`; this does not authorize advancing pins
+with `--remote`. A failed upstream or consumer check blocks that update rather
+than silently selecting a different revision.
+
 ## Required implementation test matrix
 
 Use [requirements acceptance scenarios](requirements.md) and

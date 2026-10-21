@@ -59,7 +59,8 @@ Start with [AGENTS](AGENTS.md), [the index](docs/README.md) and
 Current commands and full finalization/push gates are in
 [testing and release](docs/testing-and-release.md). App build/test commands do not
 exist yet. Documentation-only work requires every available documentation/bootstrap
-check; never call nonexistent app tests passed.
+check; never call nonexistent app tests passed. For authorized Shared pin updates,
+follow the [Shared-first publication order](docs/testing-and-release.md#shared-submodule-updates).
 
 Update current guides with changes. Past decisions, dated observations and test
 records belong only in [HISTORY.md](HISTORY.md), not current instructions.

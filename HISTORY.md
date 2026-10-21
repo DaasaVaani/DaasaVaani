@@ -59,6 +59,27 @@ metadata, not application code or workflow YAML. Publication requires rerunning
 all available documentation/bootstrap checks; absent app builds/tests are not
 passes. Shared consumer pins remain independent and unchanged.
 
+## 2026-10-21: coordinated Shared pin correction
+
+- The owner identified that the three consumers still pinned
+  `5a2446c31ffb97c9899a7ba3a287e58b2b2eb490` after documentation publication,
+  and authorized updating them with the correct upstream-first commit order.
+- Selected `dbaac0d4c5d255a0c6663d9c21fa2b918761e027`, already published on
+  Shared main with successful Repository hygiene run39576588515. The intervening
+  Shared changes are Markdown only. Shared was published/validated before these
+  consumer pin commits; no history rewriting or automatic branch tracking.
+- Updated the Website gitlink and documented the Shared-first procedure; Android
+  and Library received their own authorized pin updates and procedure links.
+- `python shared\tools\check_repository.py`: passed15 tracked Shared files.
+  `git --no-pager diff --check`: passed.
+- `python <session-folder>\files\validate-shared-pins.py`: passed58 Markdown files
+  across four roots and three actual pinned checkouts, links/anchors/fences/
+  UTF8/newlines/whitespace,153 preserved requirement IDs, exact clean Shared
+  checkouts and documentation-only upstream scope. Session helper is temporary.
+- No app/schema/build/conformance tooling exists; no such success is claimed.
+  No workflow YAML changed; local YAML/actionlint tooling remains unavailable.
+  The documentation-only bootstrap exception applies, not a code-test waiver.
+
 ## Snapshot: README.md
 
 # DaasaVaani
