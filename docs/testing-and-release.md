@@ -204,7 +204,11 @@ tests. The connected test launches the actual Compose app, requires preparation,
 downloads/verifies the served fixtures and opens canonical text. The native
 suite also covers Room4 typed favorites, durable list/occurrence management and
 device-only recent history, preserving migrations, v1/v2 import/export,
-reader/list navigation and locale/theme controls;
+reader/list navigation and locale/theme controls. Synthetic verified-catalog
+journeys exercise native real Favorites literal filtering, complete configured
+expandable pages, query reset, retained viewport/reader/Android Back context,
+unresolved typed references and no incidental personal writes. These do not prove
+full production linguistic search or the complete real corpus;
 see the [native validation guide](https://github.com/DaasaVaani/AndroidApp/blob/main/README.md)
 for its owning scenarios and current limitations. The Website demo
 must run at the endpoint configured in Android settings. API26/other devices,
@@ -260,7 +264,7 @@ IDs or a release acceptance declaration.
 | I18N-01/02/03, SET-04 | Matching two-locale resources; web first-use ordered browser-language selection, configured fallback, persisted four-mode appearance with contrast/media checks; native durable locale/theme preferences; canonical text remains independent | Complete script/personal preferences, device/font matrix and full localization conformance pending |
 | LIB-01/02/03/04/05/08/09/10/11 | Typed web/native lyric/legacy favorites/lists, independent occurrences/plain text, duplicate-name confirmation, management/manual replacement, exact catalog details/explicit reading, reader-to-list addition and preserving web v5/native Room4 upgrades | Recitation/offline/full personal collections and remaining production migrations remain incomplete |
 | LIB-06, SET-04, QUAL-05 | Web v5/native Room4 default-on device-only typed50-distinct successful-open history, explicit disable/re-enable/clear, retained unresolved refs, exact accounting, migration/failure/no-network and restart checks | Selected-script/offline parity and full personal backup remain incomplete |
-| UX-13 | In-session Library/Favorites context and list-origin selected editor state, Back/Forward/reader return with measured scroll/focus; removed-result/direct-reader/reload coverage | No persistent search history; filters/Explore, offline and Android continuity pending |
+| UX-13 | Web in-session Library/Favorites context and list-origin selected editor state, Back/Forward/reader return with measured scroll/focus; removed-result/direct-reader/reload coverage; native real Favorites query/pages/viewport and reader/Android Back context | No persistent search history; full filters/Explore, offline and remaining native Library continuity pending |
 | XFER-01/02/03/04/05/06/08 | Bounded web worker/native v1/v2 codecs with independent vectors, explicit previews/transactional new-list saves and saved-v2 exports, actual cross-client v2 codec round trips, catalog-only details, browser share/copy adapters, cancellation/errors/no-write checks | Real sharing-surface delivery, verified App Links and full backups incomplete |
 | SET-01/02 | Owned settings/schema guards, Shared policy binding and immutable clean fixture-tool pin | Complete production settings inventory, language/protocol/backup contracts and all compatibility fixtures pending |
 | QUAL-01/02/03 | Semantic browser controls, keyboard focus entrypoint, standalone canonical reading and no video/tracking dependencies | Full keyboard/screen-reader/contrast/scaling/platform journeys remain unverified; no formal conformance claim |

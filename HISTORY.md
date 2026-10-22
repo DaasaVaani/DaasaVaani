@@ -94,6 +94,57 @@
 - After those two readiness corrections, full `npm run check` again passed90
   units, fresh build/typecheck and all231 browser cases, with zero retries,
   failures or skips. The Shared pin and application implementation were unchanged.
+- Published89d69a5dd803c52e6ab87e5453db67c70496e58f after successful exact
+  preflight39725998499; main/build/Pages39726395617 and CodeQL39726395899
+  passed. Every required main job/step and unchanged local/remote SHA was checked.
+  The temporary exception bypassed only the owner-authorized PR requirement,
+  not lint/app validation, force/delete protection or any release gate.
+- Downloaded the exact successful Pages artifact and compared public HTML,
+  both workers, main JS/CSS and all three license notices byte-for-byte.
+  Main JS assets/index-C2qe8Vx4.js was715478 bytes, SHA256
+  7e7a1e191877bd2ee42bb723f35499aa3a834d579321da15fa68a8be96987742.
+  The isolated `verify-hosted-online.mjs` command passed for871 actual lyrics:
+  two metadata requests, one selected item, encoded hash/size, exact canonical
+  text/layout/line IDs, cached repeat/no-write, typed favorite and two independent
+  list occurrences, recent history,320px reading and return focus. Restarted
+  personal routes made no owner request; direct reload made2+1 and the next
+  uncached item one, for seven owner requests across the whole journey.
+  Disabled history and unrelated personal rows remained unchanged.
+- Its first hosted harness run expected an uncounted Favorites heading;
+  accepting the actual semantic heading's optional numeric count fixed the
+  harness, not the application. Every browser closed in `finally`. Exact public
+  notice checks also passed separately through Node/tar byte comparisons.
+  Completed/main-contained/no-PR Website history/online validation refs and the
+  Shared online-UI ref were deleted. Owned old history helper/artifact scratch
+  was removed; other worktrees, original inputs, server and emulator were preserved.
+- Android published7d754ea3f4e9a0a1b463cd153f8a6ad6f807c522 with
+  independent Shared9b8845a21bb529268bba49ffbf6a44dece45a9ed unchanged.
+  Its real Favorites now has independent literal filtering, complete configured
+  expandable paging/query reset, retained viewport and reader/Android Back
+  context, without dropping unresolved typed references or incidental writes.
+  Successful explicit reader history remains enabled by its existing protocol.
+  Partial coverage: SEARCH-01, UX-13 and LIB-01, not full linguistic search.
+- The first full native run passed38 core/48 connected but failed two existing
+  history cases: an unnecessary navigation reset cleared reader selection.
+  Removing that reset preserved history and return behavior. Preparation-progress
+  thread affinity was also corrected. The final exact-tree `npm run config`
+  and `.\gradlew.bat :core:build :app:build :app:lintDebug :app:lintRelease
+  :app:connectedDebugAndroidTest --no-daemon --console=plain` passed38 core/
+  50 connected with zero failures/errors/skips; each lint reported52 warnings
+  and zero errors. App JVM remained NO-SOURCE. Hygiene76/YAML5/actionlint/
+  ShellCheck/whitespace passed. No source/media identity, schema or pin migration.
+- Native exact preflight39728901931 and main39729188660 passed at the same
+  SHA. Parent independently checked clean local/remote main and Shared, both
+  workflow conclusions and every named main step. Connected evidence remains
+  local, not CI. The owned main-contained/no-PR validation branch was deleted;
+  server5173 and emulator5556 stayed available. Production offline/language/
+  full-personal/signing/device-release gates remain open.
+- The combined publication/coverage handoff changed only this history and three
+  current guides. Its full `npm run check` passed90 units, fresh build/typecheck
+  and231 browser cases without failures/skips; Markdown20/local links199/
+  unchanged normative requirement rows153, strict YAML4, actionlint/ShellCheck
+  and whitespace passed. Native was not rebuilt for these Website-only guide
+  edits; its separately verified38/50 and exact-SHA CI evidence remain above.
 
 ## 2026-10-22: Website successful-open history and personal v5
 
