@@ -29,9 +29,9 @@ does not waive any validation gate.
 | P2 | Two-locale UI generation with committed web/Android resources | Reviewed five-Latin/nine-non-Latin tables, transliteration, technical grammar, plurals/escaping conformance |
 | P4 | Real canonical text-only hash-addressed publication; separate fixture index producer and sampled OSA/candidate parity | Public populated-metadata/Latin/media adapters, durable ledger/receipts, semantic dates, ZIP/planner and complete language/profile index evidence |
 | P5 | Separate consented real full-library in-memory preview/UUID reading, literal title filter, complete paging and reader continuity; existing fixture search/preferences/themes | Production individual on-demand reading, full filters/discovery/script/helper/video/accessibility/platform journeys |
-| P5a | Transactional typed lyric/legacy web favorites/lists/preferences, preserving v1/v2/v3-to-v4 upgrade, worker v1/v2 preview and saved-v2 export, optional share/copy/fallbacks, independent occurrence editing/import/management, exact prepared catalog lookup and reader-to-list addition | Recents/bookmarks/learning/recitation, real sharing-surface interoperability, native durable lists/occurrences, full backups and remaining production migrations |
+| P5a | Transactional typed lyric/legacy web favorites/lists/preferences, preserving v1/v2/v3-to-v4 upgrade, worker v1/v2 preview and saved-v2 export, optional share/copy/fallbacks, independent occurrence editing/import/management, exact prepared catalog lookup and reader-to-list addition; native Room3 typed favorites/durable lists/occurrences | Recents/bookmarks/learning/recitation, real sharing-surface interoperability, full backups and remaining production migrations |
 | P6 | No persistent offline snapshot implementation | Journals/atomic activation/resume/repair/reader-safe GC and service worker lifecycle |
-| P7 | Separate native real canonical full preparation/reading in memory; fixture search, Room favorites/preferences, locale/theme and bounded transfer preview/re-export, core and connected tests | Native durable lists/occurrences/backups, signed App Links/receiving-app matrix, durable preparation/recovery, typed personal references and full parity/device matrix |
+| P7 | Separate native real canonical full preparation/reading in memory; fixture search, Room3 typed favorites/durable lists/occurrences/preferences, preserving upgrades, locale/theme, bounded v1/v2 preview/save/re-export and reader/list navigation, core and connected tests | Full personal backups/recents/bookmarks/learning/recitation, signed App Links/receiving-app matrix, durable preparation/recovery and full parity/device matrix |
 | P3/P8/P9 | Dependency-ordered Shared/fixture-publisher pins; full web fixture CI/Pages and native build/core/lint CI | Live-provider clarification, production ingestion/publication/signing, device CI and release readiness |
 
 The fixture capability is deliberately named `fixture-catalog-v1`; all UIs label
@@ -72,17 +72,21 @@ permission failures retain the manual fallbacks and never save a list. Adapter
 tests are not delivery confirmation or real OS/receiving-app interoperability;
 the XFER-08 platform matrix and signed App Links remain open.
 Android's bounded native codec has independent Node/zlib vectors and strict
-actual-ceiling rejection, plus connected preview/re-export evidence. It displays
-catalog known/pending/unavailable states without guessing matches and does not
-save a list. Failed/cancelled provider writes can leave an incomplete selected
+actual-ceiling rejection, plus connected preview/new-list save/re-export evidence.
+It displays catalog known/pending/unavailable states without guessing matches.
+Typed favorites and independently identified list occurrences persist in Room3;
+v1 imports structurally become legacy references and saved lists export v2.
+Actual client-generated v2 gzip/link round trips cover both codec directions,
+not OS delivery. Failed/cancelled provider writes can leave an incomplete selected
 destination; the warning preserves this distinction from unchanged personal data.
 Official Unicode16 name matching is implemented in both consumers using Shared's
 pinned tables and conformance fixtures, without platform lowercase/ICU.
 Website derives keys on demand from raw names; no persisted-key cache exists
-in v4. Native has no durable list-name keys yet. Existing names/identities remain
-unchanged; future persisted caches require explicit profile-aware preserving
-migration, never automatic renaming/merging. This prerequisite does not complete
-native durable lists or full personal-state parity.
+in v4. Native list-name behavior follows its
+[owning storage/validation guide](https://github.com/DaasaVaani/AndroidApp/blob/main/README.md).
+Existing names/identities remain unchanged; future persisted caches require
+explicit profile-aware preserving migration, never automatic renaming/merging.
+Durable lists do not complete full personal-state parity.
 
 The [real lyric preview](lyric-preview.md) provides partial DATA-01/02/04/05,
 UX-07/13, OFF-02 and SET-01/02 evidence. It preserves canonical line/layout

@@ -40,9 +40,11 @@ handoff is not delivery confirmation. Available verified catalog titles resolve 
 lyrics; explicit Read opens known entries, and readers can add independent
 occurrences to chosen lists. Recitation remains incomplete.
 Shared generates the English/Kannada UI resources; Android has separate real
-text-only preparation/reading and fixture features with durable Room favorites/preferences and locale/theme
-controls, strict local list-file/pasted-link preview and actual re-export.
-Native preview works before preparation but cannot yet save a durable list;
+text-only preparation/reading and fixture features with typed Room favorites,
+durable lists/independent occurrences, preferences and locale/theme controls.
+Strict v1/v2 file/pasted-link previews can be explicitly saved as independent
+lists; readers and list entries use exact typed identities without guessing.
+Native preview and list management work before preparation;
 verified App Links and real receiving-app delivery remain open.
 Production contracts, reviewed transliteration, persistent
 offline snapshots and the remaining product journeys are incomplete.

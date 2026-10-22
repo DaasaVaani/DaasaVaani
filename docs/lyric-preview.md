@@ -89,7 +89,9 @@ This slice provides partial DATA-01/02/04/05, UX-07/13, OFF-02 and SET-01/02
 coverage, with partial LIB-01/02/03/04/05/08/09/10/11 and XFER-01/02/03/04/05/06/08
 for the Website typed personal slice. See [validation commands and obligations](testing-and-release.md) and
 the [roadmap](implementation-roadmap.md). The native application independently
-implements a read-only full-preparation preview with the same media independence.
+implements full-preparation reading with the same media independence, typed
+favorites and durable lists/occurrences. Preparation remains memory-only in both
+clients; local collections do not establish persistent offline content readiness.
 
 Still open: production individual PWA item reading, bookmarks/recents/learning/
 recitation for real UUIDs, full personal backups, full linguistic search/

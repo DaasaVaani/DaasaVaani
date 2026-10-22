@@ -105,7 +105,7 @@ bytes. Browser journeys check byte-identical packaged licensing, an old-package
 collision that now splits, existing newly equal names without any current database/
 row rewrite, and future explicit independent reuse/rename cancellation.
 `npm test -- unicode-names` is the focused unit command. These are Unicode-data/
-algorithm checks, not transliteration, linguistic review or complete native lists.
+algorithm checks, not transliteration, linguistic review or full personal parity.
 `npm run demo` publishes only synthetic fixture artifacts and serves the
 local Website at the configured settings/web.yml port. It is not a production
 Library deployment or a source migration.
@@ -158,8 +158,12 @@ focus through return/Back/Forward. Reader-to-list choices are explicit and
 revision-bound, preserve repetitions and refuse concurrent-tab stale writes.
 Native codec vectors and connected preview/re-export checks are documented in
 the [Android guide](https://github.com/DaasaVaani/AndroidApp/blob/main/README.md).
-They do not establish durable native list saves, signed App Links, real receiving-
-app/provider interoperability or complete offline-shell/platform behavior.
+Native connected checks also cover typed durable favorites/lists/occurrences and
+preserving Room upgrades, duplicate-name confirmations and stale-write refusal.
+Actual client-generated v2 file/link compatibility requires both actual codec
+directions and exact snapshot comparison, with preview causing no personal write
+or content request. These do not establish signed App Links, real receiving-app/
+provider interoperability or complete offline-shell/platform behavior.
 Tests include actual 9MiB encoded, 8MiB decoded and 2,048-character complete-link
 boundaries, not only reduced test limits. Highly compressible valid data is not
 rejected by an invented ratio cap. The build emits third-party license notices.
@@ -181,7 +185,8 @@ npm run config
 App-level JVM tests currently have no sources; the pure core has executable JVM
 tests. The connected test launches the actual Compose app, requires preparation,
 downloads/verifies the served fixtures and opens canonical text. The native
-suite also covers the durable Room personal foundation and locale/theme controls;
+suite also covers Room3 typed favorites, durable list/occurrence management,
+v1/v2 import/export, reader/list navigation and locale/theme controls;
 see the [native validation guide](https://github.com/DaasaVaani/AndroidApp/blob/main/README.md)
 for its owning scenarios and current limitations. The Website demo
 must run at the endpoint configured in Android settings. API26/other devices,
@@ -235,9 +240,9 @@ IDs or a release acceptance declaration.
 | SEARCH-12/13 | Sampled independent substring/full-matrix oracle, counted-gram candidates, native core checks and real browser search | Ordinary fixture text only; reviewed profiles/aliases/markers, exhaustive proof and complete native parity pending |
 | PLAT-01/05 | Real React and Compose apps; built-site browser journeys at desktop/mobile/320px and one native API36 reading journey | PWA installation, complete routes/layout/interaction modes and supported-platform/device matrix pending |
 | I18N-01/02/03, SET-04 | Matching two-locale resources; web first-use ordered browser-language selection, configured fallback, persisted four-mode appearance with contrast/media checks; native durable locale/theme preferences; canonical text remains independent | Complete script/personal preferences, device/font matrix and full localization conformance pending |
-| LIB-01/02/03/04/05/08/09/10/11 | Typed web lyric/legacy favorites/lists, independent occurrences/plain text, duplicate-name confirmation, management/manual replacement, exact catalog details/explicit reading, reader-to-list addition and non-destructive v1/v2/v3-to-v4 upgrade; native Room favorites/preferences | Recitation/offline/remaining personal migrations and native durable lists/occurrences remain incomplete |
+| LIB-01/02/03/04/05/08/09/10/11 | Typed web/native lyric/legacy favorites/lists, independent occurrences/plain text, duplicate-name confirmation, management/manual replacement, exact catalog details/explicit reading, reader-to-list addition and preserving web v4/native Room3 upgrades | Recitation/offline/full personal collections and remaining production migrations remain incomplete |
 | UX-13 | In-session Library/Favorites context and list-origin selected editor state, Back/Forward/reader return with measured scroll/focus; removed-result/direct-reader/reload coverage | No persistent search history; filters/Explore, offline and Android continuity pending |
-| XFER-01/02/03/04/05/06/08 | Bounded web worker/native codecs with independent vectors, web preview/saved-list export and transactional save, native file/pasted-link preview/re-export, catalog-only details, browser share/copy adapters, cancellation/errors/no-write checks | Real sharing-surface delivery, native durable saves/occurrences, verified App Links and full backups incomplete |
+| XFER-01/02/03/04/05/06/08 | Bounded web worker/native v1/v2 codecs with independent vectors, explicit previews/transactional new-list saves and saved-v2 exports, actual cross-client v2 codec round trips, catalog-only details, browser share/copy adapters, cancellation/errors/no-write checks | Real sharing-surface delivery, verified App Links and full backups incomplete |
 | SET-01/02 | Owned settings/schema guards, Shared policy binding and immutable clean fixture-tool pin | Complete production settings inventory, language/protocol/backup contracts and all compatibility fixtures pending |
 | QUAL-01/02/03 | Semantic browser controls, keyboard focus entrypoint, standalone canonical reading and no video/tracking dependencies | Full keyboard/screen-reader/contrast/scaling/platform journeys remain unverified; no formal conformance claim |
 

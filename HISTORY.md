@@ -1,5 +1,53 @@
 # Documentation history
 
+## 2026-10-22: native typed collections and actual cross-client handoff
+
+- Archived current Root descriptions of native read-only canonical reading,
+  preview-only imports, inability to save durable lists/occurrences and absent
+  native list-name behavior. Native Room3 now stores typed favorites and durable
+  lists/independent occurrences, with preserving upgrades, Unicode16 duplicate
+  confirmation/fences, v1/v2 previews/new-list save/saved-v2 exports and reader/
+  list navigation. Full personal collections/backup/offline parity remain open.
+- Android published4a89004c3c119fcab09099fc2d6482d176a5f640 with independently
+  pinned Shared7ad993c. Its agent ran `npm run config` and
+  `.\gradlew.bat :core:build :app:build :app:lintDebug :app:lintRelease
+  :app:connectedDebugAndroidTest --no-daemon --console=plain`: all builds/lints,
+  33 core and37 API36 connected tests passed without failures/skips. Hygiene69,
+  strict YAML5, actionlint and whitespace passed. Exact preflight39712923897
+  and main39713501257 passed; parent independently verified matching remote SHA,
+  clean tree and every required CI step including all-variant/JVM/lint build.
+  Connected checks are local evidence, not a claim that CI ran an emulator.
+- Actual Website worker-generated v2 gzip/link were consumed by native's real
+  codec and re-exported. Reverse verification decoded native's actual237-byte
+  gzip and actual URL through the built Website worker, independently decoded
+  gzip with Node/zlib and compared both to the exact mixed Shared fixture.
+  Native gzip SHA256 was
+  f0acf892c49e0c8cdd9bbfba5cf69ed410ea8991c9d026b6567288165e2dd7e9.
+  Actual Website file preview also succeeded with byte-equivalent native40
+  personal records and zero owner-content requests. No OS/App Links/receiving-app
+  delivery or production offline readiness is inferred.
+- Website Favorites bc5517d232a8abd357a37a105f3e32511fc5c0e7 passed exact
+  preflight39711835970, main/build/Pages39712144043 and CodeQL39712144152.
+  Hosted HTML/JS/CSS/notices/Unicode license matched the exact CI Pages artifact.
+  Fresh Chromium exercised49 actual owner-lyric favorites across all three
+  configured pages with new-page focus, exact available-title filtering/reset,
+  zero requests before consent,873 preparation requests for871 lyrics, unchanged
+  personal preferences/favorites and desktop/320px fit.
+- The owner selected default-on device-only Recently opened recording. Shared
+  defines the ordered distinct typed50-entry record and explicit clear/disable
+  behavior; consumer history implementation remains pending. No prior activity
+  is fabricated from existing favorites/lists. Owner originals remain untouched.
+- Shared9b8845a21bb529268bba49ffbf6a44dece45a9ed passed28 tests and exact
+  preflight39713315903/main39714010247 before further consumer adoption.
+  This handoff keeps the Website independently pinned7ad993c; history is not
+  yet exposed by this Website revision. Final `npm run check` for this
+  documentation handoff passed82 units and198 browser cases without failures,
+  skips or cancellations, including the unchanged fresh TypeScript/Vite build.
+- Documentation checks passed20 Markdown files,195 local links,153 unique
+  requirement IDs and4 strict YAML files; actionlint1.7.12/ShellCheck0.11.0
+  and Git whitespace passed. Temporary cross-client preview/browser helpers
+  were closed; the user's demo server/emulator were preserved.
+
 ## 2026-10-22: independent real Favorites title browsing
 
 - Archived the preceding real Favorites presentation: it rendered every real
@@ -27,7 +75,7 @@
   ShellCheck0.11.0 and Git whitespace passed. The Vite chunk warning remains
   advisory; broad platform/language/performance/release acceptance is not claimed.
 - The preceding Website d2fb1bfe3e6e571948f5e54df5e042c7f0535cbb passed exact
-  preflight39709509872, main39709888619 and managed Pages39709889421.
+  preflight39709509872, main/build/Pages39709888619 and CodeQL39709889421.
   Independent downloads matched the CI artifact's hosted HTML/JS/CSS/notices/
   Unicode license bytes. Fresh standalone Chromium verified zero owner requests
   before consent,873 preparation requests for871 lyrics, exact18 canonical/
