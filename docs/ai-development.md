@@ -104,8 +104,9 @@ See [the storage/name protocol](architecture.md#transactions-names-and-exact-acc
   Preserve original mounted drafts/return focus, abort stale selected reads and
   project only typed references into successful-open history. Active-list changes
   end mode explicitly; unrelated personal changes do not. Session state is not
-  REC-04 persistence/Continue or durable offline readiness. Native retains its
-  independent complete-preparation gate and validation.
+  REC-04 persistence/Continue or durable offline readiness. Native independently
+  implements the same bounded saved-list surface, retaining its complete-
+  preparation gate, original list/Android Back context and separate validation.
 - Shared owns portable contracts/settings/fixtures and UI catalogs/generator/
   committed resources. Library owns source/assets/registries/ingestion/publisher.
   Consumers query published artifacts and pin Shared independently.

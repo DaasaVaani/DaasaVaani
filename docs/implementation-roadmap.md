@@ -28,8 +28,10 @@ same bounded focused-reading/scoped-awake surface. Website additionally implemen
 session-only REC-03 saved-list order, repetitions/placeholders, explicit boundaries/
 unavailability, cancellation/retry and conservative active-list invalidation,
 preserving drafts/Back focus and one awake owner. Selected successful reads use
-normal history without storing occurrence metadata. Native adoption/validation
-remains independent. REC-04 Continue recitation, reviewed verse Practice and persistent offline
+normal history without storing occurrence metadata. Native independently
+implements the same bounded saved-list surface with the existing complete
+compatible preparation gate and original list/Android Back context.
+REC-04 Continue recitation, reviewed verse Practice and persistent offline
 content remain open; this is not complete recitation.
 
 ## Current implementation coverage

@@ -53,7 +53,9 @@ test("ordered mixed occurrences never deduplicate skip wrap or change personal d
   const original = await layout(page);
   expect(requests).toHaveLength(3); await expect(previous(page)).toBeDisabled();
   await expect(page.getByRole("navigation", { name: labels.appName, exact: true })).toBeHidden();
-  await next(page).click(); await position(page, 2, 8); expect(await layout(page)).toEqual(original);
+  await next(page).click(); await position(page, 2, 8);
+  await expect(body(page).locator("div[lang=kn] > p")).toHaveCount(4);
+  expect(await layout(page)).toEqual(original);
   for (const value of [3, 4]) {
     await next(page).click(); await position(page, value, 8);
     await expect(body(page).getByText(labels.lyricsUnavailable, { exact: true })).toBeVisible();
@@ -68,7 +70,9 @@ test("ordered mixed occurrences never deduplicate skip wrap or change personal d
   await next(page).click(); await position(page, 7, 8);
   await expect(body(page).locator("div[lang=kn] > p")).toHaveCount(2);
   const fixtureLayout = await layout(page);
-  await next(page).click(); await position(page, 8, 8); expect(await layout(page)).toEqual(fixtureLayout);
+  await next(page).click(); await position(page, 8, 8);
+  await expect(body(page).locator("div[lang=kn] > p")).toHaveCount(2);
+  expect(await layout(page)).toEqual(fixtureLayout);
   await expect(next(page)).toBeDisabled(); await expect(page.getByText(labels.recitationEnd, { exact: true })).toBeVisible();
   await context.setOffline(true);
   for (let value = 7; value >= 1; value--) { await previous(page).click(); await position(page, value, 8); }
@@ -214,7 +218,9 @@ test("actual offline fixture reads reuse only already verified session content a
   await start(page).click(); await expect(body(page).locator("div[lang=kn] > p")).toHaveCount(2);
   const original = await layout(page);
   await context.setOffline(true);
-  await next(page).click(); await position(page, 2, 3); expect(await layout(page)).toEqual(original);
+  await next(page).click(); await position(page, 2, 3);
+  await expect(body(page).locator("div[lang=kn] > p")).toHaveCount(2);
+  expect(await layout(page)).toEqual(original);
   await next(page).click(); await position(page, 3, 3);
   await expect(body(page).getByRole("alert")).toBeVisible();
   await expect(body(page).locator("div[lang=kn]")).toHaveCount(0);

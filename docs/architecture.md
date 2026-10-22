@@ -402,7 +402,12 @@ The original editor DOM remains mounted hidden during mode, preserving focus
 targets and drafts. Position focus moves only on explicit entry/movement, not
 asynchronous results. Already verified process-local text may work offline;
 this neither prepares a complete snapshot nor provides persistent offline readiness.
-Native owns its independent adoption, complete-preparation gate and validation.
+Native independently implements ordered saved-list Recite after its existing
+complete compatible preparation gate. Management/preview before preparation does
+not bypass lyric recitation readiness. Android Back restores the original list
+context; movement retains one scoped awake owner. Its preserving typed history,
+active-list invalidation and device checks remain independently owned, not proof
+of durable snapshots or every device/OS power policy.
 
 ### Personal schema refusal
 

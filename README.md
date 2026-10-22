@@ -37,10 +37,11 @@ and optional Recently opened recording.
 Loaded Website and native readers also offer focused **Recite**, explicit exit/restorable
 controls and optional screen-awake requests with honest support/lifecycle/error
 feedback. Individual mode does not write personal data, reload text or force full
-screen. Website saved lists additionally offer explicit ordered Recite with every
+screen. Website and native saved lists additionally offer explicit ordered Recite with every
 independent repetition/placeholder, honest unavailable/empty/boundary states and
 Previous/Next without wrapping. This is session-only, not Continue recitation or
-durable offline readiness. Successful selected lyrics use normal recent history. See the
+durable offline readiness. Native retains its complete-preparation gate.
+Successful selected lyrics use normal recent history. See the
 [focused-reading guide](docs/lyric-preview.md#focused-recite).
 Recently opened retains the configured latest50 distinct typed references across
 restarts, never search queries or lyric copies, and never sends history to a service.

@@ -1,5 +1,74 @@
 # Documentation history
 
+## 2026-10-22: list publication and selected-content readiness synchronization
+
+- Website9170414fc789df679fc0d0b577901d417e523e91/tree20adf7d independently
+  pins Shared397988. Exact preflight39827310611 passed every actual required
+  job/step, with only intended upload/deployment skips. Fresh live admin/main/
+  no-bypass guard/clean tree/pin/78da baseline/ancestry gates preceded normal
+  main push. Main/Pages39828274614 and CodeQL39828282463 passed every actual
+  job/step; main browser/platform dependency installation itself took11m31s.
+  No incomplete metadata or running installation was counted as a pass.
+- Safely extracted the exact29-entry Pages artifact and compared24 deployed
+  bodies byte-for-byte. Fresh isolated public Chromium exercised actual871
+  catalog/3 Library requests,8 mixed exact ordered occurrences and an empty list,
+  literal canonical layout/fonts, full native70 five-table/index-schema/personal/
+  history preservation, actual offline verified-session traversal and installed
+  interface Settings restart without automatic Recite entry.12 cache bodies
+  plus worker totaled1016553/8388608 bytes; no Library/media was cached.
+- The first hosted probe asserted cached fixture text immediately after the
+  new occurrence heading. That heading correctly appears before the separate
+  selected-content ready commit, even for a verified in-memory item; no old
+  occurrence text is exposed. Awaited the exact paragraph count before comparing
+  the unchanged digest. Final hosted proof passed. Added the same explicit
+  readiness boundary to three new browser assertions, preserving all digest/
+  personal/request-count assertions, retry settings and time limits.
+  This test-only follow-up still requires complete final validation after the
+  native-owned frozen dist/device/HTTP slot is explicitly released. No production
+  source or frozen output changed during native ownership.
+- Native released the slot after complete successful validation and committed,
+  without pushing,79acdb3b885c73382714ca8b0dd9b6ad9b39e875/tree39ca35a,
+  independently pinned to Shared397988. Config, clean51 core/all application
+  variants/both lints/all95 connected cases passed, zero failures/errors/skips.
+  Hygiene101/YAML5/actionlint/ShellCheck/all whitespace passed; lint58/59 warnings,
+  zero errors, and app JVM NO-SOURCE remain distinguished. It preserved
+  PID3840/emulator5556 and removed only its owned logs/helpers. Parent verified
+  the exact clean commit/tree/pin/trailer and submitted only that validated tree
+  for preflight. Archived prior Native-individual-only/list-validation-open
+  descriptions: bounded native REC-03 now retains complete preparation, exact
+  occurrences/typed history, scoped awake continuity and original list/Back
+  context. No durable offline or REC-04/release claim follows.
+- First post-release full Website check passed121 units/build and383/384 browsers:
+  the unchanged font-bound/density/reload journey exhausted its30s test budget.
+  Targeted3-repeat/all-viewport stress at the auto-selected8 workers passed5/9;
+  atomic same-style measurement passed8/9 and mixed real-keyboard/pointer
+  actions passed6/9, still hitting that total budget rather than a wrong font
+  value. Trace timing confirmed repeated browser action/assertion overhead.
+  Discarded both tentative font-test changes, restoring the exact existing
+  pointer/keyboard assertions. No runtime, timeout, retry, tested font step,
+  density, viewport or equality requirement was changed. The next complete check
+  attempted a2-worker command; actual concurrency was verified rather than
+  inferred from that command's name (see the final result below).
+- The Native preflight gate initially assumed at least two jobs, as in Website.
+  Actual declared Native hygiene has one job. Corrected only this local helper
+  assumption, retaining exact complete job pagination and every actual step/
+  success check. Fresh exact Native preflight39840910332 passed all actual
+  job/steps and live policy/admin/tree/pin/dd155 baseline/ancestry checks preceded
+  normal main publication. Exact main39842267213 subsequently passed every
+  actual job/step; no unfinished/skipped required step was accepted.
+- Final `npm run check -- -- --workers=2` passed121 units, strict TypeScript/
+  production build and all384 browser cases, zero failures/skips. Its actual
+  expanded command was `npm test && npm run test:e2e --workers=2`: nested npm
+  consumed the flag, and the observed runner still used8 workers, not2. Removed
+  the unverified forwarding recipe from current guidance; no concurrency change
+  or2-worker success is claimed. The complete unchanged configured suite passed
+  at its existing30s test budgets, with original font tests restored byte-for-byte.
+  Current-guide/archive validation passed17 files/237 local links/anchors/
+  153 unique IDs; pinned Shared hygiene75, strict Node YAML4, actionlint/
+  ShellCheck and all whitespace checks passed. Only three explicit list-test
+  content-readiness waits and native capability/publication documentation remain
+  in this follow-up, not runtime/default/schema or test-limit changes.
+
 ## 2026-10-22: saved-list Recite and final individual-mode publication evidence
 
 - Archived the superseded Website-only individual Recite limitation: saved-list

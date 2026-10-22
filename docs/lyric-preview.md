@@ -183,11 +183,12 @@ Already verified session text remains usable without a network connection, but
 this is not durable offline readiness: reload retains the existing online/
 preparation gate.
 
-Website saved lists offer an explicit Recite list action over the exact stored
+Website and native saved lists offer an explicit Recite list action over the exact stored
 order. Repetitions and raw placeholders remain independent occurrences;
 Previous/Next do not wrap or skip missing entries. Empty/start/end states and
 unavailable/failed/cancelled downloads are explicit, with retry only on request.
-Only the selected lyric loads; successful opens use normal typed recent history,
+Website loads only the selected lyric; native selects from completely prepared
+verified content. Successful opens use normal typed recent history,
 never storing local occurrence IDs/fallbacks there. List movement retains one
 focused/optional-awake owner and the same independent reading preferences.
 Exit/Escape/Back restore the original mounted list drafts and start focus;
