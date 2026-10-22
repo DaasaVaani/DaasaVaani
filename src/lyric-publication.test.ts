@@ -1,6 +1,6 @@
 import { afterEach, expect, test, vi } from "vitest";
 import { lyricFixture, lyricId } from "../tests/lyric-fixture";
-import { prepareLyrics } from "./lyric-publication";
+import { loadLyricCatalog, prepareLyrics } from "./lyric-publication";
 import type { LyricItem } from "../shared/types/lyrics";
 
 afterEach(() => vi.unstubAllGlobals());
@@ -118,4 +118,83 @@ test("aborted preparation propagates cancellation and never exposes a partial ca
   const pending = prepareLyrics(controller.signal);
   controller.abort(new DOMException("Cancelled", "AbortError"));
   await expect(pending).rejects.toThrow("Cancelled");
+});
+test("online catalog loading fetches only metadata and reads exactly the selected pinned item", async () => {
+  const fixture = lyricFixture(3), requests = serve(fixture);
+  const library = await loadLyricCatalog();
+  expect(requests).toHaveLength(2);
+  expect(library.summary(lyricId(2))).toEqual(fixture.manifest.catalog[1]);
+  expect(library.item(lyricId(2))).toBeUndefined();
+  const item = await library.read(lyricId(2));
+  expect(item.lyricId).toBe(lyricId(2)); expect(requests).toHaveLength(3);
+  expect(await library.read(lyricId(2))).toBe(item);
+  expect(library.item(lyricId(1))).toBeUndefined();
+  await expect(library.read("fixture-one")).rejects.toThrow("unavailable");
+  await expect(library.read("__proto__")).rejects.toThrow("unavailable");
+  expect(requests).toHaveLength(3);
+});
+test("online cache budgets bind only requested items and refuse over-capacity reads before their request", async () => {
+  const fixture = lyricFixture(), requests = serve(fixture);
+  const library = await loadLyricCatalog(undefined, { ...__WEB_CONFIG__.lyricPreview,
+    maxEncodedBytes: fixture.encodedBytes - 1, maxDecodedBytes: fixture.decodedBytes });
+  expect(requests).toHaveLength(2);
+  expect(() => library.assertCompleteFits()).toThrow("configured preparation byte limits");
+  await library.read(lyricId(1)); expect(requests).toHaveLength(3);
+  await expect(library.read(lyricId(2))).rejects.toThrow("configured preparation byte limits");
+  expect(requests).toHaveLength(3); expect(library.item(lyricId(1))).toBeDefined();
+});
+test("failed reads release byte reservations and never poison cache identities before an explicit retry", async () => {
+  const fixture = lyricFixture(1), requests = serve(fixture), summary = fixture.manifest.catalog[0];
+  if (!summary) throw new Error("Missing synthetic item");
+  const original = fixture.files.get(summary.item.path);
+  if (!original) throw new Error("Missing synthetic object");
+  const library = await loadLyricCatalog(undefined, { ...__WEB_CONFIG__.lyricPreview,
+    maxEncodedBytes: fixture.encodedBytes, maxDecodedBytes: fixture.decodedBytes });
+  fixture.files.set(summary.item.path, Buffer.from("corrupt"));
+  await expect(library.read(lyricId(1))).rejects.toThrow("size mismatch");
+  expect(library.item(lyricId(1))).toBeUndefined();
+  fixture.files.set(summary.item.path, original);
+  expect((await library.read(lyricId(1))).lyricId).toBe(lyricId(1));
+  expect(requests).toHaveLength(4);
+  const invalid = lyricFixture(1, { item: item => { item.lines.push({ kind: "line", lineId: lyricId(991), text: "\ud800" }); } });
+  serve(invalid);
+  const broken = await loadLyricCatalog(undefined, { ...__WEB_CONFIG__.lyricPreview,
+    maxEncodedBytes: invalid.encodedBytes, maxDecodedBytes: invalid.decodedBytes });
+  for (let attempt = 0; attempt < 2; attempt++) {
+    await expect(broken.read(lyricId(1))).rejects.toThrow("malformed Unicode");
+    expect(broken.item(lyricId(1))).toBeUndefined();
+  }
+});
+test("cancelled online reads do not expose content or consume cache capacity", async () => {
+  const fixture = lyricFixture(1); serve(fixture);
+  const library = await loadLyricCatalog(undefined, { ...__WEB_CONFIG__.lyricPreview,
+    maxEncodedBytes: fixture.encodedBytes, maxDecodedBytes: fixture.decodedBytes });
+  const controller = new AbortController();
+  vi.stubGlobal("fetch", vi.fn((_input: RequestInfo | URL, options?: RequestInit) => new Promise<Response>((_resolve, reject) => {
+    const signal = options?.signal;
+    if (!signal) throw new Error("Missing cancellation signal");
+    signal.addEventListener("abort", () => reject(signal.reason), { once: true });
+  })));
+  const pending = library.read(lyricId(1), controller.signal);
+  controller.abort(new DOMException("Cancelled", "AbortError"));
+  await expect(pending).rejects.toThrow("Cancelled");
+  expect(library.item(lyricId(1))).toBeUndefined();
+  serve(fixture);
+  expect((await library.read(lyricId(1))).lyricId).toBe(lyricId(1));
+});
+test("valid bytes arriving after an ignored abort cannot populate the online cache", async () => {
+  const fixture = lyricFixture(1); serve(fixture);
+  const library = await loadLyricCatalog(), reference = fixture.manifest.catalog[0]?.item;
+  const bytes = reference && fixture.files.get(reference.path);
+  if (!bytes) throw new Error("Missing synthetic late response");
+  let finish: ((response: Response) => void) | undefined;
+  vi.stubGlobal("fetch", vi.fn(() => new Promise<Response>(resolve => { finish = resolve; })));
+  const controller = new AbortController(), pending = library.read(lyricId(1), controller.signal);
+  controller.abort(new DOMException("Cancelled", "AbortError"));
+  if (!finish) throw new Error("Late response request did not start");
+  finish(new Response(new Uint8Array(bytes)));
+  await expect(pending).rejects.toThrow("Cancelled");
+  expect(library.item(lyricId(1))).toBeUndefined();
+  serve(fixture);
+  expect((await library.read(lyricId(1))).lyricId).toBe(lyricId(1));
 });

@@ -7,12 +7,12 @@ import styles from "./App.module.css";
 import { ListExport, type ExportSource } from "./ListExport";
 import type { Publication } from "./artifacts";
 import { ListEntryView } from "./ListEntryView";
-import type { PreparedLyrics } from "./lyric-publication";
+import type { LyricLibrary } from "./lyric-publication";
 
 interface EntryDraft { id?: string; kind: ListEntry["kind"]; identifier: string; text: string; fallback: string }
 
 export function Lists({ labels, personal, publication, lyrics }: {
-  labels: typeof messages.en; personal: PersonalStore; publication?: Publication; lyrics?: PreparedLyrics;
+  labels: typeof messages.en; personal: PersonalStore; publication?: Publication; lyrics?: LyricLibrary;
 }) {
   const id = useId();
   const [name, setName] = useState("");

@@ -23,14 +23,29 @@ demonstrations do not close remaining production contracts or prove full readine
 7. Report requirement coverage, actual commands/results, limitations, unresolved
    acceptance evidence and commit/push state. Validation is not push authorization.
 
+## Delivery batching
+
+- Run independent Website and Android slices in parallel when their exact Shared
+  prerequisites are published. Keep repository and shared-server ownership explicit.
+- Prefer larger coherent behavior/test/documentation batches over isolated
+  housekeeping pushes. Full final-tree validation and exact-SHA publication gates
+  still apply to every batch.
+- Prioritize text-first reading, search, personal data and offline reliability.
+  Other approved features remain in scope unless the owner explicitly changes it.
+- Escalate only genuine product choices, missing reviewed inputs or external
+  permissions; present a recommendation and trade-offs together. Do not guess
+  linguistic truth, identities, rights or significant deferred contracts.
+- Reuse Shared contracts, generated resources and conformance fixtures across
+  consumers; preserve independent pins and required platform-specific validation.
+
 ## Current repository state
 
 | Surface | Current capability |
 | --- | --- |
-| Website | Consented real text-only in-memory preparation/catalog/UUID reading with typed favorites/lists and device-only recent history; separate fixture reader/search, browsing/list-reader continuity, preferences, preserving personal v5 upgrade and worker v1/v2 transfer/export |
+| Website | Verified real text-only online catalog/on-demand UUID reading with bounded in-memory content, typed favorites/lists and device-only recent history; separate fixture reader/search, browsing/list-reader continuity, preferences, preserving personal v5 upgrade and worker v1/v2 transfer/export |
 | Shared | Lyric/source/publication and fixture/minimal-list/logical-list contracts, official Unicode16 name-matching resources, portable settings and generated web/Android UI catalogs |
 | Library | Reviewed owner-text import with stable identities/held exceptions, complete empty authoring fields, canonical text-only post-merge publication; separate synthetic indexed fixture publisher |
-| Android | Separate real canonical preparation/reading; typed Room3 favorites, durable lists/occurrences, preserving upgrades, locale/theme, bounded v1/v2 preview/new-list save/re-export and reader/list navigation; production lifecycle/full personal parity remain incomplete |
+| Android | Separate real canonical preparation/reading; typed Room4 favorites, durable lists/occurrences/recent history, preserving upgrades, locale/theme, bounded v1/v2 preview/new-list save/re-export and reader/list navigation; production lifecycle/full personal parity remain incomplete |
 | Website library/ | Absent; reviewed sources belong only to Library |
 | Website settings/ | Web schema/settings; portable defaults and bounds consumed from Shared |
 | Tooling | Exact npm lockfiles and Gradle wrapper/version catalog; use the current command registry |

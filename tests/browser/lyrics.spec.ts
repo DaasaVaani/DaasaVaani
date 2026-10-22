@@ -1,4 +1,4 @@
-import { test, expect } from "@playwright/test";
+import { test, expect, type Page } from "@playwright/test";
 import { readFileSync } from "node:fs";
 import { gzipSync, gunzipSync } from "node:zlib";
 import type { ListTransferV2 } from "../../src/list-transfer-types";
@@ -7,6 +7,27 @@ import { lyricFixture, lyricId } from "../lyric-fixture";
 import { config, serveLyrics as serve, personalSnapshot } from "../lyric-browser";
 
 const labels = messages.en;
+async function holdDownload(page: Page, target: string) {
+  await page.addInitScript(targetUrl => {
+    const original = window.fetch.bind(window);
+    Reflect.set(window, "holdLyricDownload", true);
+    Reflect.set(window, "lyricDownloadAborted", false);
+    window.fetch = (input, options) => {
+      const url = input instanceof Request ? input.url : String(input);
+      if (url === targetUrl && Reflect.get(window, "holdLyricDownload")) {
+        return new Promise<Response>((_resolve, reject) => {
+          const signal = options?.signal;
+          if (!signal) throw new Error("Missing lyric download abort signal");
+          signal.addEventListener("abort", () => {
+            Reflect.set(window, "lyricDownloadAborted", true);
+            reject(signal.reason);
+          }, { once: true });
+        });
+      }
+      return original(input, options);
+    };
+  }, target);
+}
 test.beforeEach(async ({ page }) => {
   // These journeys preserve no-write reading; default-on history is exercised separately.
   await page.goto("/#/settings");
@@ -46,8 +67,8 @@ test("real Favorites have independent complete title paging and preserve context
   const before = await personalSnapshot(page);
   expect(requests).toHaveLength(0);
   await page.getByRole("link", { name: labels.ownerLyrics, exact: true }).click();
-  await page.getByRole("button", { name: labels.prepareLibrary }).click();
   await expect(page.getByRole("article")).toHaveCount(config.lyricPreview.pageSize);
+  expect(requests).toHaveLength(2);
   await page.getByRole("link", { name: labels.favorites, exact: true }).click();
   const query = favorites.getByRole("searchbox", { name: labels.lyricTitleFilter, exact: true });
   await query.fill("synthetic");
@@ -59,6 +80,7 @@ test("real Favorites have independent complete title paging and preserve context
   }
   const last = favorites.getByRole("article").last().getByRole("link", { name: labels.open, exact: true });
   await last.press("Enter");
+  await expect(page.locator("div[lang=kn] > p")).toHaveCount(4);
   await page.getByRole("link", { name: labels.favorites, exact: false }).filter({ hasText: "←" }).click();
   await expect(last).toBeFocused();
   await expect(query).toHaveValue("synthetic");
@@ -72,7 +94,7 @@ test("real Favorites have independent complete title paging and preserve context
   await expect(favorites.getByRole("status")).toHaveText(labels.noResults);
   await query.fill("");
   await expect(favorites.getByRole("article")).toHaveCount(config.lyricPreview.pageSize);
-  expect(requests).toHaveLength(count + 2);
+  expect(requests).toHaveLength(3);
   expect(await personalSnapshot(page)).toEqual(before);
   expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(true);
 });
@@ -84,8 +106,6 @@ test("explicit real favorites and repeated reader-to-list saves persist without 
   await create.getByRole("button", { name: labels.createList, exact: true }).click();
   await expect(page.getByRole("list", { name: labels.lists, exact: true }).getByRole("button", { name: "Synthetic real reader", exact: true })).toBeVisible();
   await page.getByRole("link", { name: labels.ownerLyrics, exact: true }).click();
-  expect(requests).toHaveLength(0);
-  await page.getByRole("button", { name: labels.prepareLibrary }).click();
   await page.getByRole("article").first().getByRole("link", { name: labels.open, exact: true }).click();
   await page.getByRole("button", { name: labels.addFavorite, exact: true }).click();
   await expect(page.getByRole("button", { name: labels.removeFavorite, exact: true })).toHaveAttribute("aria-pressed", "true");
@@ -116,12 +136,9 @@ test("explicit real favorites and repeated reader-to-list saves persist without 
   await expect(read).toBeFocused();
   expect(requests).toEqual(prepared);
   await page.reload();
-  await expect(favorites.getByText(labels.lyricCatalogPending, { exact: true })).toBeVisible();
+  await expect(favorites.getByText(labels.lyricOnlineCatalogPending, { exact: true })).toBeVisible();
   expect(requests).toEqual(prepared); expect(await personalSnapshot(page)).toEqual(saved);
   await read.click();
-  await expect(page.getByRole("button", { name: labels.prepareLibrary })).toBeVisible();
-  expect(requests).toEqual(prepared);
-  await page.getByRole("button", { name: labels.prepareLibrary }).click();
   await expect(page.getByRole("button", { name: labels.removeFavorite, exact: true })).toBeVisible();
   expect(requests).toHaveLength(prepared.length * 2);
   expect(await personalSnapshot(page)).toEqual(saved);
@@ -132,6 +149,65 @@ test("explicit real favorites and repeated reader-to-list saves persist without 
   expect(removed.tables.personal).toMatchObject([{ favorites: [] }]);
   expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(true);
 });
+test("repeated reader additions wait for their own committed list snapshot before another selection", async ({ page }) => {
+  await page.addInitScript(() => {
+    const put = IDBObjectStore.prototype.put;
+    IDBObjectStore.prototype.put = function (value: unknown, key?: IDBValidKey) {
+      const request = key === undefined ? put.call(this, value) : put.call(this, value, key);
+      if (this.name === "lists" && Reflect.get(window, "holdNextListObservation")) {
+        Reflect.set(window, "holdNextListObservation", false);
+        const db = this.transaction.db;
+        this.transaction.addEventListener("complete", () => {
+          // A real queued transaction delays observation without fabricating a write result.
+          const barrier = db.transaction([...db.objectStoreNames], "readwrite");
+          Reflect.set(window, "listObservationHeld", true);
+          const pump = () => {
+            const next = barrier.objectStore("control").get("state");
+            next.onsuccess = () => { if (Reflect.get(window, "holdListObservation")) pump(); };
+          };
+          pump();
+        }, { once: true, capture: true });
+      }
+      return request;
+    };
+  });
+  await serve(page);
+  await page.goto("/#/lists");
+  const name = "Observed reader additions", create = page.getByRole("form", { name: labels.createList, exact: true });
+  await create.getByLabel(labels.listName, { exact: true }).fill(name);
+  await create.getByRole("button", { name: labels.createList, exact: true }).click();
+  await expect(page.getByRole("list", { name: labels.lists, exact: true }).getByRole("button", { name, exact: true })).toBeVisible();
+  await page.getByRole("link", { name: labels.ownerLyrics, exact: true }).click();
+  await page.getByRole("article").first().getByRole("link", { name: labels.open, exact: true }).click();
+  await expect(page.locator("div[lang=kn] > p")).toHaveCount(4);
+  const region = page.getByRole("region", { name: labels.addToList, exact: true });
+  const choice = region.getByLabel(labels.chooseList, { exact: true }), add = region.getByRole("button", { name: labels.addOccurrence, exact: true });
+  const listId = await choice.getByRole("option", { name: new RegExp(`^${name} · `) }).getAttribute("value");
+  if (!listId) throw new Error("Missing observed target list");
+  const before = await personalSnapshot(page);
+  await page.evaluate(() => {
+    Reflect.set(window, "holdListObservation", true); Reflect.set(window, "holdNextListObservation", true);
+  });
+  try {
+    await choice.selectOption(listId); await add.click();
+    await expect(region.getByRole("status")).toHaveText(labels.occurrenceAdded);
+    await expect.poll(() => page.evaluate(() => Reflect.get(window, "listObservationHeld"))).toBe(true);
+    await expect(choice).toBeDisabled(); await expect(add).toBeDisabled();
+  } finally { await page.evaluate(() => Reflect.set(window, "holdListObservation", false)); }
+  await expect(choice).toBeEnabled();
+  await choice.selectOption(listId); await add.click();
+  await expect(region.getByRole("status")).toHaveText(labels.occurrenceAdded);
+  await expect.poll(async () => (await personalSnapshot(page)).tables.lists).toMatchObject([{ name, entries: [
+    { kind: "lyric", lyricId: lyricId(1) }, { kind: "lyric", lyricId: lyricId(1) },
+  ] }]);
+  const after = await personalSnapshot(page), header = before.tables.control?.[0];
+  if (!header || typeof header !== "object" || !("revision" in header) || typeof header.revision !== "number") {
+    throw new Error("Missing verified pre-add revision");
+  }
+  expect(after.tables.control).toEqual([{ ...header, revision: header.revision + 2 }]);
+  expect(after.tables.personal).toEqual(before.tables.personal); expect(after.tables.recentHistory).toEqual(before.tables.recentHistory);
+});
+
 test("mixed typed transfers resolve only explicit lyric references and list-origin reading retains exact context", async ({ page }) => {
   const requests = await serve(page);
   const value: ListTransferV2 = { format: "daasavaani-list", formatVersion: 2, name: "Synthetic mixed references", entries: [
@@ -168,10 +244,8 @@ test("mixed typed transfers resolve only explicit lyric references and list-orig
   const rename = page.getByRole("form", { name: labels.renameList, exact: true }).getByLabel(labels.listName, { exact: true });
   await rename.fill("Unsaved real list name");
   await read.focus(); await read.press("Enter");
-  await expect(page.getByRole("button", { name: labels.prepareLibrary })).toBeVisible();
-  expect(requests).toHaveLength(0);
-  await page.getByRole("button", { name: labels.prepareLibrary }).click();
   await expect(page.locator("div[lang=kn] > p")).toHaveCount(4);
+  expect(requests).toHaveLength(3);
   await page.getByRole("link", { name: labels.backToList, exact: false }).click();
   await expect(rename).toHaveValue("Unsaved real list name"); await expect(read).toBeFocused();
   await expect(rows.first().getByText(labels.referenceKnown, { exact: true })).toBeVisible();
@@ -185,20 +259,17 @@ test("mixed typed transfers resolve only explicit lyric references and list-orig
   expect(requests).toEqual(prepared); expect(await personalSnapshot(page)).toEqual(saved);
   expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(true);
 });
-test("real lyric preparation needs consent, preserves personal data and exact layout, and resets on reload", async ({ page }) => {
-  const requests = await serve(page);
-  await page.goto("/#/lyrics");
-  await expect(page.getByRole("button", { name: labels.prepareLibrary })).toBeVisible();
-  expect(requests).toHaveLength(0);
-  await expect(page.getByText("Development demo", { exact: false })).toHaveCount(0);
-  await page.getByRole("link", { name: labels.settings, exact: true }).click();
+test("online browsing loads only metadata and exact selected text without personal writes, including direct reload", async ({ page }) => {
+  const fixture = lyricFixture(), requests = await serve(page, fixture);
+  await page.goto("/#/settings");
   await expect(page.getByRole("button", { name: messages.en.languageName, exact: true })).toBeVisible();
-  await page.getByRole("link", { name: labels.ownerLyrics, exact: true }).click();
   const before = await personalSnapshot(page);
-  await page.getByRole("button", { name: labels.prepareLibrary }).click();
+  expect(requests).toHaveLength(0);
+  await page.getByRole("link", { name: labels.ownerLyrics, exact: true }).click();
   await expect(page.getByRole("article")).toHaveCount(2);
-  expect(requests).toHaveLength(4);
-  const preparedRequests = [...requests];
+  expect(requests).toEqual(["latest.json", fixture.descriptor.manifest.path]);
+  await expect(page.getByText("Development demo", { exact: false })).toHaveCount(0);
+  await expect(page.getByRole("button", { name: labels.prepareLibrary })).toHaveCount(0);
   await page.getByRole("article").first().getByRole("link", { name: labels.open, exact: true }).click();
   await expect(page.locator("div[lang=kn] > p")).toHaveText(["ಕನ್ನಡ 😀  ", " \t ", "", "ಅಕ್ಷರ"], { useInnerText: false });
   expect(await page.locator("div[lang=kn] > p").evaluateAll(nodes => nodes.map(node => node.textContent)))
@@ -206,18 +277,18 @@ test("real lyric preparation needs consent, preserves personal data and exact la
   await expect(page.getByRole("button", { name: labels.addFavorite })).toBeVisible();
   await expect(page.getByText(labels.canonical, { exact: true })).toHaveCount(0);
   await expect(page.getByText(labels.lyricNoMedia, { exact: true })).toBeVisible();
-  expect(requests).toEqual(preparedRequests);
+  expect(requests).toEqual(["latest.json", fixture.descriptor.manifest.path, fixture.manifest.catalog[0]?.item.path]);
+  const preparedRequests = [...requests];
   expect(await personalSnapshot(page)).toEqual(before);
   expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(true);
   await page.reload();
-  await expect(page.getByRole("button", { name: labels.prepareLibrary })).toBeVisible();
-  await expect(page.locator("div[lang=kn] > p")).toHaveCount(0);
-  expect(requests).toEqual(preparedRequests);
+  await expect(page.locator("div[lang=kn] > p")).toHaveText(["ಕನ್ನಡ 😀  ", " \t ", "", "ಅಕ್ಷರ"], { useInnerText: false });
+  expect(requests).toEqual([...preparedRequests, ...preparedRequests]);
+  expect(await personalSnapshot(page)).toEqual(before);
 });
 test("complete title paging and reader Back/Forward retain exact query, focus and prepared bytes", async ({ page }) => {
   const count = config.lyricPreview.pageSize * 2 + 1, requests = await serve(page, lyricFixture(count));
   await page.goto("/#/lyrics");
-  await page.getByRole("button", { name: labels.prepareLibrary }).click();
   await expect(page.getByRole("article")).toHaveCount(config.lyricPreview.pageSize);
   await page.getByRole("searchbox", { name: labels.lyricTitleFilter }).fill("synthetic");
   await page.getByRole("button", { name: labels.showMoreResults }).click();
@@ -230,6 +301,9 @@ test("complete title paging and reader Back/Forward retain exact query, focus an
   const before = [...requests];
   await read.press("Enter");
   await expect(page).toHaveURL(new RegExp(lyricId(count)));
+  await expect(page.locator("div[lang=kn] > p")).toHaveCount(4);
+  expect(requests).toHaveLength(before.length + 1);
+  const readRequests = [...requests];
   await page.goBack();
   await expect(page.getByRole("searchbox")).toHaveValue("synthetic");
   await expect(read).toBeFocused();
@@ -239,62 +313,91 @@ test("complete title paging and reader Back/Forward retain exact query, focus an
   await expect(page.locator("div[lang=kn] > p")).toHaveCount(4);
   await page.getByRole("link", { name: labels.lyricBack, exact: false }).click();
   await expect(read).toBeFocused();
-  expect(requests).toEqual(before);
+  expect(requests).toEqual(readRequests);
 });
-test("corrupt owner artifacts fail without partial browsing and retry independently of unavailable fixtures", async ({ page }) => {
+test("corrupt requested lyrics never expose partial text and retry without refetching the catalog or unavailable fixtures", async ({ page }) => {
   let corrupt = true;
-  await serve(page, lyricFixture(), () => corrupt);
+  const requests = await serve(page, lyricFixture(), () => corrupt);
   await page.route("**/demo/latest.json", route => route.fulfill({ status: 503, body: "Unavailable" }));
   await page.goto("/#/lyrics");
-  await page.getByRole("button", { name: labels.prepareLibrary }).click();
+  await expect(page.getByRole("article")).toHaveCount(2);
+  expect(requests).toHaveLength(2);
+  await page.getByRole("article").first().getByRole("link", { name: labels.open, exact: true }).click();
   await expect(page.getByRole("alert")).toContainText("Artifact encoded size mismatch");
   await expect(page.getByRole("article")).toHaveCount(0);
+  await expect(page.locator("div[lang=kn] > p")).toHaveCount(0);
   await expect(page.getByText(labels.noResults, { exact: true })).toHaveCount(0);
   corrupt = false;
   await page.getByRole("button", { name: labels.retry }).click();
-  await expect(page.getByRole("article")).toHaveCount(2);
-  await expect(page.getByRole("alert")).toHaveCount(0);
-  await page.getByRole("article").first().getByRole("link", { name: labels.open, exact: true }).click();
   await expect(page.locator("div[lang=kn] > p")).toHaveCount(4);
+  await expect(page.getByRole("alert")).toHaveCount(0);
+  expect(requests).toHaveLength(4);
 });
 test("cancellation aborts the active download and retry cannot activate stale partial state", async ({ page }) => {
   const requests = await serve(page);
-  await page.addInitScript(descriptorUrl => {
-    const original = window.fetch.bind(window);
-    Reflect.set(window, "holdLyricDownload", true);
-    Reflect.set(window, "lyricDownloadAborted", false);
-    window.fetch = (input, options) => {
-      const url = input instanceof Request ? input.url : String(input);
-      if (url === descriptorUrl && Reflect.get(window, "holdLyricDownload")) {
-        return new Promise<Response>((_resolve, reject) => {
-          const signal = options?.signal;
-          if (!signal) throw new Error("Missing lyric download abort signal");
-          signal.addEventListener("abort", () => {
-            Reflect.set(window, "lyricDownloadAborted", true);
-            reject(signal.reason);
-          }, { once: true });
-        });
-      }
-      return original(input, options);
-    };
-  }, config.lyricPreview.descriptorUrl);
+  await holdDownload(page, config.lyricPreview.descriptorUrl);
   await page.goto("/#/lyrics");
-  await page.getByRole("button", { name: labels.prepareLibrary }).click();
   await page.getByRole("button", { name: labels.cancel, exact: true }).click();
   await expect.poll(() => page.evaluate(() => Reflect.get(window, "lyricDownloadAborted"))).toBe(true);
   await expect(page.getByRole("article")).toHaveCount(0);
   await expect(page.getByRole("alert")).toHaveCount(0);
+  await expect(page.getByText(labels.loadingCancelled, { exact: true })).toBeVisible();
   expect(requests).toHaveLength(0);
   await page.evaluate(() => Reflect.set(window, "holdLyricDownload", false));
-  await page.getByRole("button", { name: labels.prepareLibrary }).click();
+  await page.getByRole("button", { name: labels.retry }).click();
   await expect(page.getByRole("article")).toHaveCount(2);
-  expect(requests).toHaveLength(4);
+  expect(requests).toHaveLength(2);
+});
+test("catalog errors remain explicit with no partial cards or personal writes until an explicit retry", async ({ page }) => {
+  const requests = await serve(page);
+  let unavailable = true;
+  await page.route(config.lyricPreview.descriptorUrl, route => unavailable
+    ? route.fulfill({ status: 503, body: "Synthetic catalog unavailable" }) : route.fallback());
+  await page.goto("/#/settings");
+  await expect(page.getByRole("heading", { name: labels.settings, exact: true })).toBeVisible();
+  const before = await personalSnapshot(page);
+  await page.getByRole("link", { name: labels.ownerLyrics, exact: true }).click();
+  await expect(page.getByRole("alert")).toContainText("HTTP 503");
+  await expect(page.getByRole("article")).toHaveCount(0);
+  await expect(page.getByText(labels.noResults, { exact: true })).toHaveCount(0);
+  expect(await personalSnapshot(page)).toEqual(before);
+  unavailable = false;
+  await page.getByRole("button", { name: labels.retry, exact: true }).click();
+  await expect(page.getByRole("article")).toHaveCount(2);
+  expect(requests).toHaveLength(2);
+  expect(await personalSnapshot(page)).toEqual(before);
+});
+test("cancelling an individual read never records history and retry fetches only that item", async ({ page }) => {
+  const fixture = lyricFixture(), reference = fixture.manifest.catalog[0]?.item;
+  if (!reference) throw new Error("Missing synthetic selected item");
+  const requests = await serve(page, fixture);
+  await holdDownload(page, new URL(reference.path, new URL(".", config.lyricPreview.descriptorUrl)).href);
+  await page.goto("/#/settings");
+  const recording = page.getByRole("checkbox", { name: labels.recentHistoryEnabled, exact: true });
+  await expect(recording).not.toBeChecked(); await recording.click(); await expect(recording).toBeChecked();
+  const before = await personalSnapshot(page);
+  await page.getByRole("link", { name: labels.ownerLyrics, exact: true }).click();
+  await page.getByRole("article").first().getByRole("link", { name: labels.open, exact: true }).click();
+  await page.getByRole("button", { name: labels.cancel, exact: true }).click();
+  await expect.poll(() => page.evaluate(() => Reflect.get(window, "lyricDownloadAborted"))).toBe(true);
+  await expect(page.getByText(labels.loadingCancelled, { exact: true })).toBeVisible();
+  await expect(page.locator("div[lang=kn] > p")).toHaveCount(0);
+  expect(requests).toHaveLength(2);
+  expect(await personalSnapshot(page)).toEqual(before);
+  await page.evaluate(() => Reflect.set(window, "holdLyricDownload", false));
+  await page.getByRole("button", { name: labels.retry, exact: true }).click();
+  await expect(page.locator("div[lang=kn] > p")).toHaveCount(4);
+  await expect.poll(async () => (await personalSnapshot(page)).tables.recentHistory)
+    .toEqual([{ id: "history", enabled: true, entries: [{ kind: "lyric", lyricId: lyricId(1) }] }]);
+  const after = await personalSnapshot(page);
+  expect(after.tables.personal).toEqual(before.tables.personal); expect(after.tables.lists).toEqual(before.tables.lists);
+  expect(requests).toEqual(["latest.json", fixture.descriptor.manifest.path, reference.path]);
 });
 test("unknown lyric IDs never infer matches and saved UI locale/theme do not alter canonical Kannada", async ({ page }) => {
-  await serve(page);
+  const requests = await serve(page);
   await page.goto("/#/lyrics/00000000-0000-4000-8000-000000000000");
-  await page.getByRole("button", { name: labels.prepareLibrary }).click();
   await expect(page.getByRole("alert")).toHaveText(labels.lyricsUnavailable);
+  expect(requests).toHaveLength(2);
   await expect(page.locator("div[lang=kn] > p")).toHaveCount(0);
   await page.getByRole("link", { name: labels.settings, exact: true }).click();
   await page.getByRole("button", { name: messages.kn.languageName, exact: true }).click();
@@ -304,7 +407,6 @@ test("unknown lyric IDs never infer matches and saved UI locale/theme do not alt
   await page.getByRole("article").first().getByRole("link", { name: messages.kn.open, exact: true }).click();
   await expect(page.locator("div[lang=kn] > p").first()).toHaveText("ಕನ್ನಡ 😀  ");
   await page.reload();
-  await page.getByRole("button", { name: messages.kn.prepareLibrary }).click();
   await expect(page.locator("html")).toHaveAttribute("lang", "kn");
   await expect(page.locator("html")).toHaveAttribute("data-theme", "warm");
   await expect(page.locator("div[lang=kn] > p").first()).toHaveText("ಕನ್ನಡ 😀  ");

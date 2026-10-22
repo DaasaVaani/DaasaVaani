@@ -12,17 +12,21 @@ export function AddToList({ labels, personal, reference }: {
   const id = useId();
   const [selected, setSelected] = useState<{ record: ListRecord; expected: Revision }>();
   const [busy, setBusy] = useState(false);
+  const [committed, setCommitted] = useState<Revision>();
   const [error, setError] = useState("");
   const [saved, setSaved] = useState(false);
+  const working = busy || (committed !== undefined && committed.epoch === personal.control.epoch &&
+    personal.control.revision < committed.revision);
   const choice = useRef<HTMLSelectElement>(null), focus = useRef(false);
   useLayoutEffect(() => {
-    if (!busy && focus.current) { choice.current?.focus(); focus.current = false; }
-  }, [busy]);
+    if (!working && focus.current) { choice.current?.focus(); focus.current = false; }
+  }, [working]);
   async function add() {
     if (!selected) return;
     setBusy(true); setError(""); setSaved(false);
     try {
-      await saveList(editEntry(selected.record, undefined, reference), selected.expected, true);
+      const revision = await saveList(editEntry(selected.record, undefined, reference), selected.expected, true);
+      setCommitted(revision);
       setSelected(undefined); setSaved(true);
     } catch (reason) { setError(personalMessage(reason, labels)); setSelected(undefined); }
     finally { focus.current = true; setBusy(false); }
@@ -32,7 +36,7 @@ export function AddToList({ labels, personal, reference }: {
     {!personal.lists.length ? <p>{labels.noListsForItem} <Link to="/lists">{labels.lists}</Link></p> : <form
       aria-label={labels.addToList} onSubmit={event => { event.preventDefault(); void add(); }}>
       <label htmlFor={`${id}-choice`}>{labels.chooseList}</label>
-      <select ref={choice} id={`${id}-choice`} value={selected?.record.id ?? ""} disabled={busy}
+      <select ref={choice} id={`${id}-choice`} value={selected?.record.id ?? ""} disabled={working}
         onChange={event => {
           const record = personal.lists.find(list => list.id === event.currentTarget.value);
           setSelected(record ? { record, expected: personal.control } : undefined); setError(""); setSaved(false);
@@ -40,7 +44,7 @@ export function AddToList({ labels, personal, reference }: {
         <option value="">{labels.chooseList}</option>
         {personal.lists.map(list => <option key={list.id} value={list.id}>{list.name} · {list.id}</option>)}
       </select>
-      <button disabled={busy || !selected} type="submit">{labels.addOccurrence}</button>
+      <button disabled={working || !selected} type="submit">{labels.addOccurrence}</button>
     </form>}
     {error && <p role="alert">{error}</p>}
     {saved && <p role="status">{labels.occurrenceAdded}</p>}

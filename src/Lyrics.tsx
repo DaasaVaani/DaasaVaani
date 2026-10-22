@@ -1,7 +1,8 @@
 import { useEffect, useId, useRef, useState } from "react";
 import { Link, Route, Routes, useLocation, useNavigate, useParams } from "react-router-dom";
 import messages from "../shared/generated/web/ui.json";
-import { prepareLyrics, type PreparedLyrics } from "./lyric-publication";
+import { loadLyricCatalog, type LyricLibrary } from "./lyric-publication";
+import type { LyricItem } from "../shared/types/lyrics";
 import { hasFavorite, referenceKey, type PersonalStore } from "./personal-model";
 import type { Publication } from "./artifacts";
 import type { PersonalReference } from "./list-transfer-types";
@@ -35,7 +36,7 @@ function LyricPagination({ count, nextId, paging, labels }: {
   </div>;
 }
 function LyricReader({ publication, labels, personal, toggle, opened }: {
-  publication: PreparedLyrics; labels: Labels; personal?: PersonalStore; toggle: (reference: PersonalReference) => void;
+  publication: LyricLibrary; labels: Labels; personal?: PersonalStore; toggle: (reference: PersonalReference) => void;
   opened: (reference: PersonalReference) => void;
 }) {
   const { id } = useParams();
@@ -43,9 +44,28 @@ function LyricReader({ publication, labels, personal, toggle, opened }: {
   const state: unknown = location.state;
   const origin = state !== null && typeof state === "object" && "browseFrom" in state ? state.browseFrom : undefined;
   const fromBrowsing = origin === "/lyrics" || origin === "/lists" || origin === "/favorites" || origin === "/recent";
-  const item = id ? publication.item(id) : undefined;
+  const [loaded, setLoaded] = useState<LyricItem>();
+  const [busy, setBusy] = useState(false), [error, setError] = useState(""), [cancelled, setCancelled] = useState(false);
+  const [attempt, setAttempt] = useState(0);
+  const controller = useRef<AbortController | null>(null);
+  const known = id ? publication.summary(id) : undefined;
+  const item = !cancelled && id ? publication.item(id) ?? (loaded?.lyricId === id ? loaded : undefined) : undefined;
   const reference: PersonalReference | undefined = item && { kind: "lyric", lyricId: item.lyricId };
   const favorite = reference && personal?.personal ? hasFavorite(personal.personal, reference) : false;
+  useEffect(() => {
+    setError(""); setCancelled(false);
+    if (!id || !publication.summary(id) || publication.item(id)) { setBusy(false); return; }
+    const request = new AbortController();
+    controller.current = request; setBusy(true);
+    void publication.read(id, request.signal).then(value => {
+      if (!request.signal.aborted) setLoaded(value);
+    }).catch(reason => {
+      if (!request.signal.aborted) setError(reason instanceof Error ? reason.message : String(reason));
+    }).finally(() => {
+      if (controller.current === request) { controller.current = null; setBusy(false); }
+    });
+    return () => { request.abort(); if (controller.current === request) controller.current = null; };
+  }, [id, publication, attempt]);
   useEffect(() => {
     if (item) opened({ kind: "lyric", lyricId: item.lyricId });
   }, [item, opened]);
@@ -56,7 +76,13 @@ function LyricReader({ publication, labels, personal, toggle, opened }: {
       }
     }}>← {origin === "/lists" ? labels.backToList : origin === "/favorites" ? labels.favorites
       : origin === "/recent" ? labels.recentHistory : labels.lyricBack}</Link>
-    {!item ? <p role="alert">{labels.lyricsUnavailable}</p> : <>
+    {!known ? <p role="alert">{labels.lyricsUnavailable}</p> : !item ? <>
+      {error ? <p role="alert" className={styles.error}>{labels.error}: {error}</p>
+        : <p role="status">{cancelled ? labels.loadingCancelled : labels.loading}</p>}
+      {busy ? <button onClick={() => {
+        controller.current?.abort(); controller.current = null; setBusy(false); setCancelled(true);
+      }}>{labels.cancel}</button> : <button onClick={() => setAttempt(value => value + 1)}>{labels.retry}</button>}
+    </> : <>
       <header className={styles.readerHeader}>
         <h1 lang="kn">{item.title}</h1>
         {personal && reference && <button className={styles.secondary} aria-pressed={favorite} onClick={() => toggle(reference)}>
@@ -73,7 +99,7 @@ function LyricReader({ publication, labels, personal, toggle, opened }: {
   </section>;
 }
 export function ReferenceFavorites({ labels, personal, publication, legacyPublication, toggle }: {
-  labels: Labels; personal: PersonalStore; publication?: PreparedLyrics; legacyPublication?: Publication;
+  labels: Labels; personal: PersonalStore; publication?: LyricLibrary; legacyPublication?: Publication;
   toggle: (reference: PersonalReference) => void;
 }) {
   const location = useLocation();
@@ -93,17 +119,17 @@ export function ReferenceFavorites({ labels, personal, publication, legacyPublic
   ].filter(group => group.entries.length);
   return <div hidden={location.pathname !== "/favorites"}>{groups.map((group, index) => {
     const entries = group.kind === "lyric" ? group.entries.filter(reference => reference.kind === "lyric" &&
-      (!paging.query || publication?.item(reference.lyricId)?.title.includes(paging.query))) : group.entries;
+      (!paging.query || publication?.summary(reference.lyricId)?.title.includes(paging.query))) : group.entries;
     const shown = group.kind === "lyric" ? entries.slice(0, paging.limit) : entries;
     const next = entries[paging.limit];
     return <section key={group.kind} aria-label={group.label}>
     <h2 tabIndex={-1} ref={index === 0 ? heading : undefined}>{group.label}</h2>
-    {group.kind === "lyric" && <p>{publication ? labels.lyricPersonalLimits : labels.lyricCatalogPending}</p>}
+    {group.kind === "lyric" && <p>{publication ? labels.lyricOnlineLimits : labels.lyricOnlineCatalogPending}</p>}
     {group.kind === "lyric" && publication && <label>{labels.lyricTitleFilter}
       <input type="search" value={paging.query} onChange={event => paging.setQuery(event.target.value)} />
     </label>}
     <div id={group.kind === "lyric" ? paging.resultsId : undefined} className={styles.grid}>{shown.map(reference => {
-      const item = reference.kind === "lyric" ? publication?.item(reference.lyricId) : undefined;
+      const item = reference.kind === "lyric" ? publication?.summary(reference.lyricId) : undefined;
       return <article className={styles.card} key={referenceKey(reference)}>
         {item ? <h3 lang="kn">{item.title}</h3> : <p>{group.pending ? labels.referencePending : labels.lyricsUnavailable}</p>}
         <code>{reference.kind === "lyric" ? reference.lyricId : reference.videoId}</code>
@@ -120,7 +146,7 @@ export function ReferenceFavorites({ labels, personal, publication, legacyPublic
   })}</div>;
 }
 export function Lyrics({ labels, publication, onPrepared, personal, toggle, opened }: {
-  labels: Labels; publication?: PreparedLyrics; onPrepared: (publication: PreparedLyrics) => void;
+  labels: Labels; publication?: LyricLibrary; onPrepared: (publication: LyricLibrary) => void;
   personal?: PersonalStore; toggle: (reference: PersonalReference) => void;
   opened: (reference: PersonalReference) => void;
 }) {
@@ -128,34 +154,34 @@ export function Lyrics({ labels, publication, onPrepared, personal, toggle, open
   const active = /^\/lyrics(?:\/|$)/u.test(location.pathname);
   const catalogActive = /^\/lyrics\/?$/u.test(location.pathname);
   const [busy, setBusy] = useState(false), [error, setError] = useState("");
-  const [progress, setProgress] = useState<{ done: number; total: number }>();
+  const [cancelled, setCancelled] = useState(false), [attempt, setAttempt] = useState(0);
   const paging = useLyricPaging("lyric-read");
   const controller = useRef<AbortController | null>(null);
-  useEffect(() => () => controller.current?.abort(), []);
-  function prepare() {
+  useEffect(() => {
+    if (!active || publication) return;
     const request = new AbortController();
-    controller.current?.abort(); controller.current = request;
-    setBusy(true); setError(""); setProgress(undefined);
-    void prepareLyrics(request.signal, (done, total) => {
-      if (controller.current === request && !request.signal.aborted) setProgress({ done, total });
-    }).then(value => {
+    controller.current = request;
+    setBusy(true); setError(""); setCancelled(false);
+    void loadLyricCatalog(request.signal).then(value => {
       if (controller.current === request && !request.signal.aborted) onPrepared(value);
     }).catch(reason => {
       if (controller.current === request && !request.signal.aborted) setError(reason instanceof Error ? reason.message : String(reason));
     }).finally(() => {
-      if (controller.current === request) { controller.current = null; setBusy(false); setProgress(undefined); }
+      if (controller.current === request) { controller.current = null; setBusy(false); }
     });
-  }
+    return () => { request.abort(); if (controller.current === request) controller.current = null; };
+  }, [active, publication, onPrepared, attempt]);
   const entries = publication?.catalog.filter(entry => entry.title.includes(paging.query)) ?? [];
   const shown = entries.slice(0, paging.limit);
   return <section hidden={!active}>
-    <aside className={styles.notice}><p>{labels.lyricPreviewNotice}</p><p>{labels.lyricPersonalLimits}</p></aside>
+    <aside className={styles.notice}><p>{labels.lyricPreviewNotice}</p><p>{labels.lyricOnlineLimits}</p></aside>
     {!publication && <section className={styles.reader}>
       <h1>{labels.ownerLyrics}</h1>
       {error && <p className={styles.error} role="alert">{labels.error}: {error}</p>}
-      {busy ? <><p role="status">{labels.loading} {progress && `${progress.done} / ${progress.total}`}</p>
-        <button onClick={() => { controller.current?.abort(); controller.current = null; setBusy(false); setProgress(undefined); }}>{labels.cancel}</button></>
-        : <button onClick={prepare}>{error ? labels.retry : labels.prepareLibrary}</button>}
+      {!error && <p role="status">{cancelled ? labels.loadingCancelled : labels.loading}</p>}
+      {busy ? <button onClick={() => {
+        controller.current?.abort(); controller.current = null; setBusy(false); setCancelled(true);
+      }}>{labels.cancel}</button> : <button onClick={() => setAttempt(value => value + 1)}>{labels.retry}</button>}
     </section>}
     {publication && <>
       <div hidden={!catalogActive}>

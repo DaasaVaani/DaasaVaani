@@ -37,7 +37,8 @@ legacy mapping or unrestricted source/personal migration is authorized.
 manual local API -> proposed Library source/assets/settings -> review PR
 -> post-merge global conversion/index/package -> full validation
 -> static compatible artifacts -> clients
--> explicit preparation/refresh -> completely validated active snapshot
+   -> online catalog/selected-item validation -> in-memory reader
+   -> explicit preparation/refresh -> completely validated active snapshot
 ```
 
 Owner-supplied text follows the independent local import -> reviewed canonical
@@ -69,7 +70,7 @@ Initial values and exact field bounds belong only in the linked owning files.
 | Owner/source and keys | Current application and validation | Compatibility/open work |
 | --- | --- | --- |
 | [Web settings/schema](../settings/web.schema.json): `base`, `descriptorUrl`, `canonicalBaseUrl`, `listLinkPath`, `listFileName` | Strict build-time settings; fixture artifact entry and minimal-list URL/file projection | Public route/origin changes require old-link/hosting review; distinct real-publication settings below never reinterpret fixture formats |
-| [Web settings/schema](../settings/web.schema.json): `lyricPreview.descriptorUrl`, `pageSize`, `maxItems`, `maxEncodedBytes`, `maxDecodedBytes`, `concurrentRequests` | Credential-free absolute HTTPS endpoint, full preparation plan/count/aggregate bounds before item requests, bounded workers and explicit complete paging | Separate `lyric-preview-v1`, consented memory-only content lifecycle; no production on-demand or persistent offline claim; personal references follow the independent v5 protocol below |
+| [Web settings/schema](../settings/web.schema.json): `lyricPreview.descriptorUrl`, `pageSize`, `maxItems`, `maxEncodedBytes`, `maxDecodedBytes`, `concurrentRequests` | Credential-free absolute HTTPS endpoint, verified metadata/catalog count, bounded requested-item cache/in-flight byte reservations and complete paging; complete-preparation helper retains whole-plan/concurrent-worker validation | Separate prelaunch `lyric-preview-v1`, on-demand online memory-only lifecycle; no persistent offline or complete production-profile claim; see the [reader lifecycle](lyric-preview.md#online-loading-and-failure-behavior) and independent personal v5 protocol below |
 | [Web settings](../settings/web.yml): `transferChunkBytes`, `listCompressionLevel` | Byte allocation/compression controls passed to the dedicated codec worker; schema and actual-ceiling codec tests | Encoding choices do not narrow accepted valid input or change decoded/text limits |
 | [Web settings](../settings/web.yml): `databaseName` | Build-time Dexie/native IndexedDB identity | Changing it is not a migration; it would strand the prior database and requires explicit compatibility handling |
 | [Web settings](../settings/web.yml): `fontFamily`, `readerFontSize`, `space`, `contentWidth`, `readerWidth`, `themes` | Typed CSS tokens, system fonts, three palettes and measured contrast checks | Personal font/density/helper/script settings and physical-device/font conformance remain incomplete |
@@ -321,6 +322,11 @@ through the same validated transaction, with no automatic fallback/title.
 Cancellation/no selection changes nothing; an intervening write invalidates the
 choice and requires reselection. Duplicate list names are distinguished by local
 list UUID in the chooser, without renaming, merging or selecting a target by name.
+After a successful append, the chooser remains disabled until its observed store
+has reached that committed revision, or a replacement epoch supplies a new
+snapshot. A second selection must not capture pre-commit list contents while
+the asynchronous personal subscription catches up. This does not rebase an
+existing selection or relax concurrent-write refusal.
 The hash-link preview derives its complete hash from the router's current
 location, including route query/hash text so unsupported suffixes are rejected.
 It must not capture `window.location.hash` in the parent outside router updates:

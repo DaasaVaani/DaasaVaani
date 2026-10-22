@@ -2,7 +2,7 @@ import { useLayoutEffect, useRef, useState } from "react";
 import { Link, useLocation } from "react-router-dom";
 import messages from "../shared/generated/web/ui.json";
 import type { Publication } from "./artifacts";
-import type { PreparedLyrics } from "./lyric-publication";
+import type { LyricLibrary } from "./lyric-publication";
 import { referenceKey, type PersonalStore, type RecentHistoryV1 } from "./personal-model";
 import { updateHistory } from "./personal";
 import styles from "./App.module.css";
@@ -40,14 +40,14 @@ export function HistoryControls({ labels, history }: { labels: Labels; history: 
 }
 
 export function RecentHistory({ labels, personal, publication, lyrics }: {
-  labels: Labels; personal: PersonalStore; publication?: Publication; lyrics?: PreparedLyrics;
+  labels: Labels; personal: PersonalStore; publication?: Publication; lyrics?: LyricLibrary;
 }) {
   const location = useLocation();
   return <section hidden={location.pathname !== "/recent"} aria-label={labels.recentHistory}>
     <h1>{labels.recentHistory}</h1>
     <HistoryControls labels={labels} history={personal.history} />
     <div className={styles.grid}>{personal.history.entries.map(reference => {
-      const item = reference.kind === "lyric" ? lyrics?.item(reference.lyricId) : publication?.summary(reference.videoId);
+      const item = reference.kind === "lyric" ? lyrics?.summary(reference.lyricId) : publication?.summary(reference.videoId);
       const pending = reference.kind === "lyric" ? !lyrics : !publication;
       const path = reference.kind === "lyric" ? `/lyrics/${reference.lyricId}` : item ? `/item/${encodeURIComponent(reference.videoId)}` : undefined;
       return <article className={styles.card} key={referenceKey(reference)}>

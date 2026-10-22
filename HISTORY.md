@@ -1,5 +1,90 @@
 # Documentation history
 
+## 2026-10-22: on-demand online reading and accelerated delivery
+
+- The owner approved parallel Website/native slices, larger coherent validated
+  batches, text-first reading/search/personal/offline priority, escalation only
+  for genuine decisions and reuse of Shared contracts/conformance resources.
+  No approved feature was removed and no validation or publication gate waived.
+- Archived the preceding Website real-reader lifecycle: merely opening
+  `#/lyrics` or a UUID link made no owner request; explicit consent downloaded
+  and validated the complete publication before exposing catalog/reading.
+  All content was in memory, reload required consent again, reads after
+  preparation made no item request, and list Read initially reached that gate.
+  Whole-library count/byte planning and worker abort/settle behavior belonged to
+  that preparation path. The independently pinned Android complete-preparation
+  requirement remains unchanged; Website online loading now uses the approved
+  metadata-plus-selected-item direction, not persistent offline activation.
+- The prior Website750ec0ca3e69a6904d07e1c35e5fb41b2d548c4e passed exact
+  preflight39719424532, main/Pages39719671491 and CodeQL39719670656.
+  Public HTML/JS/CSS/legal resources matched the exact CI artifact. Its JS was
+  assets/index-5N3HRknV.js,712478 bytes,SHA256
+  e39877bc4c34e5dcf2d3f58f215af295d1f41cfb27696e72158d6ac240ae6b84.
+  Isolated Chromium verified873 requests for871 actual approved lyrics,
+  canonical desktop/320px reading, exact typed recent ordering/repeat no-write,
+  return/control focus, clear/disable/restart/re-enable and no implicit owner
+  requests. Early hosted harness attempts selected the still-mounted old
+  Recently opened control before Settings rendered; waiting for the actual
+  Settings heading fixed the harness, without changing application behavior.
+- Archived native Room3/history-pending descriptions. Android published
+  c13171f6ed874aa5178c6c0cd0e5dc9dd3c09d0d with independent Shared9b8845a,
+  Room4/accounting4 and preserving v1/v2/v3 upgrades. Full `npm run config`
+  and `.\gradlew.bat :core:build :app:build :app:lintDebug :app:lintRelease
+  :app:connectedDebugAndroidTest --no-daemon --console=plain` passed36 core/
+  48 connected tests without failures/skips. Hygiene74,YAML5,actionlint and
+  whitespace passed; lint reported54 warnings per variant, app JVM NO-SOURCE.
+  Exact preflight39720260569/main39721301287 passed and parent verified every
+  required CI step and local/remote SHA. Connected evidence is local, not CI.
+  Its completed main-contained/no-PR validation branch was removed; its tree/
+  Shared were clean and no Website/server/emulator mutation occurred.
+- Shared published4111fea55b927d3be85ddee6b6fc8e256b8be36c with additive
+  platform-distinct online-loading labels only; existing native preparation
+  labels/contracts remain unchanged. Full28 tests, hygiene72,YAML11,
+  deterministic generation, actionlint/ShellCheck/whitespace passed; exact
+  preflight39721959010/main39722156616 passed before Website independently
+  adopted it. Native remains independently pinned to9b8845a.
+- Extracted shared catalog/item validation and retained complete-preparation
+  conformance coverage, including the actual64MiB boundary. Focused loader
+  tests passed11: metadata-only requests, selected immutable references, cache
+  reuse/unknown IDs, exact budgets, failure-reservation rollback, retries and
+  late valid responses after ignored cancellation. First combined browser run
+  passed51/failed3: the old exact bare catalog-heading assertion no longer
+  matched the immediately available counted catalog heading. Its semantic
+  catalog-region/count/focus assertions retain the intended navigation proof.
+- The next full `npm run check` passed90 units/227 browser cases and failed
+  one repeated reader-to-list addition with an explicit stale-data refusal.
+  Successful own commits could re-enable the chooser before its asynchronous
+  personal subscription delivered the new list/revision. The chooser now waits
+  for observation of its returned commit before allowing another selection;
+  concurrent changes still invalidate captured choices, without automatic retry
+  or rebasing. A deterministic browser case queues a real nonmutating IndexedDB
+  transaction to delay observation, requires disabled controls during that delay,
+  then checks two independent typed occurrences, exactly two revisions and
+  unchanged personal/history rows. `node node_modules\typescript\bin\tsc
+  --noEmit` passed after the coupled fix.
+- `npm run test:e2e -- lyrics --grep 'own committed|explicit real favorites'`
+  ran all33 lyric browser cases because the npm/Windows argument forwarding
+  omitted the grep flag; all passed. Final `npm run check` passed90 units,
+  fresh production build/typecheck and231 browser cases with zero retries,
+  failures or skips. The existing500kB chunk advisory remains, not a
+  production performance pass. VS Code's unit-test tool found no adapter;
+  the repository's configured `npm test` also independently passed90.
+- Documentation bootstrap checks passed20 Markdown files/199 local links and
+  anchors, UTF8/newline/whitespace/fences and153 unchanged normative requirement
+  rows; four strict YAML documents, actionlint with ShellCheck and both
+  whitespace checks passed. The first inline requirement-count assertion
+  incorrectly included SHA-256/UTF-16 prose tokens; anchoring to normative table
+  rows fixed the checker without changing requirements.
+- Partial coverage: UX-12/13, OFF-11/12, DATA-03/04 and LIB-01/05/09/10.
+  This is bounded current-publication online reading, not full search,
+  persistent offline activation, transliteration or release acceptance.
+  Android complete preparation and independent Shared pin remain unchanged.
+- Live Website rulesets25497312/25525161 matched the current operating guide:
+  the temporary owner-authorized role5 direct-main implementation exception
+  remains on PR/check rules only; force/delete protection has no bypass.
+  Publication still requires successful exact-SHA lint/full-app preflight and
+  unchanged-SHA main validation/deployment; normal policy remains a release gate.
+
 ## 2026-10-22: Website successful-open history and personal v5
 
 - Archived the preceding v4 protocol: native40/control4, three stores, the

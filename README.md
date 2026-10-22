@@ -7,11 +7,11 @@ static PWA and a separate native Android app.
 The approved [lyric identity and optional media contract](https://github.com/DaasaVaani/shared/blob/main/docs/lyric-identity.md)
 defines permanent lyric UUIDs and text-only publication without YouTube/images.
 Library publishes owner-approved canonical lyrics without videos or images.
-The [real lyric preview](docs/lyric-preview.md) downloads and validates the
-complete publication only after explicit consent, then supports UUID-based
-reading in memory. Successful opens update optional device-only Recently opened
+The [real lyric reader](docs/lyric-preview.md) loads verified catalog metadata
+when online browsing or an exact UUID link is opened, then downloads only the
+selected lyric. Verified content stays in memory. Successful opens update optional device-only Recently opened
 history, initially enabled with separate disable/clear controls; disabling
-recording preserves existing entries. Preparation and previews do not record
+recording preserves existing entries. Catalog loading and previews do not record
 activity. Explicit controls save
 typed lyric favorites and independent list occurrences locally. List v2 transfers
 preserve lyric/legacy identities and user text; v1 imports remain supported.
@@ -46,7 +46,7 @@ lyrics; explicit Read opens known entries, and readers can add independent
 occurrences to chosen lists. Recitation remains incomplete.
 Shared generates the English/Kannada UI resources; Android has separate real
 text-only preparation/reading and fixture features with typed Room favorites,
-durable lists/independent occurrences, preferences and locale/theme controls.
+durable lists/independent occurrences, recent history, preferences and locale/theme controls.
 Strict v1/v2 file/pasted-link previews can be explicitly saved as independent
 lists; readers and list entries use exact typed identities without guessing.
 Native preview and list management work before preparation;

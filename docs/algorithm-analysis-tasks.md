@@ -27,6 +27,17 @@ explicitly selected below remain **candidates for analysis**, not approvals. Pre
 directions such as code-point OSA, one global JSON/gzip index, additive ranking,
 Sanscript, ZIP STORE, Room/Dexie and explicit snapshot activation.
 
+The current [bounded canonical online reader](lyric-preview.md#online-loading-and-failure-behavior)
+validates catalog metadata in time linear in its decoded size, then uses expected
+O(1) exact-ID map lookup. An uncached object requires O(E + D + L)
+decoding/text/line validation (encoded bytes E, decoded bytes D, line/layout records L);
+unrequested lyric text is not loaded. Retained memory scales with catalog metadata,
+verified requested content and in-flight decoder work, under the owning logical
+encoded/decoded ceilings. Failed/aborted reservations are released without
+activating content. These logical bounds are not allocator/peak-heap or full
+production/offline proofs. Literal title filtering remains a catalog scan, not
+the reviewed linguistic search algorithm.
+
 Priority is a proposed analysis order, not an approved delivery commitment:
 **A** = resolve correctness/feasibility or data-preservation risks early;
 **B** = resolve before the owning implementation slice. Work can proceed

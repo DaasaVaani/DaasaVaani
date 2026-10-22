@@ -10,10 +10,10 @@ import { listNameHint, useListSave } from "./ListSave";
 import { ListExport, transferMessage, type ExportSource } from "./ListExport";
 import { ListEntryView } from "./ListEntryView";
 import type { Publication } from "./artifacts";
-import type { PreparedLyrics } from "./lyric-publication";
+import type { LyricLibrary } from "./lyric-publication";
 
 export function ListPreview({ labels, initialLink, personal, publication, lyrics }: {
-  labels: typeof messages.en; initialLink?: string; personal?: PersonalStore; publication?: Publication; lyrics?: PreparedLyrics;
+  labels: typeof messages.en; initialLink?: string; personal?: PersonalStore; publication?: Publication; lyrics?: LyricLibrary;
 }) {
   const id = useId();
   const [link, setLink] = useState("");

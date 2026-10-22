@@ -11,7 +11,7 @@ import { Lists } from "./Lists";
 import { AddToList } from "./AddToList";
 import { Lyrics, ReferenceFavorites } from "./Lyrics";
 import { HistoryControls, RecentHistory } from "./RecentHistory";
-import type { PreparedLyrics } from "./lyric-publication";
+import type { LyricLibrary } from "./lyric-publication";
 import type { PersonalReference } from "./list-transfer-types";
 import { hasFavorite, toggleFavorite } from "./personal-model";
 import styles from "./App.module.css";
@@ -21,7 +21,7 @@ function FixtureOnly({ children }: { children: ReactNode }) {
   return /^\/lyrics(?:\/|$)/u.test(useLocation().pathname) ? null : children;
 }
 function ListRoute({ labels, personal, publication, lyrics }: {
-  labels: Labels; personal?: PersonalStore; publication?: Publication; lyrics?: PreparedLyrics;
+  labels: Labels; personal?: PersonalStore; publication?: Publication; lyrics?: LyricLibrary;
 }) {
   const location = useLocation();
   const link = new URL(__WEB_CONFIG__.listLinkPath, __WEB_CONFIG__.canonicalBaseUrl).href +
@@ -91,7 +91,7 @@ function Reader({ publication, labels, personal, store, toggle, opened }: Reader
 }
 
 function ListsSession({ labels, personal, publication, lyrics }: {
-  labels: Labels; personal: PersonalStore; publication?: Publication; lyrics?: PreparedLyrics;
+  labels: Labels; personal: PersonalStore; publication?: Publication; lyrics?: LyricLibrary;
 }) {
   const location = useLocation();
   const state: unknown = location.state;
@@ -211,7 +211,7 @@ function Library({ publication, labels, personal, favoritesOnly }: {
 
 export default function App() {
   const [publication, setPublication] = useState<Publication>();
-  const [lyrics, setLyrics] = useState<PreparedLyrics>();
+  const [lyrics, setLyrics] = useState<LyricLibrary>();
   const [personalReady, setPersonalReady] = useState(false);
   const [store, setStore] = useState<PersonalStore>();
   const [personal, setPersonal] = useState<Personal>(browserDefaultPersonal);

@@ -15,7 +15,6 @@ async function expectHistory(page: Page, entries: PersonalReference[], enabled =
 }
 async function prepare(page: Page) {
   await nav(page, labels.ownerLyrics).click();
-  await page.getByRole("button", { name: labels.prepareLibrary, exact: true }).click();
   await expect(page.getByRole("article")).toHaveCount(2);
 }
 async function open(page: Page, index = 0) {
@@ -26,7 +25,7 @@ async function settled(page: Page) {
   await page.evaluate(() => new Promise<void>(resolve => requestAnimationFrame(() => requestAnimationFrame(() => resolve()))));
 }
 
-test("only successful explicit real and fixture reads record typed history; preparation and preview do not", async ({ page }) => {
+test("only successful explicit real and fixture reads record typed history; catalog loading and preview do not", async ({ page }) => {
   const requests = await serveLyrics(page);
   await page.goto("/#/recent");
   await expect(page.getByRole("checkbox", { name: labels.recentHistoryEnabled, exact: true })).toBeChecked();
@@ -133,10 +132,11 @@ test("history commit never steals focus from another control or a new route", as
   await expect(nav(page, labels.ownerLyrics)).toBeFocused();
   await changeAndMove(true);
   await expectHistory(page, []);
-  await expect(page.getByRole("heading", { name: labels.ownerLyrics, exact: true })).toBeVisible();
+  await expect(page.getByRole("region", { name: labels.ownerLyrics, exact: true })).toBeVisible();
+  await expect(page.getByRole("article")).toHaveCount(2);
   await settled(page);
   await expect(page.getByRole("main")).toBeFocused();
-  expect(requests).toEqual([]);
+  expect(requests).toHaveLength(2);
 });
 
 test("history quota failure is explicit and atomic without hiding verified reading or fabricating a saved open", async ({ page }) => {
@@ -163,7 +163,7 @@ test("history quota failure is explicit and atomic without hiding verified readi
   await page.getByRole("link", { name: "← " + labels.lyricBack, exact: true }).click();
   await open(page);
   await expectHistory(page, [lyric(1)]);
-  expect(requests).toHaveLength(4);
+  expect(requests).toHaveLength(3);
 });
 
 test("an over-capacity current history is refused without resetting its preference or any personal row", async ({ page }) => {
@@ -223,7 +223,7 @@ test("the actual recent window retains unresolved typed identities across reload
   await page.reload();
   await expect(region.getByRole("article")).toHaveCount(maxRecents);
   await expectHistory(page, [lyric(1), ...entries.slice(0, -1)]);
-  expect(requests).toHaveLength(4);
+  expect(requests).toHaveLength(3);
 });
 
 for (const invalid of [false, true]) {

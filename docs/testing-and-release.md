@@ -76,20 +76,26 @@ keyboard/new-page focus, independent Favorites paging, reader Back/Forward,
 query reset and worker-error recovery without stale cards or false no-results.
 These synthetic fixtures are not a production language/corpus benchmark.
 The [real-preview suite](../tests/browser/lyrics.spec.ts) serves only synthetic,
-independently hashed public-family objects. It verifies explicit whole-download
-consent, complete title paging, exact canonical text/layout, locale independence,
+independently hashed public-family objects. It verifies metadata-only browsing,
+exact selected-object requests without complete preparation, complete title paging, exact canonical text/layout, locale independence,
 Back/Forward focus/scroll, corrupt-object failure/retry, cancellation, unknown IDs,
-reload reconsent and byte-equivalent personal database snapshots for reading
+direct-route/reload loading and byte-equivalent personal database snapshots for reading
 with recent recording explicitly disabled.
 Additional typed-personal journeys cover explicit real favorites/repeated
 reader-to-list saves, unresolved favorites after reload with no implicit download,
+own-commit observation delays without stale reselection or lost occurrences,
 independent real Favorites title filtering and complete configured-size paging,
 new-page/reader-return focus and unchanged personal records,
 mixed v2 preview/re-export/new-list save, UUID-looking legacy separation and
 real list-origin return/focus/unsaved context. Loader units
 cover compatible optional fields versus unsupported capabilities/versions,
 identity/control/layout/hash/size failures and aggregate/count exact/+1 bounds,
-including the actual configured decoded-byte ceiling. Incremental commands:
+including the actual configured decoded-byte ceiling. Online cache cases prove
+metadata-only loading, unknown-ID no-item requests, successful cache reuse,
+pre-request aggregate refusal, failed/cancelled reservation release and no cache
+activation from late valid bytes after an ignored abort. Browser cases prove
+explicit catalog/item error and cancellation/retry, with no false no-results or
+history write before a successful exposed reader. Incremental commands:
 
 ```powershell
 npm test -- lyric-publication
@@ -98,7 +104,7 @@ npm run test:e2e -- lyrics
 
 These focused checks do not replace `npm run check` before finalization/push.
 The [history suite](../tests/browser/recent-history.spec.ts) covers actual real
-and fixture reader success, no activity from preparation/preview/failed routes,
+and fixture reader success, no activity from catalog loading/preview/failed routes,
 distinct typed ordering and the actual configured rolling-window ceiling,
 disabled-state persistence, clear independence and no re-recording of a
 still-mounted reader after peer-tab controls. It checks v4 preservation/rollback,
@@ -196,8 +202,9 @@ npm run config
 App-level JVM tests currently have no sources; the pure core has executable JVM
 tests. The connected test launches the actual Compose app, requires preparation,
 downloads/verifies the served fixtures and opens canonical text. The native
-suite also covers Room3 typed favorites, durable list/occurrence management,
-v1/v2 import/export, reader/list navigation and locale/theme controls;
+suite also covers Room4 typed favorites, durable list/occurrence management and
+device-only recent history, preserving migrations, v1/v2 import/export,
+reader/list navigation and locale/theme controls;
 see the [native validation guide](https://github.com/DaasaVaani/AndroidApp/blob/main/README.md)
 for its owning scenarios and current limitations. The Website demo
 must run at the endpoint configured in Android settings. API26/other devices,
@@ -251,8 +258,8 @@ IDs or a release acceptance declaration.
 | SEARCH-12/13 | Sampled independent substring/full-matrix oracle, counted-gram candidates, native core checks and real browser search | Ordinary fixture text only; reviewed profiles/aliases/markers, exhaustive proof and complete native parity pending |
 | PLAT-01/05 | Real React and Compose apps; built-site browser journeys at desktop/mobile/320px and one native API36 reading journey | PWA installation, complete routes/layout/interaction modes and supported-platform/device matrix pending |
 | I18N-01/02/03, SET-04 | Matching two-locale resources; web first-use ordered browser-language selection, configured fallback, persisted four-mode appearance with contrast/media checks; native durable locale/theme preferences; canonical text remains independent | Complete script/personal preferences, device/font matrix and full localization conformance pending |
-| LIB-01/02/03/04/05/08/09/10/11 | Typed web/native lyric/legacy favorites/lists, independent occurrences/plain text, duplicate-name confirmation, management/manual replacement, exact catalog details/explicit reading, reader-to-list addition and preserving web v5/native Room3 upgrades | Recitation/offline/full personal collections and remaining production migrations remain incomplete |
-| LIB-06, SET-04, QUAL-05 | Web v5 default-on device-only typed50-distinct successful-open history, explicit disable/re-enable/clear, retained unresolved refs, exact accounting, migration/failure/no-network and restart checks | Native history, selected-script/offline parity and full personal backup remain incomplete |
+| LIB-01/02/03/04/05/08/09/10/11 | Typed web/native lyric/legacy favorites/lists, independent occurrences/plain text, duplicate-name confirmation, management/manual replacement, exact catalog details/explicit reading, reader-to-list addition and preserving web v5/native Room4 upgrades | Recitation/offline/full personal collections and remaining production migrations remain incomplete |
+| LIB-06, SET-04, QUAL-05 | Web v5/native Room4 default-on device-only typed50-distinct successful-open history, explicit disable/re-enable/clear, retained unresolved refs, exact accounting, migration/failure/no-network and restart checks | Selected-script/offline parity and full personal backup remain incomplete |
 | UX-13 | In-session Library/Favorites context and list-origin selected editor state, Back/Forward/reader return with measured scroll/focus; removed-result/direct-reader/reload coverage | No persistent search history; filters/Explore, offline and Android continuity pending |
 | XFER-01/02/03/04/05/06/08 | Bounded web worker/native v1/v2 codecs with independent vectors, explicit previews/transactional new-list saves and saved-v2 exports, actual cross-client v2 codec round trips, catalog-only details, browser share/copy adapters, cancellation/errors/no-write checks | Real sharing-surface delivery, verified App Links and full backups incomplete |
 | SET-01/02 | Owned settings/schema guards, Shared policy binding and immutable clean fixture-tool pin | Complete production settings inventory, language/protocol/backup contracts and all compatibility fixtures pending |
