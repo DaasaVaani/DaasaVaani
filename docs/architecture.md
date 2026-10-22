@@ -169,6 +169,9 @@ Personal values never enter repository settings; payloads cannot override limits
   recognizes only the explicit Library/Favorites/Lists origins; direct/new-tab
   readers use Library fallback. A hidden list's captured revision is not silently
   advanced by concurrent personal writes.
+- Canonical Show another lyric uses the entire verified catalog, current/session
+  UUID exclusion and the ordinary reader without separate personal choice state;
+  see the [discovery boundary](lyric-preview.md#show-another-lyric).
 - Workbox shell resources separate from content under the
   [normal-update protocol](#web-app-interface-shell-and-normal-updates).
 - Root /open/ hash links, narrow signed Android association and browser fallback;

@@ -28,6 +28,42 @@ test("complete preparation validates every UUID object before exposing exact tex
   expect(requests.every(url => url.startsWith(new URL(".", __WEB_CONFIG__.lyricPreview.descriptorUrl).href))).toBe(true);
   expect(fetch).toHaveBeenCalledWith(new URL(__WEB_CONFIG__.lyricPreview.descriptorUrl), expect.objectContaining({ credentials: "omit", cache: "no-store" }));
 });
+test("discovery reaches the whole verified catalog independently of paging without fetching or mutating content", async () => {
+  const count = __WEB_CONFIG__.lyricPreview.pageSize * 2 + 1, fixture = lyricFixture(count);
+  const requests = serve(fixture), library = await loadLyricCatalog(), before = structuredClone(library.catalog);
+  expect(requests).toHaveLength(2);
+  for (let index = 0; index < count; index++) {
+    expect(library.chooseAnother(undefined, () => (index + 0.5) / count)?.lyricId).toBe(lyricId(index + 1));
+  }
+  expect(library.chooseAnother(undefined, () => 0)?.lyricId).toBe(lyricId(1));
+  expect(library.chooseAnother(undefined, () => 1 - Number.EPSILON)?.lyricId).toBe(lyricId(count));
+  expect(library.chooseAnother(lyricId(1), () => 0)?.lyricId).toBe(lyricId(2));
+  expect(library.chooseAnother(lyricId(count), () => 1 - Number.EPSILON)?.lyricId).toBe(lyricId(count - 1));
+  expect(library.catalog).toEqual(before);
+  expect(library.catalog.every(summary => !library.item(summary.lyricId))).toBe(true);
+  expect(requests).toHaveLength(2);
+});
+test("discovery rejects empty published catalogs and handles sole/missing exclusions without invalid random values", async () => {
+  serve(lyricFixture(0));
+  await expect(loadLyricCatalog()).rejects.toThrow("Unsupported lyric manifest");
+  const random = vi.fn(() => 0);
+  serve(lyricFixture(1));
+  const sole = await loadLyricCatalog();
+  expect(sole.chooseAnother(undefined, () => 0)?.lyricId).toBe(lyricId(1));
+  expect(sole.chooseAnother(lyricId(99), () => 0)?.lyricId).toBe(lyricId(1));
+  expect(sole.chooseAnother(lyricId(1), random)).toBeUndefined();
+  expect(random).not.toHaveBeenCalled();
+  for (const invalid of [NaN, Infinity, -1, 1, 2]) {
+    expect(() => sole.chooseAnother(undefined, () => invalid)).toThrow("Invalid lyric choice random value");
+  }
+});
+test("prepared discovery stays with that verified catalog and requires no discovery or item request", async () => {
+  const requests = serve(lyricFixture()), library = await prepareLyrics(), before = requests.length;
+  const chosen = library.chooseAnother(lyricId(1), () => 0);
+  expect(chosen?.lyricId).toBe(lyricId(2));
+  expect(library.item(lyricId(2))?.lyricId).toBe(chosen?.lyricId);
+  expect(requests).toHaveLength(before);
+});
 test("additive optional fields are compatible while unknown required capabilities and future formats fail explicitly", async () => {
   serve(lyricFixture(1, { item: item => { item.optionalFuture = "ignored"; },
     manifest: manifest => { manifest.optionalFuture = true; }, descriptor: descriptor => { descriptor.optionalFuture = []; } }));

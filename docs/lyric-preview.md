@@ -76,6 +76,48 @@ The catalog/query/expanded page and available focus/scroll survive in-session
 reader return and Back/Forward. Reload resets this context and performs a fresh
 online metadata/selected-item load, without a complete-download gate.
 
+## Show another lyric
+
+EXP-02's explicit action is available on the verified canonical catalog and a
+successfully loaded canonical reader. It samples from the entire same verified
+catalog, never only title-filter matches, visible pages, favorites or history.
+The notice makes that independent scope and non-personalized behavior explicit.
+It does not load discovery metadata, classify items, prepare content or infer
+missing source fields.
+
+The reader excludes its current UUID. Catalog choice excludes the most recently
+successfully opened canonical UUID in that same catalog session, when present.
+This single process-local reference is not persisted or derived from Recently
+opened. If no eligible candidate exists, including a sole/current lyric, the
+action is disabled and an explicit unavailable status is shown. A malformed empty
+published catalog remains a manifest error under the unchanged nonempty schema;
+it is not converted into a successful empty discovery result.
+
+The selector filters the bounded catalog then uses the platform's ordinary
+non-security random fraction to select an eligible index. It validates injected
+fractions and reports faults explicitly rather than choosing a fallback.
+Selection costs O(catalog items) time/temporary references within `maxItems`.
+It changes no library objects or personal data and fetches nothing itself.
+The existing reader downloads/verifies only the chosen uncached object, or reuses
+that catalog's verified in-memory item. Failure/retry stays pinned to that object,
+not a silently chosen replacement. Literal text/layout/IDs and Favorite/Add to
+list controls remain the ordinary canonical reader.
+
+The first catalog choice pushes a reader; consecutive choices replace that reader,
+preserving its original Catalog/Favorites/Lists/Recently opened return context.
+Back therefore does not traverse a generated chain of reader choices. Catalog
+filter/pages and available originating focus/scroll survive normal return.
+Only a successful exposed reader records the existing optional history, once;
+selection failures and unavailable actions record nothing. Disabled history keeps
+reading fully no-write. Reload discards this discovery context.
+
+This is not reviewed Explore groups, first-publication-date discovery, Practice,
+personalized recommendations or complete persistent offline-version support.
+The native application independently requires complete preparation before reading;
+its feature/validation boundary belongs to its owning guide.
+
+## Personal reading and references
+
 The real route hides fixture notices/errors and synthetic preparation messages.
 Personal-storage errors remain explicit. Explicit reader controls save typed
 lyric favorites and new independent list occurrences; merely loading/reading
@@ -108,7 +150,7 @@ records, and all saved-list exports use minimal v2 without local IDs/lyric copie
 
 ## Coverage and open work
 
-This slice provides partial DATA-01/02/04/05, UX-07/13, OFF-02 and SET-01/02
+This slice provides partial DATA-01/02/04/05, UX-07/13, EXP-02/04, OFF-02 and SET-01/02
 coverage, with partial LIB-01/02/03/04/05/06/08/09/10/11 and XFER-01/02/03/04/05/06/08
 for the Website typed personal slice. See [validation commands and obligations](testing-and-release.md) and
 the [roadmap](implementation-roadmap.md). The native application independently

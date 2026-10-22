@@ -33,6 +33,13 @@ export class LyricLibrary {
   }
   summary(id: string) { return this.summaries.get(id); }
   item(id: string) { return this.items.get(id); }
+  chooseAnother(excludedId?: string, random: () => number = Math.random) {
+    const candidates = this.catalog.filter(summary => summary.lyricId !== excludedId);
+    if (!candidates.length) return undefined;
+    const value = random();
+    if (!Number.isFinite(value) || value < 0 || value >= 1) throw new Error("Invalid lyric choice random value");
+    return candidates[Math.floor(value * candidates.length)];
+  }
   assertCompleteFits() {
     let encoded = this.encoded, decoded = this.decoded;
     for (const summary of this.catalog) {

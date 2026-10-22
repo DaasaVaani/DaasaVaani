@@ -1,4 +1,4 @@
-import { useEffect, useId, useRef, useState } from "react";
+import { useCallback, useEffect, useId, useRef, useState } from "react";
 import { Link, Route, Routes, useLocation, useNavigate, useParams } from "react-router-dom";
 import messages from "../shared/generated/web/ui.json";
 import { loadLyricCatalog, type LyricLibrary } from "./lyric-publication";
@@ -11,6 +11,27 @@ import { ReadingPreferences, type ReadingPreferencesProps } from "./ReadingPrefe
 import styles from "./App.module.css";
 
 type Labels = typeof messages.en;
+function AnotherLyric({ publication, labels, excludedId, reading = false }: {
+  publication: LyricLibrary; labels: Labels; excludedId?: string; reading?: boolean;
+}) {
+  const navigate = useNavigate(), location = useLocation(), notice = useId();
+  const [error, setError] = useState("");
+  const available = publication.catalog.some(summary => summary.lyricId !== excludedId);
+  return <section>
+    <p id={notice} className={styles.muted}>{labels.anotherLyricNotice}</p>
+    <button disabled={!available} aria-describedby={notice} onClick={() => {
+      setError("");
+      try {
+        const chosen = publication.chooseAnother(excludedId);
+        if (!chosen) { setError(labels.noAnotherLyric); return; }
+        const state: unknown = location.state;
+        navigate(`/lyrics/${chosen.lyricId}`, { replace: reading, state: reading ? state : { browseFrom: "/lyrics" } });
+      } catch (reason) { setError(reason instanceof Error ? reason.message : String(reason)); }
+    }}>{labels.showAnotherLyric}</button>
+    {!available && <p role="status">{labels.noAnotherLyric}</p>}
+    {error && <p role="alert" className={styles.error}>{labels.error}: {error}</p>}
+  </section>;
+}
 function useLyricPaging(readPrefix: string) {
   const [query, setQuery] = useState(""), [pages, setPages] = useState(1);
   const nextFocus = useRef<string | undefined>(undefined), resultsId = useId();
@@ -91,6 +112,7 @@ function LyricReader({ publication, labels, personal, preferences, change, toggl
           {favorite ? labels.removeFavorite : labels.addFavorite}
         </button>}
       </header>
+      <AnotherLyric publication={publication} labels={labels} excludedId={item.lyricId} reading />
       {personal && <ReadingPreferences labels={labels} personal={preferences} change={change} />}
       <div lang="kn" className={styles.lyrics}>{item.lines.map((line, index) =>
         <p key={line.kind === "line" ? line.lineId : `layout-${index}`}
@@ -161,6 +183,13 @@ export function Lyrics({ labels, publication, onPrepared, personal, preferences,
   const [cancelled, setCancelled] = useState(false), [attempt, setAttempt] = useState(0);
   const paging = useLyricPaging("lyric-read");
   const controller = useRef<AbortController | null>(null);
+  const lastOpened = useRef<{ publication: LyricLibrary; lyricId: string } | undefined>(undefined);
+  const rememberOpened = useCallback((reference: PersonalReference) => {
+    if (reference.kind === "lyric" && publication?.summary(reference.lyricId)) {
+      lastOpened.current = { publication, lyricId: reference.lyricId };
+    }
+    opened(reference);
+  }, [opened, publication]);
   useEffect(() => {
     if (!active || publication) return;
     const request = new AbortController();
@@ -191,6 +220,8 @@ export function Lyrics({ labels, publication, onPrepared, personal, preferences,
       <div hidden={!catalogActive}>
         <section className={styles.hero}><h1>{labels.ownerLyrics}<span className={styles.count}>{publication.catalog.length}</span></h1>
           <label>{labels.lyricTitleFilter}<input type="search" value={paging.query} onChange={event => paging.setQuery(event.target.value)} /></label>
+          <AnotherLyric publication={publication} labels={labels}
+            excludedId={lastOpened.current?.publication === publication ? lastOpened.current.lyricId : undefined} />
         </section>
         <section id={paging.resultsId} className={styles.grid} aria-label={labels.ownerLyrics}>
           {shown.map(entry => <article className={styles.card} key={entry.lyricId}>
@@ -203,7 +234,7 @@ export function Lyrics({ labels, publication, onPrepared, personal, preferences,
       </div>
       <Routes>
         <Route path="/lyrics" element={null} />
-        <Route path="/lyrics/:id" element={<LyricReader publication={publication} labels={labels} personal={personal} preferences={preferences} change={change} toggle={toggle} opened={opened} />} />
+        <Route path="/lyrics/:id" element={<LyricReader publication={publication} labels={labels} personal={personal} preferences={preferences} change={change} toggle={toggle} opened={rememberOpened} />} />
         <Route path="/lyrics/*" element={<p role="alert">{labels.unknownRoute}</p>} />
         <Route path="*" element={null} />
       </Routes>

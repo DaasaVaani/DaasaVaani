@@ -43,6 +43,13 @@ fixture/v1 formats remain legacy-only. Full personal collections/backup and
 production adapters remain open. The [preview guide](lyric-preview.md) defines the current narrower lifecycle,
 not a change to approved production PWA on-demand reading/offline behavior.
 
+The Website's explicit [Show another lyric](lyric-preview.md#show-another-lyric)
+uses the entire same verified canonical catalog independently of title filtering,
+excludes the current/session-last-opened UUID, and preserves normal reader/history
+and return behavior. It adds no persisted choice history, inferred classifications
+or personalized recommendation. Reviewed Explore groups, publication dates,
+Practice and complete active-snapshot offline discovery remain open.
+
 Recently opened recording is initially enabled, device-only and bounded to the
 latest50 distinct successful opens, with separate clear/disable controls.
 The [Shared recent-history contract](https://github.com/DaasaVaani/shared/blob/main/docs/recent-history.md)

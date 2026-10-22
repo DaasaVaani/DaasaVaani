@@ -154,6 +154,20 @@ npm run test:e2e -- lyrics
 ```
 
 These focused checks do not replace `npm run check` before finalization/push.
+The [canonical discovery suite](../tests/browser/discovery.spec.ts) maps partial
+EXP-02/04 and UX-13 evidence: selection beyond filtered pages, exact chosen-object
+requests/text/layout/IDs, current/last-opened exclusion, normal history/revision
+counts and no mounted-reader replay, catalog/Favorites return with measured focus,
+ordinary typed Favorite/Add to list, Kannada sole/current unavailability and
+explicit selection/item failure with pinned-object retry and no personal writes.
+Units reach every candidate through configured two-page-plus-one catalogs, test
+index endpoints, sole/unknown exclusions and invalid random values, reject empty
+published catalogs under the unchanged schema, and prove selection fetches nothing.
+`node node_modules\@playwright\test\cli.js test discovery` is incremental only.
+Browser random injection is single-use for the selector, then restores the actual
+random source before React Router creates its independent history keys; tests
+must not manufacture navigation-key collisions. These cases do not prove reviewed
+Explore groups/dates, Practice or persistent active-snapshot offline discovery.
 The [history suite](../tests/browser/recent-history.spec.ts) covers actual real
 and fixture reader success, no activity from catalog loading/preview/failed routes,
 distinct typed ordering and the actual configured rolling-window ceiling,
@@ -332,6 +346,7 @@ IDs or a release acceptance declaration.
 | LIB-06, SET-04, QUAL-05 | Web v6/native Room5 default-on device-only typed50-distinct successful-open history, explicit disable/re-enable/clear, retained unresolved refs, exact accounting, migration/failure/no-network and restart checks | Selected-script/offline parity and full personal backup remain incomplete |
 | UX-02/03/14, SET-04 | Website/native canonical/fixture and later Settings lyric-only bounded font/all densities, exact layout preservation, persisted independent native-unit choices, no-op/history and preserving web v6/native Room5 checks; Website peer propagation | Onboarding/helper/Recite/Practice/offline and complete font/device evidence remain open |
 | UX-13 | Web in-session Library/Favorites context and list-origin selected editor state, Back/Forward/reader return with measured scroll/focus; removed-result/direct-reader/reload coverage; native prepared real Library and independent Favorites literal query/pages/viewport and reader/Android Back context, plus Library Settings return | No persistent search history; full production filters/search/Explore and offline continuity remain incomplete |
+| EXP-02/04 | Web explicit entire-verified-catalog canonical selection, current/session-last-opened exclusion, honest sole/current/error states, selected-object reader with ordinary typed favorite/list controls and normal optional history/return behavior | Reviewed Explore groups/first-publication dates, Practice and complete persistent active-snapshot offline discovery remain incomplete; native adopts and validates independently |
 | XFER-01/02/03/04/05/06/08 | Bounded web worker/native v1/v2 codecs with independent vectors, explicit previews/transactional new-list saves and saved-v2 exports, actual cross-client v2 codec round trips, catalog-only details, browser share/copy adapters and native complete-link chooser/payload/Back/fallback/no-write checks | Real receiving-app/provider/device interoperability, direct native file sharing, verified App Links and full backups incomplete |
 | SET-01/02 | Owned settings/schema guards, Shared policy binding and immutable clean fixture-tool pin | Complete production settings inventory, language/protocol/backup contracts and all compatibility fixtures pending |
 | QUAL-01/02/03 | Semantic browser controls, keyboard focus entrypoint, standalone canonical reading and no video/tracking dependencies | Full keyboard/screen-reader/contrast/scaling/platform journeys remain unverified; no formal conformance claim |

@@ -1,5 +1,50 @@
 # Documentation history
 
+## 2026-10-22: canonical Show another lyric
+
+- Archived P5's preceding discovery status: full discovery remained incomplete
+  and there was no explicit real-catalog selection action. The new EXP-02 slice
+  uses the entire verified canonical catalog, not filtered/paged results, without
+  inventing taxonomy, personalization or offline readiness. Reviewed groups,
+  first-publication dates, Practice and complete production discovery remain open.
+- Shared publishedf4f8aecb2af5f7614ba81a3fb770048324b8850f after full32 tests,
+  hygiene72, strict YAML11, actionlint/ShellCheck/whitespace and three byte-identical
+  regenerated resources. Exact preflight39762681122/main39762972394 passed
+  every actual job/step; live policy/admin/no-bypass guard/clean-tree/ancestry
+  gates preceded unchanged normal main push. The owned no-PR contained ref was
+  cleaned. Exactly3 keys per locale were added against Website241,8 against
+  Native44 (including5 preceding shell captions); all old captions and settings/
+  schema/type/fixture bytes were unchanged. Consumers adopt independently.
+- Added bounded pure selection, explicit catalog/reader action and session-only
+  last-successful-open reference. Reader choices replace the current reader while
+  retaining its origin, so Back remains truthful. No collection/schema/default/
+  dependency/source/lyric change accompanies selection; normal successful reader
+  history remains independent and optional.
+- Initial new unit incorrectly treated an empty published catalog as valid;
+  corrected it to assert the existing strict nonempty manifest refusal, without
+  weakening the schema. Incremental full `npm test` passed101 units; the focused
+  loader/discovery subset passed14. Initial browser run passed6/15 but failed9
+  focus assertions because a global constant Math.random stub also forced
+  React Router history keys to collide. Replaced that injection with one selector
+  call followed by restoration of real randomness before navigation; no router,
+  focus assertion, suite, retry or timeout was weakened. Corrected
+  `node node_modules\@playwright\test\cli.js test discovery` passed all15 cases
+  across desktop/Pixel7/320px, including exact personal/revision/request checks.
+- Final Website `npm run check` passed101 units, strict TypeScript/production
+  build and294 browser cases without failures/skips. Shared consumer hygiene72,
+  strict YAML4, actionlint/ShellCheck and both whitespace checks passed.
+  Documentation checks covered20 UTF8/newline-clean files,213 local links and
+  all153 unique normative IDs. The tested production output was frozen while
+  Native used the shared connected-test/HTTP slot.
+- Preceding Root evidence batchdd3ebb06c58e4eec45991d4f7b8ccc632ffad0bd
+  passed exact preflight39759918112/main/Pages39760680680 and
+  CodeQL39760680574, every actual required job/step. Its final safely inspected
+  Pages artifact and all17 hosted resource bodies matched the earlier
+  browser-verified71ad82a byte-for-byte: no runtime/dependency/settings/pin/
+  manifest/icon/worker body changed. Owned no-PR contained ref and artifact
+  scratch were cleaned; complete logs retained. Native334dab8 remained clean
+  and independently pinned44 before this new discovery slice.
+
 ## 2026-10-22: native explicit link sharing and installation publication evidence
 
 - Website installation batch71ad82a6cdc51623e6eca1905963bde1bc7ac729

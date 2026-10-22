@@ -28,6 +28,12 @@ light/dark changes affect only Follow device, without changing personal records,
 UI language or canonical text.
 Library/Favorites searches and result positions survive in-session reading and
 Back/Forward navigation, without persistent search history.
+Canonical catalog/readers offer **Show another lyric** from the entire verified
+catalog, independently of title filtering or visible pages. It avoids the current
+or last successfully opened lyric in that catalog session and explains when no
+other candidate exists. Selection is not personalized, does not prepare a library
+or save separate choice history; opening the result uses normal reader controls
+and optional Recently opened recording.
 Recently opened retains the configured latest50 distinct typed references across
 restarts, never search queries or lyric copies, and never sends history to a service.
 Loaded search results expose every ranked match through explicit configured-size
