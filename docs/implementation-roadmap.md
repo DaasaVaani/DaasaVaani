@@ -11,7 +11,7 @@ The approved [lyric identity and optional media contract](https://github.com/Daa
 is the target for P1/P4/P5a/P7: text-only lyric publication, permanent UUID lookup,
 typed references and versioned legacy-preserving transfers. Source/publication
 schemas and separate real readers implement the initial slice. Website typed
-favorites/lists, v1/v2 transfer adapters and preserving personal v4 upgrades are
+favorites/lists/recent history, v1/v2 transfer adapters and preserving personal v5 upgrades are
 implemented; full personal collections/backups and production publication remain open. Follow its
 Shared-first rollout without inferred legacy mapping or identity changes.
 
@@ -29,7 +29,7 @@ does not waive any validation gate.
 | P2 | Two-locale UI generation with committed web/Android resources | Reviewed five-Latin/nine-non-Latin tables, transliteration, technical grammar, plurals/escaping conformance |
 | P4 | Real canonical text-only hash-addressed publication; separate fixture index producer and sampled OSA/candidate parity | Public populated-metadata/Latin/media adapters, durable ledger/receipts, semantic dates, ZIP/planner and complete language/profile index evidence |
 | P5 | Separate consented real full-library in-memory preview/UUID reading, literal title filter, complete paging and reader continuity; existing fixture search/preferences/themes | Production individual on-demand reading, full filters/discovery/script/helper/video/accessibility/platform journeys |
-| P5a | Transactional typed lyric/legacy web favorites/lists/preferences, preserving v1/v2/v3-to-v4 upgrade, worker v1/v2 preview and saved-v2 export, optional share/copy/fallbacks, independent occurrence editing/import/management, exact prepared catalog lookup and reader-to-list addition; native Room3 typed favorites/durable lists/occurrences | Recents/bookmarks/learning/recitation, real sharing-surface interoperability, full backups and remaining production migrations |
+| P5a | Transactional typed lyric/legacy web favorites/lists/preferences/recent history, preserving v1/v2/v3/v4-to-v5 upgrade, worker v1/v2 preview and saved-v2 export, optional share/copy/fallbacks, independent occurrence editing/import/management, exact prepared catalog lookup and reader-to-list addition; native Room3 typed favorites/durable lists/occurrences | Native history, bookmarks/learning/recitation, real sharing-surface interoperability, full backups and remaining production migrations |
 | P6 | No persistent offline snapshot implementation | Journals/atomic activation/resume/repair/reader-safe GC and service worker lifecycle |
 | P7 | Separate native real canonical full preparation/reading in memory; fixture search, Room3 typed favorites/durable lists/occurrences/preferences, preserving upgrades, locale/theme, bounded v1/v2 preview/save/re-export and reader/list navigation, core and connected tests | Full personal backups/recents/bookmarks/learning/recitation, signed App Links/receiving-app matrix, durable preparation/recovery and full parity/device matrix |
 | P3/P8/P9 | Dependency-ordered Shared/fixture-publisher pins; full web fixture CI/Pages and native build/core/lint CI | Live-provider clarification, production ingestion/publication/signing, device CI and release readiness |
@@ -60,7 +60,7 @@ Settings/preview/list management remain available when the Library endpoint fail
 Saving requires an explicit action after preview and creates a new independent
 list only. Duplicate names require confirmation; revision/epoch changes require
 renewed review. No lyric is fetched by transfer or saving, and no offline readiness
-or signed native App Links is claimed. The [current storage protocol](architecture.md#web-typed-personal-storage-v4)
+or signed native App Links is claimed. The [current storage protocol](architecture.md#web-typed-personal-storage-v5)
 does not establish full-backup exportability, complete list/recitation journeys,
 production migration coverage or native parity.
 Saved-list export rechecks its read revision after encoding and refuses concurrent
@@ -82,7 +82,7 @@ destination; the warning preserves this distinction from unchanged personal data
 Official Unicode16 name matching is implemented in both consumers using Shared's
 pinned tables and conformance fixtures, without platform lowercase/ICU.
 Website derives keys on demand from raw names; no persisted-key cache exists
-in v4. Native list-name behavior follows its
+in v5. Native list-name behavior follows its
 [owning storage/validation guide](https://github.com/DaasaVaani/AndroidApp/blob/main/README.md).
 Existing names/identities remain unchanged; future persisted caches require
 explicit profile-aware preserving migration, never automatic renaming/merging.
@@ -92,7 +92,8 @@ The [real lyric preview](lyric-preview.md) provides partial DATA-01/02/04/05,
 UX-07/13, OFF-02 and SET-01/02 evidence. It preserves canonical line/layout
 identity without optional media. Website explicit favorite/list actions write
 typed lyric references, never real UUIDs in fixture `videoId` fields; reading
-itself performs no personal write or new request. Legacy discriminants are
+itself performs no favorite/list/preference write or new request; optional
+device-only recent history records successful explicit opens. Legacy discriminants are
 structurally upgraded without source/identity remapping. V1 previews re-export
 unchanged; confirmed imports create fresh local IDs and saved exports use v2.
 It is not production profile search, persistent offline preparation or the final
@@ -116,7 +117,7 @@ stored as a fallback or exported. Recitation remains incomplete.
 
 UX-11 and SET-04 receive partial Website evidence for persisted Light/Dark/Warm/
 Follow device selection. System-color changes do not write personal data, and
-explicit choices/locale/canonical text stay independent. Strict v1/v2/v3-to-v4
+explicit choices/locale/canonical text stay independent. Strict v1/v2/v3/v4-to-v5
 migrations preserve favorites/lists/identities and create a fresh writer fence;
 future/invalid schemas remain non-destructive refusals. Palette contrast tests
 do not establish full physical-device/font/offline-shell accessibility evidence.

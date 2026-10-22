@@ -16,11 +16,12 @@ import { verifyUnicodeResources } from "./tools/unicode-resources.ts";
 verifyUnicodeResources();
 const config = strictYaml(readFileSync(new URL("./settings/web.yml", import.meta.url), "utf8"));
 const bounds = strictYaml(readFileSync(new URL("./shared/settings/publication-policy.yml", import.meta.url), "utf8"));
-const validate = new Ajv2020({ strict: true }).compile<Omit<WebConfig, "defaultUiLanguage" | "defaultTheme" | "uiLanguages" | "uiThemes" | "maxFavorites">>(schema);
+const validate = new Ajv2020({ strict: true }).compile<Omit<WebConfig, "defaultUiLanguage" | "defaultTheme" | "defaultRecentHistoryEnabled" | "uiLanguages" | "uiThemes" | "maxFavorites">>(schema);
 if (!validate(config)) throw new Error("Invalid web settings: " + JSON.stringify(validate.errors));
 const defaults = strictYaml(readFileSync(new URL("./shared/settings/defaults.yml", import.meta.url), "utf8"));
 const validateDefaults = new Ajv2020({ strict: true }).compile<{
   uiLanguage: WebConfig["defaultUiLanguage"]; theme: WebConfig["defaultTheme"];
+  recentHistoryEnabled: boolean;
   supportedUiLanguages: WebConfig["uiLanguages"]; supportedThemes: WebConfig["uiThemes"];
 }>(defaultsSchema);
 if (!validateDefaults(defaults)) throw new Error("Invalid portable defaults: " + JSON.stringify(validateDefaults.errors));
@@ -79,7 +80,8 @@ export default defineConfig({
     return within === "" || (!within.startsWith("..") && !isAbsolute(within));
   } } },
   define: { __WEB_CONFIG__: JSON.stringify({ ...config, defaultUiLanguage: defaults.uiLanguage,
-    defaultTheme: defaults.theme, uiLanguages: defaults.supportedUiLanguages, uiThemes: defaults.supportedThemes,
+    defaultTheme: defaults.theme, defaultRecentHistoryEnabled: defaults.recentHistoryEnabled,
+    uiLanguages: defaults.supportedUiLanguages, uiThemes: defaults.supportedThemes,
     maxFavorites: personal.maxFavorites }), __BOUNDS__: JSON.stringify(bounds), __PERSONAL_LIMITS__: JSON.stringify(personal),
     __TRANSFER_LIMITS__: JSON.stringify({ maxListEncodedBytes: personal.maxListEncodedBytes,
       maxListDecodedBytes: personal.maxListDecodedBytes, maxSharedUrlAscii: personal.maxSharedUrlAscii }) },

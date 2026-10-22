@@ -9,7 +9,10 @@ defines permanent lyric UUIDs and text-only publication without YouTube/images.
 Library publishes owner-approved canonical lyrics without videos or images.
 The [real lyric preview](docs/lyric-preview.md) downloads and validates the
 complete publication only after explicit consent, then supports UUID-based
-reading in memory. Reading itself writes no personal data; explicit controls save
+reading in memory. Successful opens update optional device-only Recently opened
+history, initially enabled with separate disable/clear controls; disabling
+recording preserves existing entries. Preparation and previews do not record
+activity. Explicit controls save
 typed lyric favorites and independent list occurrences locally. List v2 transfers
 preserve lyric/legacy identities and user text; v1 imports remain supported.
 Existing identifiers are never guessed or remapped. Persistent offline state,
@@ -25,6 +28,8 @@ light/dark changes affect only Follow device, without changing personal records,
 UI language or canonical text.
 Library/Favorites searches and result positions survive in-session reading and
 Back/Forward navigation, without persistent search history.
+Recently opened retains the configured latest50 distinct typed references across
+restarts, never search queries or lyric copies, and never sends history to a service.
 Loaded search results expose every ranked match through explicit configured-size
 pages; Show more focuses the first newly revealed result and retains the expanded
 context through in-session reading.

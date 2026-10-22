@@ -1,15 +1,16 @@
-import { useEffect, useId, useRef, useState, type ReactNode } from "react";
+import { useCallback, useEffect, useId, useRef, useState, type ReactNode } from "react";
 import { HashRouter, NavLink, Link, Route, Routes, useLocation, useNavigate, useParams, useSearchParams } from "react-router-dom";
 import messages from "../shared/generated/web/ui.json";
 import type { FixtureItem, SearchIndex, SearchPolicy } from "../shared/types/publication";
 import { Publication, loadPublication } from "./artifacts";
-import { browserDefaultPersonal, watchPersonal, updatePersonal, type Personal, type PersonalStore } from "./personal";
+import { browserDefaultPersonal, recordOpened, watchPersonal, updatePersonal, type Personal, type PersonalStore } from "./personal";
 import type { Hit } from "./search";
 import { NavigationContinuity } from "./navigation";
 import { ListPreview } from "./ListPreview";
 import { Lists } from "./Lists";
 import { AddToList } from "./AddToList";
 import { Lyrics, ReferenceFavorites } from "./Lyrics";
+import { HistoryControls, RecentHistory } from "./RecentHistory";
 import type { PreparedLyrics } from "./lyric-publication";
 import type { PersonalReference } from "./list-transfer-types";
 import { hasFavorite, toggleFavorite } from "./personal-model";
@@ -28,15 +29,18 @@ function ListRoute({ labels, personal, publication, lyrics }: {
   return <section className={styles.reader}><ListPreview labels={labels} personal={personal} publication={publication} lyrics={lyrics} initialLink={link} /></section>;
 }
 const errorText = (error: unknown) => error instanceof Error ? error.message : String(error);
-interface ReaderProps { publication: Publication; labels: Labels; personal: Personal; store: PersonalStore; toggle: (reference: PersonalReference) => void }
+interface ReaderProps {
+  publication: Publication; labels: Labels; personal: Personal; store: PersonalStore;
+  toggle: (reference: PersonalReference) => void; opened: (reference: PersonalReference) => void;
+}
 
-function Reader({ publication, labels, personal, store, toggle }: ReaderProps) {
+function Reader({ publication, labels, personal, store, toggle, opened }: ReaderProps) {
   const { id } = useParams();
   const location = useLocation();
   const navigate = useNavigate();
   const state: unknown = location.state;
   const origin = state && typeof state === "object" && "browseFrom" in state ? state.browseFrom : undefined;
-  const fromBrowsing = origin === "/" || origin === "/favorites" || origin === "/lists";
+  const fromBrowsing = origin === "/" || origin === "/favorites" || origin === "/lists" || origin === "/recent";
   const [params] = useSearchParams();
   const [item, setItem] = useState<FixtureItem>();
   const [error, setError] = useState("");
@@ -55,6 +59,9 @@ function Reader({ publication, labels, personal, store, toggle }: ReaderProps) {
   useEffect(() => {
     if (item && lineId) document.getElementById(lineId)?.scrollIntoView({ block: "center" });
   }, [item, lineId]);
+  useEffect(() => {
+    if (item && item.videoId === id) opened({ kind: "legacyVideo", videoId: item.videoId });
+  }, [id, item, opened]);
   return <section className={styles.reader}>
     <Link to={fromBrowsing ? origin : "/"} className={styles.back}
       onClick={event => {
@@ -62,7 +69,8 @@ function Reader({ publication, labels, personal, store, toggle }: ReaderProps) {
           event.preventDefault();
           navigate(-1);
         }
-      }}>← {origin === "/lists" ? labels.backToList : origin === "/favorites" ? labels.favorites : labels.back}</Link>
+      }}>← {origin === "/lists" ? labels.backToList : origin === "/favorites" ? labels.favorites
+        : origin === "/recent" ? labels.recentHistory : labels.back}</Link>
     {error && <p role="alert" className={styles.error}>{error}</p>}
     {!item && !error && <p role="status">{labels.loading}</p>}
     {item && item.videoId === id && <>
@@ -158,6 +166,7 @@ function Library({ publication, labels, personal, favoritesOnly }: {
         {favoritesOnly ? labels.favorites : labels.library}<span className={styles.count}>
           {favoritesOnly && !searching ? personal.favorites.length : entries.length}</span></h1>
       <p className={styles.muted}>{labels.tagline}</p>
+      {!favoritesOnly && <Link to="/recent">{labels.recentHistory}</Link>}
       {favoritesOnly && <h2>{labels.legacyReference}</h2>}
       {!prepared ? <div className={styles.consent}>
         <p>{labels.searchConsent}</p>
@@ -211,6 +220,9 @@ export default function App() {
   const [fixtureError, setFixtureError] = useState("");
   const [attempt, setAttempt] = useState(0);
   const labels = messages[personal.language];
+  const opened = useCallback((reference: PersonalReference) => {
+    void recordOpened(reference).catch(reason => setError(errorText(reason)));
+  }, []);
   useEffect(() => {
     const media = matchMedia("(prefers-color-scheme: dark)");
     const changed = () => setDeviceDark(media.matches);
@@ -266,6 +278,7 @@ export default function App() {
       <NavLink to="/" end>{labels.library}</NavLink>
       <NavLink to="/lyrics">{labels.ownerLyrics}</NavLink>
       <NavLink to="/favorites">{labels.favorites}</NavLink>
+      <NavLink to="/recent">{labels.recentHistory}</NavLink>
       <NavLink to="/lists">{labels.lists}</NavLink>
       <NavLink to="/settings">{labels.settings}</NavLink>
     </nav></header>
@@ -278,20 +291,22 @@ export default function App() {
           <button onClick={() => setAttempt(value => value + 1)}>{labels.retry}</button></section>}
         {(!publication || !personalReady) && !error && !fixtureError && <p role="status">{labels.loading}</p>}
       </FixtureOnly>
-      <Lyrics labels={labels} publication={lyrics} onPrepared={setLyrics} personal={store} toggle={toggle} />
+      <Lyrics labels={labels} publication={lyrics} onPrepared={setLyrics} personal={store} toggle={toggle} opened={opened} />
       {publication && personalReady && <>
         <BrowsingSession key={`all-${attempt}`} publication={publication} labels={labels} personal={personal} favoritesOnly={false} />
         <BrowsingSession key={`favorites-${attempt}`} publication={publication} labels={labels} personal={personal} favoritesOnly />
       </>}
       {store && <ReferenceFavorites labels={labels} personal={store} publication={lyrics} legacyPublication={publication} toggle={toggle} />}
+      {store && <RecentHistory labels={labels} personal={store} publication={publication} lyrics={lyrics} />}
       {store && <ListsSession key={attempt} labels={labels} personal={store} publication={publication} lyrics={lyrics} />}
         <Routes>
         <Route path="/" element={null} />
         <Route path="/favorites" element={null} />
+        <Route path="/recent" element={null} />
         <Route path="/lists" element={null} />
         <Route path="/lyrics/*" element={null} />
         <Route path="/item/:id" element={publication && personalReady && store
-          ? <Reader publication={publication} labels={labels} personal={personal} store={store} toggle={toggle} /> : null} />
+          ? <Reader publication={publication} labels={labels} personal={personal} store={store} toggle={toggle} opened={opened} /> : null} />
         <Route path="/settings" element={<section className={styles.reader}><h1>{labels.settings}</h1>
           {personalReady && <>
           <fieldset><legend>{labels.language}</legend>
@@ -304,6 +319,7 @@ export default function App() {
               aria-pressed={personal.theme === theme} onClick={() => void change(state => ({ ...state, theme }))}>
               {theme === "device" ? labels.followDevice : labels[theme]}</button>)}
           </fieldset>
+          {store && <HistoryControls labels={labels} history={store.history} />}
           </>}
           <ListPreview labels={labels} personal={store} publication={publication} lyrics={lyrics} />
         </section>} />

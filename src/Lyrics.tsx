@@ -34,23 +34,28 @@ function LyricPagination({ count, nextId, paging, labels }: {
     {shown < count && <button aria-controls={paging.resultsId} onClick={() => paging.more(nextId)}>{labels.showMoreResults}</button>}
   </div>;
 }
-function LyricReader({ publication, labels, personal, toggle }: {
+function LyricReader({ publication, labels, personal, toggle, opened }: {
   publication: PreparedLyrics; labels: Labels; personal?: PersonalStore; toggle: (reference: PersonalReference) => void;
+  opened: (reference: PersonalReference) => void;
 }) {
   const { id } = useParams();
   const location = useLocation(), navigate = useNavigate();
   const state: unknown = location.state;
   const origin = state !== null && typeof state === "object" && "browseFrom" in state ? state.browseFrom : undefined;
-  const fromBrowsing = origin === "/lyrics" || origin === "/lists" || origin === "/favorites";
+  const fromBrowsing = origin === "/lyrics" || origin === "/lists" || origin === "/favorites" || origin === "/recent";
   const item = id ? publication.item(id) : undefined;
   const reference: PersonalReference | undefined = item && { kind: "lyric", lyricId: item.lyricId };
   const favorite = reference && personal?.personal ? hasFavorite(personal.personal, reference) : false;
+  useEffect(() => {
+    if (item) opened({ kind: "lyric", lyricId: item.lyricId });
+  }, [item, opened]);
   return <section className={styles.reader}>
     <Link to={fromBrowsing ? origin : "/lyrics"} className={styles.back} onClick={event => {
       if (fromBrowsing && event.button === 0 && !event.metaKey && !event.ctrlKey && !event.shiftKey && !event.altKey) {
         event.preventDefault(); navigate(-1);
       }
-    }}>← {origin === "/lists" ? labels.backToList : origin === "/favorites" ? labels.favorites : labels.lyricBack}</Link>
+    }}>← {origin === "/lists" ? labels.backToList : origin === "/favorites" ? labels.favorites
+      : origin === "/recent" ? labels.recentHistory : labels.lyricBack}</Link>
     {!item ? <p role="alert">{labels.lyricsUnavailable}</p> : <>
       <header className={styles.readerHeader}>
         <h1 lang="kn">{item.title}</h1>
@@ -114,9 +119,10 @@ export function ReferenceFavorites({ labels, personal, publication, legacyPublic
   </section>;
   })}</div>;
 }
-export function Lyrics({ labels, publication, onPrepared, personal, toggle }: {
+export function Lyrics({ labels, publication, onPrepared, personal, toggle, opened }: {
   labels: Labels; publication?: PreparedLyrics; onPrepared: (publication: PreparedLyrics) => void;
   personal?: PersonalStore; toggle: (reference: PersonalReference) => void;
+  opened: (reference: PersonalReference) => void;
 }) {
   const location = useLocation();
   const active = /^\/lyrics(?:\/|$)/u.test(location.pathname);
@@ -167,7 +173,7 @@ export function Lyrics({ labels, publication, onPrepared, personal, toggle }: {
       </div>
       <Routes>
         <Route path="/lyrics" element={null} />
-        <Route path="/lyrics/:id" element={<LyricReader publication={publication} labels={labels} personal={personal} toggle={toggle} />} />
+        <Route path="/lyrics/:id" element={<LyricReader publication={publication} labels={labels} personal={personal} toggle={toggle} opened={opened} />} />
         <Route path="/lyrics/*" element={<p role="alert">{labels.unknownRoute}</p>} />
         <Route path="*" element={null} />
       </Routes>

@@ -6,6 +6,7 @@ interface WebConfig {
   };
   canonicalBaseUrl: string; listLinkPath: string; listFileName: string; transferChunkBytes: number; listCompressionLevel: number;
   defaultUiLanguage: "en" | "kn"; defaultTheme: "light" | "dark" | "warm" | "device";
+  defaultRecentHistoryEnabled: boolean;
   databaseName: string; maxFavorites: number; fontFamily: string;
   readerFontSize: number; space: number; contentWidth: number; readerWidth: number;
   uiLanguages: ("en" | "kn")[];
@@ -18,7 +19,7 @@ interface WebConfig {
 declare const __WEB_CONFIG__: WebConfig;
 declare const __TRANSFER_LIMITS__: { maxListEncodedBytes: number; maxListDecodedBytes: number; maxSharedUrlAscii: number };
 interface PersonalLimits {
-  maxFavorites: number; maxLists: number; maxEntriesPerList: number; maxTotalEntries: number;
+  maxFavorites: number; maxLists: number; maxEntriesPerList: number; maxTotalEntries: number; maxRecents: number;
   maxPersonalStoredBytes: number; maxListDecodedBytes: number;
   maxListNameCodePoints: number; maxEntryTextCodePoints: number;
 }

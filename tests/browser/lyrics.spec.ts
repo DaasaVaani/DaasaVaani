@@ -1,50 +1,20 @@
-import { test, expect, type Page } from "@playwright/test";
+import { test, expect } from "@playwright/test";
 import { readFileSync } from "node:fs";
 import { gzipSync, gunzipSync } from "node:zlib";
 import type { ListTransferV2 } from "../../src/list-transfer-types";
-import Ajv2020 from "ajv/dist/2020.js";
-import { strictYaml } from "../../shared/tools/generate-catalog.mjs";
-import webSchema from "../../settings/web.schema.json" with { type: "json" };
 import messages from "../../shared/generated/web/ui.json" with { type: "json" };
 import { lyricFixture, lyricId } from "../lyric-fixture";
+import { config, serveLyrics as serve, personalSnapshot } from "../lyric-browser";
 
-const raw = strictYaml(readFileSync(new URL("../../settings/web.yml", import.meta.url), "utf8"));
-const validate = new Ajv2020({ strict: true }).compile<Pick<WebConfig, "lyricPreview" | "databaseName">>(webSchema);
-if (!validate(raw)) throw new Error("Invalid configured lyric browser settings");
-const config = raw, base = new URL(".", config.lyricPreview.descriptorUrl), labels = messages.en;
-async function serve(page: Page, fixture = lyricFixture(), corrupt: () => boolean = () => false) {
-  const requests: string[] = [];
-  const first = fixture.manifest.catalog[0];
-  if (!first) throw new Error("Missing synthetic first item");
-  await page.route(base.href + "**", route => {
-    const url = new URL(route.request().url()), key = url.pathname.slice(base.pathname.length);
-    const bytes = fixture.files.get(key);
-    if (!bytes) throw new Error("Unexpected synthetic lyric artifact request");
-    requests.push(key);
-    return route.fulfill({ body: corrupt() && key === first.item.path ? Buffer.from("corrupt") : bytes,
-      contentType: key === "latest.json" ? "application/json" : "application/octet-stream",
-      headers: { "access-control-allow-origin": "*", "cache-control": "no-store" } });
-  });
-  return requests;
-}
-async function personalSnapshot(page: Page) {
-  return page.evaluate(async databaseName => {
-    const database = await new Promise<IDBDatabase>((resolve, reject) => {
-      const request = indexedDB.open(databaseName);
-      request.onsuccess = () => resolve(request.result);
-      request.onerror = () => reject(request.error);
-    });
-    try {
-      const names = [...database.objectStoreNames], transaction = database.transaction(names, "readonly");
-      return { version: database.version, tables: Object.fromEntries(await Promise.all(names.map(async name => [name,
-        await new Promise<unknown[]>((resolve, reject) => {
-          const request = transaction.objectStore(name).getAll();
-          request.onsuccess = () => resolve(request.result);
-          request.onerror = () => reject(request.error);
-        })]))) };
-    } finally { database.close(); }
-  }, config.databaseName);
-}
+const labels = messages.en;
+test.beforeEach(async ({ page }) => {
+  // These journeys preserve no-write reading; default-on history is exercised separately.
+  await page.goto("/#/settings");
+  const recording = page.getByRole("checkbox", { name: labels.recentHistoryEnabled, exact: true });
+  await expect(recording).toBeChecked();
+  await recording.click(); await expect(recording).not.toBeChecked();
+  await page.goto("about:blank");
+});
 test("real Favorites have independent complete title paging and preserve context without personal writes", async ({ page }) => {
   const count = config.lyricPreview.pageSize * 2 + 1, fixture = lyricFixture(count);
   const requests = await serve(page, fixture);

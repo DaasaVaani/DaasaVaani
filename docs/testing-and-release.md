@@ -59,10 +59,11 @@ override/reload and independent theme/canonical Kannada behavior.
 Appearance journeys exercise actual media changes, persisted Warm/Follow device,
 configured palettes and independent Kannada UI/canonical text. Pure checks enforce
 at least4.5:1 normal text/accent contrast on configured reading surfaces and3:1
-interactive-boundary contrast. Native10/20/30-to40 database cases structurally
+interactive-boundary contrast. Native10/20/30/40-to50 database cases structurally
 type legacy favorites/entries while preserving their raw values and every
 list/occurrence ID, refreshing the local fence and rolling back invalid or
-over-capacity legacy data/schema; future50 refusal and stale already-open
+over-capacity legacy data/schema and add only empty configured history;
+future60 refusal and stale already-open
 clients stay non-destructive. Media
 changes compare every personal table/header/index without automatic writes.
 Session-continuity journeys verify query/results, restored keyboard focus
@@ -78,7 +79,8 @@ The [real-preview suite](../tests/browser/lyrics.spec.ts) serves only synthetic,
 independently hashed public-family objects. It verifies explicit whole-download
 consent, complete title paging, exact canonical text/layout, locale independence,
 Back/Forward focus/scroll, corrupt-object failure/retry, cancellation, unknown IDs,
-reload reconsent and byte-equivalent personal database snapshots for reading.
+reload reconsent and byte-equivalent personal database snapshots for reading
+with recent recording explicitly disabled.
 Additional typed-personal journeys cover explicit real favorites/repeated
 reader-to-list saves, unresolved favorites after reload with no implicit download,
 independent real Favorites title filtering and complete configured-size paging,
@@ -95,6 +97,15 @@ npm run test:e2e -- lyrics
 ```
 
 These focused checks do not replace `npm run check` before finalization/push.
+The [history suite](../tests/browser/recent-history.spec.ts) covers actual real
+and fixture reader success, no activity from preparation/preview/failed routes,
+distinct typed ordering and the actual configured rolling-window ceiling,
+disabled-state persistence, clear independence and no re-recording of a
+still-mounted reader after peer-tab controls. It checks v4 preservation/rollback,
+over-capacity current-history refusal, injected quota failure without partial
+writes or hidden readable text, controls/return focus and unchanged unrelated
+personal rows. The complete configured64MiB accounting case includes history.
+`node node_modules\@playwright\test\cli.js test recent-history` is incremental only.
 Actual hosted objects and real desktop/mobile reading require separate post-deploy
 verification; synthetic tests are not owner-text/linguistic review.
 The actual Unicode16 personal-name adapter executes all Shared integer vectors,
@@ -152,7 +163,7 @@ router-bound payload decoding without a reload; unsupported query suffixes remai
 invalid and all personal tables stay unchanged.
 Catalog integration journeys verify known/unavailable/not-yet-resolved states,
 literal fallback/placeholder text, exact-ID matching, no lyric request before
-Read, retry without personal writes, and no catalog title in saved/exported data.
+Read, catalog retry without personal writes, and no catalog title in saved/exported data.
 List-origin reading retains selected editor context, measured scroll and exact
 focus through return/Back/Forward. Reader-to-list choices are explicit and
 revision-bound, preserve repetitions and refuse concurrent-tab stale writes.
@@ -240,7 +251,8 @@ IDs or a release acceptance declaration.
 | SEARCH-12/13 | Sampled independent substring/full-matrix oracle, counted-gram candidates, native core checks and real browser search | Ordinary fixture text only; reviewed profiles/aliases/markers, exhaustive proof and complete native parity pending |
 | PLAT-01/05 | Real React and Compose apps; built-site browser journeys at desktop/mobile/320px and one native API36 reading journey | PWA installation, complete routes/layout/interaction modes and supported-platform/device matrix pending |
 | I18N-01/02/03, SET-04 | Matching two-locale resources; web first-use ordered browser-language selection, configured fallback, persisted four-mode appearance with contrast/media checks; native durable locale/theme preferences; canonical text remains independent | Complete script/personal preferences, device/font matrix and full localization conformance pending |
-| LIB-01/02/03/04/05/08/09/10/11 | Typed web/native lyric/legacy favorites/lists, independent occurrences/plain text, duplicate-name confirmation, management/manual replacement, exact catalog details/explicit reading, reader-to-list addition and preserving web v4/native Room3 upgrades | Recitation/offline/full personal collections and remaining production migrations remain incomplete |
+| LIB-01/02/03/04/05/08/09/10/11 | Typed web/native lyric/legacy favorites/lists, independent occurrences/plain text, duplicate-name confirmation, management/manual replacement, exact catalog details/explicit reading, reader-to-list addition and preserving web v5/native Room3 upgrades | Recitation/offline/full personal collections and remaining production migrations remain incomplete |
+| LIB-06, SET-04, QUAL-05 | Web v5 default-on device-only typed50-distinct successful-open history, explicit disable/re-enable/clear, retained unresolved refs, exact accounting, migration/failure/no-network and restart checks | Native history, selected-script/offline parity and full personal backup remain incomplete |
 | UX-13 | In-session Library/Favorites context and list-origin selected editor state, Back/Forward/reader return with measured scroll/focus; removed-result/direct-reader/reload coverage | No persistent search history; filters/Explore, offline and Android continuity pending |
 | XFER-01/02/03/04/05/06/08 | Bounded web worker/native v1/v2 codecs with independent vectors, explicit previews/transactional new-list saves and saved-v2 exports, actual cross-client v2 codec round trips, catalog-only details, browser share/copy adapters, cancellation/errors/no-write checks | Real sharing-surface delivery, verified App Links and full backups incomplete |
 | SET-01/02 | Owned settings/schema guards, Shared policy binding and immutable clean fixture-tool pin | Complete production settings inventory, language/protocol/backup contracts and all compatibility fixtures pending |

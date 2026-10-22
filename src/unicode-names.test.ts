@@ -3,7 +3,7 @@ import { readFileSync } from "node:fs";
 import vectors from "../shared/fixtures/unicode-name-matching.json";
 import { verifyUnicodeResources } from "../tools/unicode-resources";
 import { unicodeFullCaseFold, unicodeNameKey, unicodeNameProfile, unicodeNfc, unicodeNfd } from "./unicode-names";
-import { defaultPersonal, newControl, newList, parseStore, PersonalError, saveRecord, type PersonalStore } from "./personal-model";
+import { defaultHistory, defaultPersonal, newControl, newList, parseStore, PersonalError, saveRecord, type PersonalStore } from "./personal-model";
 
 const string = (values: readonly number[]) => values.map(cp => String.fromCodePoint(cp)).join("");
 test.each(vectors.vectors)("official shared name vector: $id", vector => {
@@ -73,8 +73,8 @@ test("on-demand profile adoption preserves newly equal and formerly equal raw na
   const lists = names.map(name => newList({ format: "daasavaani-list", formatVersion: 1, name, entries: [
     { kind: "placeholder", text: "  Synthetic preserved text  " },
   ] }));
-  const state: PersonalStore = { control: newControl(), personal: defaultPersonal(), lists }, before = structuredClone(state);
-  expect(parseStore([state.control], [state.personal], lists)).toEqual(before);
+  const state: PersonalStore = { control: newControl(), personal: defaultPersonal(), lists, history: defaultHistory() }, before = structuredClone(state);
+  expect(parseStore([state.control], [state.personal], lists, [{ id: "history", ...state.history }])).toEqual(before);
   const [first, second, split] = names;
   if (first === undefined || second === undefined || split === undefined) throw new Error("Missing name fixtures");
   expect(unicodeNameKey(first)).toBe(unicodeNameKey(second));

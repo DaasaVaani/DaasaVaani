@@ -1,8 +1,10 @@
 import Dexie, { liveQuery, type Transaction } from "dexie";
 import {
-  defaultPersonal, exportListSnapshot, migratePersonalV1, migrateStoreV2, migrateStoreV3, nextRevision, parseStore, PersonalError, saveRecord, validatePersonal, validateStore,
-  type ListRecord, type Personal, type PersonalStore, type Revision,
+  defaultPersonal, exportListSnapshot, migratePersonalV1, migrateStoreV2, migrateStoreV3, migrateStoreV4, nextRevision, parseStore, PersonalError,
+  promoteRecent, saveRecord, validatePersonal, validateStore,
+  type ListRecord, type Personal, type PersonalStore, type Revision, type RecentHistoryV1,
 } from "./personal-model";
+import type { PersonalReference } from "./list-transfer-types";
 export type { Personal, PersonalStore } from "./personal-model";
 export const browserDefaultPersonal = () => defaultPersonal(navigator.languages.length ? navigator.languages : [navigator.language]);
 
@@ -11,7 +13,8 @@ db.version(1).stores({ personal: "id" });
 db.version(2).stores({ personal: "id", lists: "id", control: "id" });
 db.version(3).stores({ personal: "id", lists: "id", control: "id" });
 db.version(4).stores({ personal: "id", lists: "id", control: "id" });
-const nativeVersion = 40;
+db.version(5).stores({ personal: "id", lists: "id", control: "id", recentHistory: "id" });
+const nativeVersion = 50;
 const newerSchema = () => new Error("A newer personal database schema is present. Use a compatible app; existing data was not changed.");
 function inspectNative(): Promise<IDBDatabase> {
   return new Promise((resolve, reject) => {
@@ -28,7 +31,7 @@ function inspectNative(): Promise<IDBDatabase> {
       if (!transaction) { reject(new PersonalError("invalid")); return; }
       const abort = (reason: unknown) => { upgradeFailure = reason; transaction.abort(); };
       if (stopped) { transaction.abort(); return; }
-      if (event.oldVersion === 20 || event.oldVersion === 30) {
+      if (event.oldVersion === 20 || event.oldVersion === 30 || event.oldVersion === 40) {
         const expected = ["control", "lists", "personal"], names = [...database.objectStoreNames];
         if (names.length !== expected.length || expected.some(name => !names.includes(name)) || names.some(name => {
           const store = transaction.objectStore(name);
@@ -42,8 +45,9 @@ function inspectNative(): Promise<IDBDatabase> {
           request.onsuccess = () => {
             if (--pending !== 0) return;
             try {
-              const migrate = event.oldVersion === 20 ? migrateStoreV2 : migrateStoreV3;
+              const migrate = event.oldVersion === 20 ? migrateStoreV2 : event.oldVersion === 30 ? migrateStoreV3 : migrateStoreV4;
               const state = migrate(rows.control.result, rows.personal.result, rows.lists.result);
+              database.createObjectStore("recentHistory", { keyPath: "id" }).put({ id: "history", ...state.history });
               if (state.personal) transaction.objectStore("personal").put(state.personal);
               for (const list of state.lists) transaction.objectStore("lists").put(list);
               transaction.objectStore("control").put(state.control);
@@ -60,6 +64,7 @@ function inspectNative(): Promise<IDBDatabase> {
           if (state.personal) transaction.objectStore("personal").put(state.personal);
           database.createObjectStore("lists", { keyPath: "id" });
           database.createObjectStore("control", { keyPath: "id" }).put(state.control);
+          database.createObjectStore("recentHistory", { keyPath: "id" }).put({ id: "history", ...state.history });
         } catch (reason) { abort(reason); }
       };
       if (event.oldVersion === 0) initialize([]);
@@ -79,7 +84,7 @@ function inspectNative(): Promise<IDBDatabase> {
     request.onsuccess = () => {
       const database = request.result;
       if (stopped) { database.close(); return; }
-      const expected = ["control", "lists", "personal"];
+      const expected = ["control", "lists", "personal", "recentHistory"];
       const stores = [...database.objectStoreNames];
       if (database.version !== nativeVersion || stores.length !== expected.length || expected.some(name => !stores.includes(name))) {
         database.close(); reject(new PersonalError("invalid")); return;
@@ -120,15 +125,17 @@ async function ready(): Promise<void> {
 const personal = db.table<unknown, string>("personal");
 const lists = db.table<unknown, string>("lists");
 const control = db.table<unknown, string>("control");
+const recentHistory = db.table<unknown, string>("recentHistory");
 async function stored(transaction: Transaction): Promise<PersonalStore> {
-  const [headers, preferences, records] = await Promise.all([
+  const [headers, preferences, records, histories] = await Promise.all([
     transaction.table("control").toArray(), transaction.table("personal").toArray(), transaction.table("lists").toArray(),
+    transaction.table("recentHistory").toArray(),
   ]);
-  return parseStore(headers, preferences, records);
+  return parseStore(headers, preferences, records, histories);
 }
 export async function readStore(): Promise<PersonalStore> {
   await ready();
-  return db.transaction("r", personal, lists, control, stored);
+  return db.transaction("r", personal, lists, control, recentHistory, stored);
 }
 export async function readListSnapshot(id: string, expected: Revision) {
   return exportListSnapshot(await readStore(), id, expected);
@@ -142,7 +149,7 @@ export async function readPersonal(): Promise<Personal> {
 }
 export async function updatePersonal(change: (value: Personal) => Personal): Promise<Personal> {
   await ready();
-  return db.transaction("rw", personal, lists, control, async transaction => {
+  return db.transaction("rw", personal, lists, control, recentHistory, async transaction => {
     const state = await stored(transaction);
     const value = change(state.personal ?? browserDefaultPersonal());
     validatePersonal(value);
@@ -155,7 +162,7 @@ export async function updatePersonal(change: (value: Personal) => Personal): Pro
 }
 export async function saveList(record: ListRecord, expected: Revision, existing = false, confirmDuplicate = false): Promise<Revision> {
   await ready();
-  return db.transaction("rw", personal, lists, control, async transaction => {
+  return db.transaction("rw", personal, lists, control, recentHistory, async transaction => {
     const next = saveRecord(await stored(transaction), record, expected, existing, confirmDuplicate);
     await lists.put(record);
     await control.put(next.control);
@@ -164,7 +171,7 @@ export async function saveList(record: ListRecord, expected: Revision, existing 
 }
 export async function deleteList(id: string, expected: Revision): Promise<void> {
   await ready();
-  return db.transaction("rw", personal, lists, control, async transaction => {
+  return db.transaction("rw", personal, lists, control, recentHistory, async transaction => {
     const state = await stored(transaction);
     if (!state.lists.some(list => list.id === id)) throw new PersonalError("stale");
     const next = { ...nextRevision(state, expected), lists: state.lists.filter(list => list.id !== id) };
@@ -172,4 +179,18 @@ export async function deleteList(id: string, expected: Revision): Promise<void> 
     await lists.delete(id);
     await control.put(next.control);
   });
+}
+export async function updateHistory(change: (history: RecentHistoryV1) => RecentHistoryV1): Promise<void> {
+  await ready();
+  await db.transaction("rw", personal, lists, control, recentHistory, async transaction => {
+    const state = await stored(transaction), history = change(state.history);
+    if (history === state.history) return;
+    const next = { ...nextRevision(state, state.control), history };
+    validateStore(next);
+    await recentHistory.put({ id: "history", ...history });
+    await control.put(next.control);
+  });
+}
+export function recordOpened(reference: PersonalReference): Promise<void> {
+  return updateHistory(history => promoteRecent(history, reference));
 }

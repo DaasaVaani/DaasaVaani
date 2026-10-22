@@ -4,6 +4,9 @@ import recordSchema from "../shared/schemas/list-record-v2.schema.json";
 import transferSchema from "../shared/schemas/list-transfer.schema.json";
 import transferSchemaV2 from "../shared/schemas/list-transfer-v2.schema.json";
 import referenceSchema from "../shared/schemas/personal-reference.schema.json";
+import historySchema from "../shared/schemas/recent-history.schema.json";
+import type { RecentHistoryV1 } from "../shared/types/personal";
+export type { RecentHistoryV1 } from "../shared/types/personal";
 import { typedEntry, type ListSnapshot, type ListSnapshotV1, type ListEntryV2, type ListTransferV2, type PersonalReference } from "./list-transfer-types";
 import { unicodeNameKey as listNameKey } from "./unicode-names";
 export { unicodeNameKey as listNameKey, unicodeNameProfile } from "./unicode-names";
@@ -14,8 +17,8 @@ export interface Personal {
 export type ListEntry = ListEntryV2 & { id: string };
 export interface ListRecord { id: string; name: string; entries: ListEntry[] }
 export interface Revision { epoch: string; revision: number }
-export interface Control extends Revision { id: "state"; formatVersion: 4 }
-export interface PersonalStore { control: Control; personal?: Personal; lists: ListRecord[] }
+export interface Control extends Revision { id: "state"; formatVersion: 5 }
+export interface PersonalStore { control: Control; personal?: Personal; lists: ListRecord[]; history: RecentHistoryV1 }
 export type PersonalErrorCode = "invalid" | "listInvalid" | "capacity" | "stale" | "duplicate";
 export class PersonalError extends Error {
   constructor(readonly code: PersonalErrorCode) {
@@ -32,6 +35,7 @@ type LegacyPersonal = Omit<Personal, "favorites"> & { favorites: string[] };
 type LegacyList = Omit<ListRecord, "entries"> & { entries: (ListSnapshotV1["entries"][number] & { id: string })[] };
 const validLegacyList = ajv.compile<LegacyList>(legacyRecordSchema);
 const validReference = ajv.compile<PersonalReference>(referenceSchema);
+const validHistory = ajv.compile<RecentHistoryV1>(historySchema);
 const validSnapshotV1 = ajv.compile<ListSnapshotV1>(transferSchema), validSnapshotV2 = ajv.compile<ListTransferV2>(transferSchemaV2);
 const validSnapshot = (value: unknown): value is ListSnapshot => validSnapshotV1(value) || validSnapshotV2(value);
 const uuid = new RegExp(recordSchema.properties.id.pattern, "u");
@@ -49,6 +53,21 @@ export function toggleFavorite(personal: Personal, reference: PersonalReference)
   const key = referenceKey(reference);
   return { ...personal, favorites: hasFavorite(personal, reference)
     ? personal.favorites.filter(value => referenceKey(value) !== key) : [...personal.favorites, reference] };
+}
+export function defaultHistory(): RecentHistoryV1 {
+  return { enabled: __WEB_CONFIG__.defaultRecentHistoryEnabled, entries: [] };
+}
+export function validateHistory(value: unknown, limits = __PERSONAL_LIMITS__): asserts value is RecentHistoryV1 {
+  if (!object(value) || !Array.isArray(value.entries)) throw new PersonalError("invalid");
+  if (value.entries.length > limits.maxRecents) throw new PersonalError("capacity");
+  if (Object.keys(value.entries).length !== value.entries.length || !validHistory(value)) throw new PersonalError("invalid");
+}
+export function promoteRecent(history: RecentHistoryV1, reference: PersonalReference, limits = __PERSONAL_LIMITS__): RecentHistoryV1 {
+  validateHistory(history, limits);
+  if (!validReference(reference)) throw new PersonalError("invalid");
+  const key = referenceKey(reference);
+  if (!history.enabled || (history.entries[0] && referenceKey(history.entries[0]) === key)) return history;
+  return { ...history, entries: [reference, ...history.entries.filter(value => referenceKey(value) !== key)].slice(0, limits.maxRecents) };
 }
 
 export function defaultPersonal(preferredLanguages: readonly string[] = []): Personal {
@@ -70,7 +89,7 @@ export function validatePersonal(value: unknown, limits = __PERSONAL_LIMITS__): 
   if (value.favorites.length > limits.maxFavorites) throw new PersonalError("capacity");
 }
 export function newControl(): Control {
-  return { id: "state", formatVersion: 4, epoch: crypto.randomUUID(), revision: 0 };
+  return { id: "state", formatVersion: 5, epoch: crypto.randomUUID(), revision: 0 };
 }
 function controlRevision(controls: unknown[], version: number): Revision {
   const control = controls[0];
@@ -79,8 +98,7 @@ function controlRevision(controls: unknown[], version: number): Revision {
       typeof control.revision !== "number" || !Number.isSafeInteger(control.revision) || control.revision < 0) throw new PersonalError("invalid");
   return { epoch: control.epoch, revision: control.revision };
 }
-export function parseStore(controls: unknown[], personal: unknown[], lists: unknown[]): PersonalStore {
-  const control = controlRevision(controls, 4);
+function typedContents(personal: unknown[], lists: unknown[]) {
   if (personal.length > 1) throw new PersonalError("invalid");
   const preferences = personal[0];
   if (preferences === undefined && personal.length !== 0) throw new PersonalError("invalid");
@@ -90,11 +108,26 @@ export function parseStore(controls: unknown[], personal: unknown[], lists: unkn
     if (!validList(list)) throw new PersonalError("invalid");
     records.push(list);
   }
-  const state: PersonalStore = {
-    control: { id: "state", formatVersion: 4, ...control },
-    personal: preferences, lists: records,
-  };
+  return { personal: preferences, lists: records };
+}
+export function parseStore(controls: unknown[], personal: unknown[], lists: unknown[], histories: unknown[]): PersonalStore {
+  const control = controlRevision(controls, 5), row = histories[0];
+  if (histories.length !== 1 || !object(row) || !keys(row, ["id", "enabled", "entries"]) || row.id !== "history") {
+    throw new PersonalError("invalid");
+  }
+  const history = { enabled: row.enabled, entries: row.entries };
+  validateHistory(history);
+  const state: PersonalStore = { control: { id: "state", formatVersion: 5, ...control },
+    ...typedContents(personal, lists), history };
   validateStore(state);
+  return state;
+}
+export function migrateStoreV4(controls: unknown[], personal: unknown[], lists: unknown[], limits = __PERSONAL_LIMITS__): PersonalStore {
+  const old = { control: controlRevision(controls, 4), ...typedContents(personal, lists) };
+  validateCollections(old, limits);
+  storedBytes(old, 4, limits.maxPersonalStoredBytes);
+  const state: PersonalStore = { ...old, control: newControl(), history: defaultHistory() };
+  validateStore(state, limits);
   return state;
 }
 function legacyPreferences(personal: unknown[], version: 1 | 2 | 3, limits: typeof __PERSONAL_LIMITS__): LegacyPersonal | undefined {
@@ -136,7 +169,7 @@ function migrateLegacy(controls: unknown[], personal: unknown[], lists: unknown[
     records.push(list);
   }
   if (version !== 1) storedBytes({ control, personal: preferences, lists: records }, version, limits.maxPersonalStoredBytes);
-  const state: PersonalStore = { control: newControl(), personal: preferences && { ...preferences,
+  const state: PersonalStore = { control: newControl(), history: defaultHistory(), personal: preferences && { ...preferences,
     favorites: preferences.favorites.map(videoId => ({ kind: "legacyVideo", videoId })) },
     lists: records.map(list => ({ ...list, entries: list.entries.map(entry => ({ ...typedEntry(entry), id: entry.id })) })) };
   validateStore(state, limits);
@@ -197,13 +230,13 @@ export function jsonBytes(value: unknown, limit = Number.MAX_SAFE_INTEGER): numb
   return bytes;
 }
 export function storageBytes(state: PersonalStore, limit = Number.MAX_SAFE_INTEGER): number {
-  return storedBytes(state, 4, limit);
+  return storedBytes(state, 5, limit, state.history);
 }
 function storedBytes(state: { control: Revision; personal?: Personal | LegacyPersonal; lists: (ListRecord | LegacyList)[] },
-  version: number, limit: number): number {
+  version: number, limit: number, history?: RecentHistoryV1): number {
   const personal = state.personal;
   return jsonBytes({
-    format: version === 4 ? "daasavaani-personal-storage" : "fixture-personal-storage", formatVersion: version,
+    format: version >= 4 ? "daasavaani-personal-storage" : "fixture-personal-storage", formatVersion: version,
     control: { id: "state", formatVersion: version, epoch: state.control.epoch, revision: state.control.revision },
     personal: personal ? [{ id: "personal", favorites: personal.favorites.map(reference => typeof reference === "string" ? reference
       : reference.kind === "lyric" ? { kind: "lyric", lyricId: reference.lyricId } : { kind: "legacyVideo", videoId: reference.videoId }),
@@ -211,9 +244,11 @@ function storedBytes(state: { control: Revision; personal?: Personal | LegacyPer
     lists: [...state.lists].sort((a, b) => a.id < b.id ? -1 : a.id > b.id ? 1 : 0).map(list => ({
       id: list.id, name: list.name, entries: list.entries.map(entry => ({ id: entry.id, ...wireEntry(entry) })),
     })),
+    ...(history ? { recentHistory: [{ id: "history", enabled: history.enabled, entries: history.entries.map(reference =>
+      reference.kind === "lyric" ? { kind: "lyric", lyricId: reference.lyricId } : { kind: "legacyVideo", videoId: reference.videoId }) }] } : {}),
   }, limit);
 }
-export function validateStore(state: PersonalStore, limits = __PERSONAL_LIMITS__): void {
+function validateCollections(state: Pick<PersonalStore, "personal" | "lists">, limits: PersonalLimits): void {
   if (state.personal) validatePersonal(state.personal, limits);
   if (state.lists.length > limits.maxLists) throw new PersonalError("capacity");
   const lists = new Set<string>(), occurrences = new Set<string>();
@@ -229,6 +264,10 @@ export function validateStore(state: PersonalStore, limits = __PERSONAL_LIMITS__
     }
     jsonBytes(listSnapshot(list), limits.maxListDecodedBytes);
   }
+}
+export function validateStore(state: PersonalStore, limits = __PERSONAL_LIMITS__): void {
+  validateCollections(state, limits);
+  validateHistory(state.history, limits);
   storageBytes(state, limits.maxPersonalStoredBytes);
 }
 export function nextRevision(state: PersonalStore, expected: Revision): PersonalStore {

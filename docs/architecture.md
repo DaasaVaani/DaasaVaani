@@ -69,13 +69,13 @@ Initial values and exact field bounds belong only in the linked owning files.
 | Owner/source and keys | Current application and validation | Compatibility/open work |
 | --- | --- | --- |
 | [Web settings/schema](../settings/web.schema.json): `base`, `descriptorUrl`, `canonicalBaseUrl`, `listLinkPath`, `listFileName` | Strict build-time settings; fixture artifact entry and minimal-list URL/file projection | Public route/origin changes require old-link/hosting review; distinct real-publication settings below never reinterpret fixture formats |
-| [Web settings/schema](../settings/web.schema.json): `lyricPreview.descriptorUrl`, `pageSize`, `maxItems`, `maxEncodedBytes`, `maxDecodedBytes`, `concurrentRequests` | Credential-free absolute HTTPS endpoint, full preparation plan/count/aggregate bounds before item requests, bounded workers and explicit complete paging | Separate `lyric-preview-v1`, consented memory-only content lifecycle; no production on-demand or persistent offline claim; personal references follow the independent v4 protocol below |
+| [Web settings/schema](../settings/web.schema.json): `lyricPreview.descriptorUrl`, `pageSize`, `maxItems`, `maxEncodedBytes`, `maxDecodedBytes`, `concurrentRequests` | Credential-free absolute HTTPS endpoint, full preparation plan/count/aggregate bounds before item requests, bounded workers and explicit complete paging | Separate `lyric-preview-v1`, consented memory-only content lifecycle; no production on-demand or persistent offline claim; personal references follow the independent v5 protocol below |
 | [Web settings](../settings/web.yml): `transferChunkBytes`, `listCompressionLevel` | Byte allocation/compression controls passed to the dedicated codec worker; schema and actual-ceiling codec tests | Encoding choices do not narrow accepted valid input or change decoded/text limits |
 | [Web settings](../settings/web.yml): `databaseName` | Build-time Dexie/native IndexedDB identity | Changing it is not a migration; it would strand the prior database and requires explicit compatibility handling |
 | [Web settings](../settings/web.yml): `fontFamily`, `readerFontSize`, `space`, `contentWidth`, `readerWidth`, `themes` | Typed CSS tokens, system fonts, three palettes and measured contrast checks | Personal font/density/helper/script settings and physical-device/font conformance remain incomplete |
 | [Web settings](../settings/web.yml): `demoPort`, `demoViewports` | Development server and desktop/mobile demo tooling, not a runtime user preference | Supported-browser/device acceptance is broader than configured demo viewports |
-| [Portable defaults/schema](../shared/schemas/ui-defaults.schema.json) | Build-time locale/theme defaults and allowed choices; first supported browser locale, explicit persisted override, independent device appearance | Canonical `lyricScript` remains the fixture invariant, not an implemented selectable transliteration profile |
-| [Personal-transfer settings/schema](../shared/schemas/personal-transfer-settings.schema.json) | Build-time favorite/list/occurrence/text/logical-byte and encoded/decoded/link bounds; generated list schemas and transactional/codec tests | Recents/bookmark/learning/backup bounds are declared but their complete features and protocols are not implemented |
+| [Portable defaults/schema](../shared/schemas/ui-defaults.schema.json) | Build-time locale/theme/default history recording and allowed choices; first supported browser locale, explicit persisted override, independent device appearance | Canonical `lyricScript` remains the fixture invariant, not an implemented selectable transliteration profile; explicit stored history choices win |
+| [Personal-transfer settings/schema](../shared/schemas/personal-transfer-settings.schema.json) | Build-time favorite/list/occurrence/recent-window/text/logical-byte and encoded/decoded/link bounds; generated schemas and transactional/codec tests | Bookmark/learning/backup bounds are declared but their complete features and protocols are not implemented |
 | [Publication-safety settings/schema](../shared/schemas/publication-policy-settings.schema.json) | Strict build-time required fields, safe byte counts, platform-bounded request milliseconds and implemented required capabilities; artifact fetch/decoder checks | Untrusted remote data cannot raise these limits; this is not the full production publication/offline policy |
 | [Search settings](../shared/settings/search.yml) | Publisher emits a policy artifact; Website uses its verified snapshot-bound rules, not newer source settings | Full reviewed profiles/aliases/technical grammar, filters and excerpt conformance remain open |
 | [Fixture-tool settings](../settings/tooling.yml) | Strict helper validation of repository/full revision/local checkout; a local path override never waives exact clean revision validation | Independent producer/consumer pins; no production ingestion or source migration authorization |
@@ -120,7 +120,9 @@ Remaining production settings/schemas and lifecycle budgets remain open.
   or truncated. URL input is bounded ASCII, canonical base64url, configured HTTPS
   origin and root/open path; no payload request is sent.
 - Settings and list previews do not depend on a successful Library download.
-  Personal controls/readers require successful personal-record validation.
+  Personal controls and fixture readers require successful personal-record
+  validation; verified canonical reading remains usable with explicit personal
+  errors rather than erasing readable content.
   Previews show references/user text, not guessed catalog resolution/readiness,
   until a library-resolution adapter is available. An explicit Save creates only
   a new independent local list; re-export is local and long links require files.
@@ -170,24 +172,25 @@ Personal values never enter repository settings; payloads cannot override limits
 - Root /open/ hash links, narrow signed Android association and browser fallback;
   no forced routing or claim that installation guarantees handoff.
 
-## Web typed personal storage v4
+## Web typed personal storage v5
 
 This is the executable Website protocol for typed favorites/preferences and
-logical lists, not the full production personal/backup contract. The
+logical lists and recent history, not the full production personal/backup contract. The
 [Shared typed-reference/local-record v2 contract](https://github.com/DaasaVaani/shared/blob/main/docs/list-transfer.md#typed-reference-and-list-v2)
-owns list/occurrence fields. All three tables share the configured personal DB:
+owns list/occurrence fields. All four tables share the configured personal DB:
 
 | Table | Exact logical rows |
 | --- | --- |
 | `personal` | Zero or one `{id:"personal", favorites, language, theme}`; favorites are exact typed lyric/legacy references, unique by kind plus case-sensitive ID; absent row means first supported browser language plus validated configured defaults |
 | `lists` | Independently identified Shared list records; entry array order is authoritative |
-| `control` | Exactly one `{id:"state", formatVersion:4, epoch, revision}`; fresh local UUIDv4 epoch and nonnegative safe-integer revision |
+| `control` | Exactly one `{id:"state", formatVersion:5, epoch, revision}`; fresh local UUIDv4 epoch and nonnegative safe-integer revision |
+| `recentHistory` | Exactly one `{id:"history", enabled, entries}`; ordered unique typed references following the [Shared logical history record](https://github.com/DaasaVaani/shared/blob/main/docs/recent-history.md) |
 
 ### Opening and migration
 
-Native IndexedDB version40 is the typed v4 schema. Supported migration inputs
+Native IndexedDB version50 is the typed v5 schema. Supported migration inputs
 are native version10 (personal-only v1), version20 (three-table v2) and version30
-(three-table v3).
+(three-table v3), plus version40 (typed three-table v4).
 Open at the exact native version **before** opening Dexie,
 which can otherwise retry a newer version and patch missing schema parts.
 Native upgrade creates only the specified stores/header, validates legacy
@@ -198,10 +201,13 @@ old opaque-string favorites/v1 entries before structural adaptation. Convert
 favorites only to typed legacy references and `item` only to `legacyVideo`,
 retaining every raw ID, list/occurrence UUID, name, fallback, repetition and order.
 UUID-looking old IDs are never lyric aliases. Write converted rows and a fresh
-v4 epoch/revision0 together. The longer typed representation can exceed capacity:
+v5 epoch/revision0 together. Version40 validates its exact typed schema/old
+accounting, preserving all typed rows unchanged. Every upgrade creates only an
+empty history with the configured initially-enabled preference; no previous
+activity is inferred from favorites/lists. The longer representation can exceed capacity:
 abort rather than truncate/relax limits. New-mode or typed values mislabeled as
 older schemas are invalid. Any failure aborts the entire schema transaction.
-New initialization creates metadata only, not a personal preference or list row.
+New initialization creates control and empty history, not a personal preference or list row.
 For an absent preference row, inspect `navigator.languages` in preference order
 (or `navigator.language` if empty), matching each case-insensitive primary
 language subtag against configured supported UI languages. Regional/script tags
@@ -212,7 +218,7 @@ over browser preferences. UI selection never changes canonical Kannada, lyric
 script or theme. The pure model accepts preference tags explicitly; only the
 browser adapter reads navigator values.
 
-V4 preferences accept `light`, `dark`, `warm` and `device`; `device` follows the
+V5 preferences accept `light`, `dark`, `warm` and `device`; `device` follows the
 current browser light/dark media preference. Explicit modes ignore system changes;
 stored mode selection survives reload and remains independent of UI locale and
 canonical lyrics. Media changes update colors only, never a personal row/revision.
@@ -231,7 +237,7 @@ local transfer preview or re-export. There is no downgrade/reset migration.
 
 ### Transactions, names and exact accounting
 
-Every personal mutation uses one read-write transaction spanning all three
+Every personal mutation uses one read-write transaction spanning all four
 tables. Read/validate the complete current state, check captured epoch/revision,
 validate the prospective state including the incremented revision, then write
 only the intended record and header. Failure rolls back all writes. Creation/
@@ -252,7 +258,7 @@ locale, trim, lowercase or moving package table participates. Strict build check
 bind the pinned Shared settings/manifest/table/vector/license bytes; complete
 Unicode License V3 is included in the distribution.
 
-The v4 database stores raw names only, not derived keys or profile caches.
+The v5 database stores raw names only, not derived keys or profile caches.
 Compute this explicit profile on demand without rewriting any name, ID, occurrence,
 reference, order, preference or header. Existing names that now compare equal
 remain independent and opening a database does not ask for destructive repair.
@@ -322,12 +328,14 @@ same-document navigation from a saved list must decode the newly selected link,
 not depend on a reload or unrelated personal-state render.
 
 The exact logical accounting envelope, serialized as compact UTF8 JSON without
-BOM, is `{format:"daasavaani-personal-storage",formatVersion:4,control,personal,lists}`.
+BOM, is `{format:"daasavaani-personal-storage",formatVersion:5,control,personal,lists,recentHistory}`.
 Key order is the order shown; header keys follow the table above. `personal` is
 an empty array or one row with keys `id,favorites,language,theme`. `lists` is sorted
 by ASCII UUID; row keys are `id,name,entries`. Favorite keys are `kind,lyricId`
 or `kind,videoId`. Each entry uses `id,kind,lyricId` or `id,kind,videoId`
 then optional `fallback`, or `id,kind,text`. No text/array normalization occurs.
+`recentHistory` is one row with keys `id,enabled,entries`; each history reference
+uses `kind,lyricId` or `kind,videoId` in authoritative most-recent-first order.
 Every header, UUID, JSON escape, comma/bracket and revision digit is included.
 No timestamps exist in this version; adding them requires a versioned protocol
 and accounting change rather than an uncounted field.
@@ -338,11 +346,34 @@ serialized Unicode scalars exactly without allocating an output-sized byte
 buffer. Physical IndexedDB/index/quota usage differs from logical bytes.
 This envelope contains local control data and is **never a full-backup export**.
 Old v2/v3 accounting uses its exact `fixture-personal-storage` format/header and
-v1 entry projection before conversion. Transport decoding never selects a database
+v1 entry projection before conversion. Old v4 accounting uses its exact typed
+version4 envelope without history. Transport decoding never selects a database
 version. Unmodified v1 previews re-export v1; confirmed v1 imports structurally
 adapt to local v2 records with fresh IDs, while all saved-list exports use v2.
 Full-backup headers, complete personal collections, replacement/crash/locale
 recovery and exportability require their own exact contracts/tests.
+
+### Recently opened lifecycle
+
+Only successful explicit real/fixture reader opens promote an exact typed
+reference, remove its previous occurrence and retain the configured latest
+`maxRecents` distinct entries. This intentional rolling-window eviction never
+authorizes migration truncation. Already-first opens and disabled recording are
+no-ops without revision changes. Failed/unknown reads, preparation, preview and
+background loads do not record. There are no activity timestamps or search logs.
+
+Recording starts from the validated portable default; explicit stored values
+survive reload. Disable preserves entries, Clear preserves the enabled flag and
+every unrelated personal row. Both controls work before preparation. Reader
+effects are tied to the opened verified item, not history/preferences changes,
+so clearing/re-enabling from another tab cannot re-record a still-mounted reader.
+Failures are explicit and atomic without erasing already verified readable text.
+
+The Recent view retains unresolved references across reload without fetching
+content, resolves real/legacy IDs separately and preserves available return
+focus. History never enters minimal-list transfers or service calls and never
+claims persistent offline readiness. Independent script selection/offline
+content remain subject to their separate implementation gates.
 
 ## Selected foundation and incomplete gates
 

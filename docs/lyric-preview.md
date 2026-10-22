@@ -57,7 +57,9 @@ reader return and Back/Forward. Reload resets this context and needs consent aga
 The real route hides fixture notices/errors and synthetic preparation messages.
 Personal-storage errors remain explicit. Explicit reader controls save typed
 lyric favorites and new independent list occurrences; merely preparing/reading
-never changes personal data. A lyric reference uses `kind:"lyric",lyricId`;
+never changes favorites/lists/preferences. Successful explicit reading records
+optional device-only recent history; disabled recording makes reading fully
+no-write. A lyric reference uses `kind:"lyric",lyricId`;
 legacy fixture/video references retain `kind:"legacyVideo",videoId`, even for
 UUID-looking old values. No reference is matched or rewritten from a title,
 attached video or catalog coincidence.
@@ -77,7 +79,7 @@ opening that gate downloads lyrics. Reading after explicit preparation continues
 to the requested UUID, not a guessed substitute. List/Favorites origins restore
 available focus/scroll and the selected unsaved list editor in the same session.
 
-The [personal v4 protocol](architecture.md#web-typed-personal-storage-v4) validates
+The [personal v5 protocol](architecture.md#web-typed-personal-storage-v5) validates
 and structurally upgrades old local schemas atomically without changing existing
 list/occurrence IDs or raw legacy values. Transport families remain independent:
 v1 previews can re-export unchanged; confirmed v1 imports adapt to typed legacy
@@ -86,14 +88,20 @@ records, and all saved-list exports use minimal v2 without local IDs/lyric copie
 ## Coverage and open work
 
 This slice provides partial DATA-01/02/04/05, UX-07/13, OFF-02 and SET-01/02
-coverage, with partial LIB-01/02/03/04/05/08/09/10/11 and XFER-01/02/03/04/05/06/08
+coverage, with partial LIB-01/02/03/04/05/06/08/09/10/11 and XFER-01/02/03/04/05/06/08
 for the Website typed personal slice. See [validation commands and obligations](testing-and-release.md) and
 the [roadmap](implementation-roadmap.md). The native application independently
 implements full-preparation reading with the same media independence, typed
 favorites and durable lists/occurrences. Preparation remains memory-only in both
 clients; local collections do not establish persistent offline content readiness.
 
-Still open: production individual PWA item reading, bookmarks/recents/learning/
+Website Recently opened retains typed references across restarts, with default-on
+recording, independent disable/clear controls and no automatic content request.
+Only a verified explicitly opened reader updates it; preparation and preview
+never record. Clear/disable preserve favorites/lists/preferences; unknown
+references remain visible. See the [history lifecycle](architecture.md#recently-opened-lifecycle).
+
+Still open: production individual PWA item reading, bookmarks/learning/
 recitation for real UUIDs, full personal backups, full linguistic search/
 profiles/helpers, populated classification/context/verse/media/eligible-Latin
 public adapters, rights/registry closure, persistent offline activation/repair,

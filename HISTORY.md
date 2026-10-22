@@ -1,5 +1,86 @@
 # Documentation history
 
+## 2026-10-22: Website successful-open history and personal v5
+
+- Archived the preceding v4 protocol: native40/control4, three stores, the
+  exact daasavaani-personal-storage/version4 envelope containing only control/
+  personal/lists, metadata-only initialization and future50 refusal. Reading
+  previously made no personal write and recents were unimplemented. V5 uses
+  native50/control5, a fourth recentHistory store/one history row and future60
+  refusal; every remaining old typed identity/text/order/accounting rule stays.
+- Independently adopted verified Shared9b8845a21bb529268bba49ffbf6a44dece45a9ed.
+  Its owner-approved default-on setting, existing50-entry bound, strict typed
+  logical schema/fixtures and bilingual labels drive Website behavior. Native
+  recent implementation is separate, not inferred from the Shared publication.
+- Native10/20/30 structurally preserve legacy references; native40 preserves
+  every typed favorite/list/occurrence/preference unchanged. Each migration
+  validates exact old schema/rows and old/prospective capacity, atomically adds
+  empty configured history and a fresh v5 epoch/revision0, or fully rolls back.
+  No prior opens are invented from favorites/lists. Invalid/newer/blocked/
+  over-capacity data is never reset or silently trimmed.
+- Successful explicitly opened real/fixture readers promote exact typed IDs
+  into a device-only distinct most-recent-first window. Preparation/catalog/
+  preview/unknown/failed routes do not record. Already-first and disabled opens
+  have no write/revision. No timestamps, queries, lyrics, URLs or catalog titles
+  are stored or exported. Unresolved references persist without implicit fetch,
+  and UUID-looking legacy references never resolve as real lyrics.
+- Recently opened and Settings provide independent clear/disable controls before
+  preparation. Disabled state retains entries/restarts; Clear retains enabled
+  state and all other records. Cross-tab clear/re-enable cannot manufacture
+  another open from a still-mounted reader. Quota failure is explicit and atomic
+  while verified canonical text remains readable; deliberate retry/reopen works.
+  Controls and reader return retain available focus without stealing focus from
+  navigation. History uses the existing complete personal transaction/fence and
+  exact UTF8 envelope accounting, including the actual64MiB boundary fixture.
+- Partial coverage: LIB-06, SET-04, QUAL-05, DATA-04 and UX-13. Selected-script/
+  offline/native history parity, bookmarks/learning/recitation, full backup and
+  release/platform acceptance remain separate. All original source files stay local.
+- `npm run build` first found an optional fixture-reader item guard and one
+  old Unicode test's missing history argument; proper guards/current fixtures
+  fixed them. Focused model tests passed22. Initial canonical/history browser
+  run passed14/failed25: immediate checkbox-helper assumptions did not wait for
+  the actual async commit, and the new setup had prevented an init-script hook
+  from running on a fresh document. Tests now click and await committed state,
+  with fresh-document isolation; no fake persistence or weakened assertion.
+  The repeated focused run passed39 cases.
+- Initial full `npm run check` passed85 units and210 browser cases but failed
+  the three list-origin snapshots because default-on history intentionally wrote
+  its row/header. Updated those assertions to permit exactly the verified
+  history/reference and one revision, still comparing every unrelated record
+  and preserving focus/unsaved context; further Back/Forward is fully no-write.
+  Added explicit quota/current-capacity/focus cases; focused `node
+  node_modules\@playwright\test\cli.js test recent-history lists --grep
+  'history|list-origin'` passed24 cases.
+- The next full run passed85 units/216 browser cases and failed3 desktop
+  cases. Two reported compressed-resource network/worker errors; captured
+  manifest bytes independently passed gzip CRC, declared length and SHA256.
+  No artifact corruption or definitive environmental cause was established.
+  Neither case was bypassed, retried automatically or given a longer timeout.
+  The clear-control focus failure exposed restoration scheduled before React
+  had necessarily committed the enabled fieldset. Restoration now runs after
+  the DOM commit, retains the existing hidden/navigation/focus-owner guards and
+  does not scroll the page. The three-case regression command with
+  `--repeat-each=3` passed27 viewport cases.
+- A subsequent full run passed85 units/218 browser cases and failed1 assertion:
+  its unscoped status locator also matched the concurrent fixture-validation
+  status. Scoped the existing exact-text assertion to Recently opened, without
+  suppressing either status. Added real commit/focus-movement/navigation
+  journeys proving restoration never steals focus. Combined history/migration
+  regression passed30 cases; final `npm run check` passed85 units and222
+  browser cases at configured concurrency, without retries or skipped tests.
+- Documentation/bootstrap validation passed20 Markdown files,197 local
+  links/anchors and all153 unchanged unique requirement IDs; the initial
+  checker pattern was corrected to include the existing A11Y family.
+  Strict YAML passed4 files, configured actionlint1.7.12 with ShellCheck0.11.0
+  and `git diff --check`/`git diff --cached --check` passed. The existing
+  advisory Vite chunk-size warning remains; this is not release/performance
+  acceptance. Native validation and publication are independently owned.
+- Prior documentation35ad0bb16d0b11985b93651244214f55d9005ef0 passed exact
+  preflight39715044951, main/build/Pages39716036863 and CodeQL39716036697.
+  Hosted application bytes remained identical to the previously verified
+  Favorites deployment. Completed main-contained validation branches and exact
+  owned deployment scratch were removed; user emulator/demo server were preserved.
+
 ## 2026-10-22: native typed collections and actual cross-client handoff
 
 - Archived current Root descriptions of native read-only canonical reading,
