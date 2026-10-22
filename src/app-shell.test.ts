@@ -26,16 +26,17 @@ describe("app-interface cache boundary", () => {
   test("complete generation preserves exclusions and enforces the exact total byte ceiling", async () => {
     const directory = await mkdtemp(resolve(tmpdir(), "daasavaani-shell-test-"));
     const config = { base: "/", listLinkPath: "open/", appShell: { workerFile: "sw.js",
+      manifestFile: "manifest.webmanifest", iconPrefix: "app-icon",
       cacheId: "DaasaVaani-test-interface", maxPrecacheBytes: 8388608, updateCheckIntervalMs: 60000 } };
     try {
       for (const folder of ["open", "assets", "library", "other"]) await mkdir(resolve(directory, folder));
-      for (const file of ["index.html", "open/index.html", "assets/lazy.js", "assets/main.css",
+      for (const file of ["index.html", "open/index.html", "assets/lazy.js", "assets/main.css", "manifest.webmanifest",
         "third-party-licenses.md", "pako-license.txt", "unicode16-license.txt", "library/excluded.js",
         "other/index.html", "excluded.jpg", "excluded.json.gz", "assets/excluded.js.map"]) {
         await writeFile(resolve(directory, ...file.split("/")), file.endsWith(".js") ? "self.test = true;" : "Synthetic test only");
       }
       const first = await prepareAppShell(directory, config);
-      expect(first.count).toBe(9);
+      expect(first.count).toBe(10);
       const worker = await readFile(resolve(directory, config.appShell.workerFile), "utf8");
       expect(worker).toContain("/assets/lazy.js");
       expect(worker).not.toMatch(/excluded|\/library\/|\/other\//u);

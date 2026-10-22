@@ -1,5 +1,45 @@
 # Documentation history
 
+## 2026-10-22: declarative PWA installation metadata and original artwork
+
+- Archived the preceding installation status: manifest/icons and installation UX
+  were unimplemented; P6 covered only shell caching and normal updates.
+  Declarative metadata/artwork now implement the next bounded PLAT-01/06 slice;
+  actual OS installation and the complete supported-platform matrix stay open.
+- The preceding shell batch publishedae72ffad9995585ed9bd625b4d1c31aaf7d197a0
+  with exact Linux preflight39745429179, main/Pages39746230615 and
+  CodeQL39746230056 passed. Local and Linux suites covered95 units/270 browsers.
+  Fresh isolated hosted Chromium compared12 public resources and11 cached
+  response bodies byte-for-byte with the exact successful Pages artifact;
+  cache plus worker985456 bytes stayed below8388608. Canonical literal/layout/IDs,
+  typed favorite, Warm/font/density, disabled history and every personal row
+  survived actual offline root/open/restart and explicit local transfer save.
+  Interface cache contained no Library/demo/compressed/media objects. Owned
+  helper/browser/artifact extraction and contained no-PR validation ref were
+  cleaned; user server/emulator were preserved. This did not establish offline lyrics.
+- Added original font-independent geometric book artwork and explicit
+  `npm run icons` using existing Chromium, with no dependency/toolchain changes.
+  Initial screenshot capture failed at Chromium's Page.captureScreenshot;
+  generation now uses native SVG image decoding/canvas PNG encoding instead of
+  HTML/viewport capture. Generation and strict TypeScript/production build passed.
+  PNG/SVG outputs are committed resources; normal builds verify rather than rasterize.
+- `npm test -- app-manifest app-shell` passed6 units. Initial focused browser
+  run passed27/30: the three new media cases incorrectly assumed the configured
+  initial Light preference was Follow device. Corrected the expectation and
+  explicitly select Follow device before checking automatic/no-write media changes.
+  Strict TypeScript also caught missing helper configuration projections and an
+  incorrect caption key; both were corrected with actual schema-backed types/
+  existing `followDevice`, not casts or new captions.
+- Corrected full `npm run check` passed98 units, strict TypeScript/production
+  build and all279 browser cases across desktop/Pixel7/320px, no skips or retries.
+  All30 manifest/shell cases are included. `npm run icons` regenerated all four
+  outputs byte-identically; direct isolated Vite development HTTP verification
+  passed actual HTML/manifest identity and PNG MIME without worker registration.
+  Strict YAML4, actionlint1.7.12/ShellCheck0.11.0 and both whitespace checks passed.
+  Documentation checked20 files/210 local links/all153 unique normative IDs.
+  Vite chunk/plugin-timing and Node experimental type-strip warnings remain
+  non-release evidence; actual OS installation/device coverage is still open.
+
 ## 2026-10-22: app-interface shell and normal-update work
 
 - Archived the preceding P6 implementation status: no executable service-worker

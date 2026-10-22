@@ -89,6 +89,7 @@ test("installed interface reloads offline with its lazy list worker but no downl
     ]);
     const before = await personalSnapshot(page), cached = await interfaceCache(page);
     expect(cached).toContain(config.base + "index.html");
+    expect(cached).toContain(config.base + config.appShell.manifestFile);
     expect(cached).toContain(config.base + config.listLinkPath + "index.html");
     expect(cached.some(path => path.includes("list-transfer.worker") && path.endsWith(".js"))).toBe(true);
     expect(cached.some(path => path.includes("search.worker") && path.endsWith(".js"))).toBe(true);
@@ -96,6 +97,14 @@ test("installed interface reloads offline with its lazy list worker but no downl
     expect(cached.some(path => /\/(?:demo|library)\/|\.(?:gz|zip|png|jpg|webp|mp4|map)$/u.test(path))).toBe(false);
     await context.setOffline(true);
     await page.reload();
+    const manifest = await page.evaluate(async () => {
+      const link = document.querySelector<HTMLLinkElement>('link[rel="manifest"]');
+      if (!link) throw new Error("Missing app manifest");
+      const response = await fetch(link.href);
+      if (!response.ok) throw new Error("Offline manifest unavailable");
+      return response.json();
+    });
+    expect(manifest).toMatchObject({ id: config.base, start_url: config.base, scope: config.base });
     await expect(page.getByRole("button", { name: labels.warm, exact: true })).toHaveAttribute("aria-pressed", "true");
     await expect(page.getByText(labels.appShellNotice, { exact: true })).toBeVisible();
     await page.getByLabel(labels.transferFile).setInputFiles({

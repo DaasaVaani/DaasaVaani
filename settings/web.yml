@@ -16,6 +16,8 @@ listCompressionLevel: 6
 demoPort: 5173
 appShell:
   workerFile: sw.js
+  manifestFile: manifest.webmanifest
+  iconPrefix: app-icon
   cacheId: DaasaVaani-app-interface
   maxPrecacheBytes: 8388608
   updateCheckIntervalMs: 60000

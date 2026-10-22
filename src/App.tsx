@@ -272,6 +272,13 @@ export default function App() {
     root.dataset.theme = theme;
     root.style.colorScheme = theme === "dark" ? "dark" : "light";
     for (const [name, value] of Object.entries(__WEB_CONFIG__.themes[theme])) root.style.setProperty(`--${name}`, value);
+    let themeColor = document.querySelector<HTMLMetaElement>('meta[name="theme-color"]');
+    if (!themeColor) {
+      themeColor = document.createElement("meta");
+      themeColor.name = "theme-color";
+      document.head.append(themeColor);
+    }
+    themeColor.content = __WEB_CONFIG__.themes[theme].accent;
     root.style.setProperty("--reader-line-height", String(__WEB_CONFIG__.readerLineHeights[personal.density]));
     for (const [name, value] of Object.entries({ space: __WEB_CONFIG__.space, "reader-font": personal.fontSize,
       "content-width": __WEB_CONFIG__.contentWidth, "reader-width": __WEB_CONFIG__.readerWidth })) root.style.setProperty(`--${name}`, `${value}px`);

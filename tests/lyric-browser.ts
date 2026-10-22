@@ -10,13 +10,16 @@ import { lyricFixture } from "./lyric-fixture";
 const raw = strictYaml(readFileSync(new URL("../settings/web.yml", import.meta.url), "utf8"));
 const validate = new Ajv2020({ strict: true }).compile<Pick<WebConfig, "lyricPreview" | "databaseName" | "readerFontSize" |
   "readerFontSizeMin" | "readerFontSizeMax" | "readerFontSizeStep" | "readerLineHeights" |
-  "base" | "listLinkPath" | "appShell">>(webSchema);
+  "base" | "listLinkPath" | "appShell" | "themes">>(webSchema);
 if (!validate(raw)) throw new Error("Invalid configured lyric browser settings");
 export const config = raw;
 const defaults = strictYaml(readFileSync(new URL("../shared/settings/defaults.yml", import.meta.url), "utf8"));
-const validateDefaults = new Ajv2020({ strict: true }).compile<{ readingDensity: WebConfig["defaultReadingDensity"] }>(defaultsSchema);
+const validateDefaults = new Ajv2020({ strict: true }).compile<{
+  readingDensity: WebConfig["defaultReadingDensity"]; uiLanguage: WebConfig["defaultUiLanguage"];
+}>(defaultsSchema);
 if (!validateDefaults(defaults)) throw new Error("Invalid portable reading defaults");
 export const readingDefaults = { fontSize: config.readerFontSize, density: defaults.readingDensity };
+export const defaultUiLanguage = defaults.uiLanguage;
 const limits = strictYaml(readFileSync(new URL("../shared/settings/personal-transfer.yml", import.meta.url), "utf8"));
 const validateLimits = new Ajv2020({ strict: true }).compile<Pick<PersonalLimits, "maxRecents">>(personalSchema);
 if (!validateLimits(limits)) throw new Error("Invalid configured personal history limits");

@@ -59,8 +59,11 @@ Onboarding/helper/Recite/Practice/offline and complete font/device evidence rema
 
 The Website [app-interface protocol](architecture.md#web-app-interface-shell-and-normal-updates)
 implements the selected Workbox shell-only/normal-update direction independently
-of Library snapshots and the personal DB. Manifest/installability, persistent
-content/readiness/eviction and full platform/upgrade evidence remain open.
+of Library snapshots and the personal DB. Declarative
+[installation metadata](architecture.md#web-installation-metadata-and-original-icons)
+uses a stable base-owned identity, configured default-language branding and original
+maskable/touch artwork without forced prompts. Actual OS installation/platform
+evidence, persistent content/readiness/eviction and full upgrade evidence remain open.
 
 ## Current readiness gates
 

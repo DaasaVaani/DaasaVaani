@@ -13,6 +13,7 @@ import defaultsSchema from "./shared/schemas/ui-defaults.schema.json" with { typ
 import publicationSettingsSchema from "./shared/schemas/publication-policy-settings.schema.json" with { type: "json" };
 import { verifyUnicodeResources } from "./tools/unicode-resources.ts";
 import { prepareAppShell } from "./tools/app-shell.ts";
+import { appManifest, prepareAppManifest } from "./tools/app-manifest.ts";
 
 verifyUnicodeResources();
 const config = strictYaml(readFileSync(new URL("./settings/web.yml", import.meta.url), "utf8"));
@@ -61,7 +62,20 @@ function fixtureArtifacts(directory: string) {
 export default defineConfig({
   plugins: [react(), {
     name: "encoded-fixture-artifacts",
+    transformIndexHtml() {
+      return [
+        { tag: "link", attrs: { rel: "manifest", href: config.base + config.appShell.manifestFile }, injectTo: "head" },
+        { tag: "link", attrs: { rel: "icon", href: `${config.base}${config.appShell.iconPrefix}.svg`, type: "image/svg+xml" }, injectTo: "head" },
+        { tag: "link", attrs: { rel: "apple-touch-icon", href: `${config.base}${config.appShell.iconPrefix}-180.png` }, injectTo: "head" },
+        { tag: "meta", attrs: { name: "theme-color", content: config.themes.light.accent }, injectTo: "head" },
+      ];
+    },
     configureServer(server) {
+      server.middlewares.use((request, response, next) => {
+        if (new URL(request.url ?? "/", "http://localhost").pathname !== config.base + config.appShell.manifestFile) return next();
+        response.setHeader("Content-Type", "application/manifest+json");
+        response.end(JSON.stringify(appManifest(config, defaults.uiLanguage)));
+      });
       server.middlewares.use(fixtureArtifacts(resolve(server.config.root, "public")));
     },
     configurePreviewServer(server) {
@@ -79,6 +93,7 @@ export default defineConfig({
       await copyFile(fileURLToPath(new URL("./shared/resources/unicode16/LICENSE.txt", import.meta.url)), resolve(options.dir, "unicode16-license.txt"));
       await appendFile(resolve(options.dir, "third-party-licenses.md"),
         "\n## Unicode 16.0.0 personal-name data\n\nDerived from the pinned official Unicode data. See [the complete Unicode License V3](unicode16-license.txt).\n");
+      await prepareAppManifest(options.dir, config, defaults.uiLanguage);
       await prepareAppShell(options.dir, config);
     },
   }], base: config.base, build: { license: { fileName: "third-party-licenses.md" } },

@@ -66,8 +66,27 @@ enabled and real worker lifecycle/error/cancellation assertions remain intact.
 `npm test -- app-shell` and
 `node node_modules\@playwright\test\cli.js test app-shell` are incremental only.
 Do not rebuild Website output while native connected tests hold its shared
-HTTP slot. These checks do not establish manifest/installability, complete offline
+HTTP slot. These checks do not establish OS installation, complete offline
 Library readiness, eviction handling or full browser/device coverage.
+
+Installation metadata maps to PLAT-01/06. `npm test -- app-manifest app-shell`
+checks root/subdirectory identity, default-language branding, template ownership,
+stale/malformed/dimension failures and complete shell bounds. The
+[manifest browser suite](../tests/browser/app-manifest.spec.ts) checks both HTML
+entries, actual manifest MIME/Chromium parsing/installability errors, native
+SVG/PNG decoding, exact dimensions/palette/maskable safe geometry, independent
+UI language, resolved browser chrome and no media-change personal writes.
+Shell cases also fetch the manifest offline and exclude all icon images from
+CacheStorage. `node node_modules\@playwright\test\cli.js test app-manifest app-shell`
+is incremental only. These diagnostics do not prove actual OS/launcher installation,
+supported-browser/device behavior or native App Links.
+
+After changing original artwork, the owned Light palette or icon basename, run
+`npm run icons` with the existing Playwright Chromium, then commit generated
+SVG/180/192/512px PNGs and run the full check. Normal builds validate those
+committed resources without generating them or requiring Chromium.
+Development serves the same manifest projection; production includes it in the
+bounded shell. See the [installation protocol](architecture.md#web-installation-metadata-and-original-icons).
 
 Browser tests require the clean Library revision in settings/tooling.yml with `npm ci` completed and
 the installed Playwright Chromium (`npx playwright install chromium` if missing).
@@ -296,7 +315,7 @@ IDs or a release acceptance declaration.
 | --- | --- | --- |
 | DATA-01/02/04/05/07/08 | Real canonical source/import/publication contracts, optional empty authoring fields, LF/CRLF/UUID preservation, verse/alignment validation, held-input isolation and separate media-independent readers; typed web lyric references and preserving structural legacy adapters | Populated public metadata/Latin/media adapters, full rights/registry closure, remaining personal collections/backup and production lifecycle remain incomplete |
 | SEARCH-12/13 | Sampled independent substring/full-matrix oracle, counted-gram candidates, native core checks and real browser search | Ordinary fixture text only; reviewed profiles/aliases/markers, exhaustive proof and complete native parity pending |
-| PLAT-01/05 | Real React and Compose apps; built-site browser journeys at desktop/mobile/320px and one native API36 reading journey | PWA installation, complete routes/layout/interaction modes and supported-platform/device matrix pending |
+| PLAT-01/05/06 | Real React and Compose apps; built-site desktop/mobile/320px journeys; stable PWA manifest/root and direct-entry links, decoded original icons, Chromium installability diagnostics and independent chrome/theme checks; one native API36 reading journey | Actual OS installation/launcher behavior, complete routes/layout/interaction modes and supported-platform/device matrix pending |
 | I18N-01/02/03, SET-04 | Matching two-locale resources; web first-use ordered browser-language selection, configured fallback, persisted four-mode appearance with contrast/media checks; native durable locale/theme preferences; canonical text remains independent | Complete script/personal preferences, device/font matrix and full localization conformance pending |
 | LIB-01/02/03/04/05/08/09/10/11 | Typed web/native lyric/legacy favorites/lists, independent occurrences/plain text, duplicate-name confirmation, management/manual replacement, exact catalog details/explicit reading, reader-to-list addition and preserving web v6/native Room5 upgrades | Recitation/offline/full personal collections and remaining production migrations remain incomplete |
 | LIB-06, SET-04, QUAL-05 | Web v6/native Room5 default-on device-only typed50-distinct successful-open history, explicit disable/re-enable/clear, retained unresolved refs, exact accounting, migration/failure/no-network and restart checks | Selected-script/offline parity and full personal backup remain incomplete |

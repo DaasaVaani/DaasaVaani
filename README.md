@@ -44,7 +44,11 @@ offline, but does not make lyrics ready offline. New app code shows a notice to
 close all website windows and reopen, without forced reload/activation or personal
 data replacement. Registration/update errors have explicit retry; unsupported
 browsers retain online features. See the [shell protocol](docs/architecture.md#web-app-interface-shell-and-normal-updates).
-Manifest/icons, installability/platform coverage and persistent Library snapshots
+The [installation metadata](docs/architecture.md#web-installation-metadata-and-original-icons)
+provides a stable app identity, original maskable/touch icons and standalone launch.
+Use the browser's Install/Add to Home Screen command where offered; the site never
+forces a prompt or redirects into an app. Actual OS installation and the complete
+supported-browser/device matrix remain unverified. Persistent Library snapshots
 remain incomplete.
 Saved lists export independent minimal gzip files/links with stable-read revision
 checks. Supported browsers offer explicit system sharing and clipboard copy;

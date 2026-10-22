@@ -708,7 +708,10 @@ validation must be settled before implementation.
 - **Current executable boundary:** the [Website shell protocol](architecture.md#web-app-interface-shell-and-normal-updates)
   defines the settings-owned cache-byte ceiling/visible-focus interval, complete
   compiled/lazy/legal resource allowlist, narrow navigation fallback, waiting
-  notice and explicit unsupported/error/retry states. Code updates neither download
+  notice and explicit unsupported/error/retry states. The
+  [installation protocol](architecture.md#web-installation-metadata-and-original-icons)
+  defines stable base-owned identity, original maskable/touch artwork and the
+  metadata/image validation boundary. Code updates neither download
   Library artifacts nor force activation/reload or write personal data.
 - **Remaining analysis:** installation/platform/eviction and full compatible
   schema/active-content upgrade coordination, including persistent offline readiness.

@@ -75,7 +75,7 @@ Initial values and exact field bounds belong only in the linked owning files.
 | [Web settings](../settings/web.yml): `databaseName` | Build-time Dexie/native IndexedDB identity | Changing it is not a migration; it would strand the prior database and requires explicit compatibility handling |
 | [Web settings](../settings/web.yml): `fontFamily`, `readerFontSize`, `readerFontSizeMin`, `readerFontSizeMax`, `readerFontSizeStep`, `readerLineHeights`, `space`, `contentWidth`, `readerWidth`, `themes` | Typed CSS tokens, lyric-only bounded font/density preferences, system fonts, three palettes and measured contrast checks; portable density choices/default come from Shared | Onboarding/helper/script/Recite/Practice/offline integration and physical-device/font conformance remain incomplete |
 | [Web settings](../settings/web.yml): `demoPort`, `demoViewports` | Development server and desktop/mobile demo tooling, not a runtime user preference | Supported-browser/device acceptance is broader than configured demo viewports |
-| [Web settings](../settings/web.yml): `appShell` | Production-only Workbox GenerateSW worker filename/cache namespace, complete shell-byte ceiling and deduplicated visible-focus update interval; see the [shell protocol](#web-app-interface-shell-and-normal-updates) | No Library/content readiness, automatic snapshot replacement or browser installation guarantee; `base` must be a directory path |
+| [Web settings](../settings/web.yml): `appShell` | Workbox worker filename/cache namespace, complete shell-byte ceiling, visible-focus update interval and manifest filename/icon basename; see the [shell protocol](#web-app-interface-shell-and-normal-updates) and [installation metadata](#web-installation-metadata-and-original-icons) | No Library/content readiness, automatic snapshot replacement or browser installation guarantee; `base` must be a directory path |
 | [Portable defaults/schema](../shared/schemas/ui-defaults.schema.json) | Build-time locale/theme/default history recording and allowed choices; first supported browser locale, explicit persisted override, independent device appearance | Canonical `lyricScript` remains the fixture invariant, not an implemented selectable transliteration profile; explicit stored history choices win |
 | [Personal-transfer settings/schema](../shared/schemas/personal-transfer-settings.schema.json) | Build-time favorite/list/occurrence/recent-window/text/logical-byte and encoded/decoded/link bounds; generated schemas and transactional/codec tests | Bookmark/learning/backup bounds are declared but their complete features and protocols are not implemented |
 | [Publication-safety settings/schema](../shared/schemas/publication-policy-settings.schema.json) | Strict build-time required fields, safe byte counts, platform-bounded request milliseconds and implemented required capabilities; artifact fetch/decoder checks | Untrusted remote data cannot raise these limits; this is not the full production publication/offline policy |
@@ -179,7 +179,7 @@ Personal values never enter repository settings; payloads cannot override limits
 The production build uses pinned Workbox GenerateSW after the root and configured
 `open/` HTML, compiled assets and legal notices exist. It precaches only those
 HTML entries, every compiled JavaScript/CSS asset (including both lazy workers)
-and the complete application/dependency/Unicode notices. The inline worker has no
+and the complete application/dependency/Unicode notices plus the app manifest. The inline worker has no
 runtime-cache rules, automatic Library download or content/personal database API.
 Fixture/Library artifacts, compressed transfers, images/video and unrelated
 projects are not precached. The configured ceiling covers all precached bytes
@@ -207,9 +207,45 @@ After successful shell installation, offline Settings/list management and bounde
 local transfer decoding can use the cached lazy worker. This is not a validated
 offline lyric snapshot, per-list readiness, persistent-storage/eviction guarantee,
 complete compatible-schema upgrade proof or full browser/device/installability
-coverage. A first-ever offline visit still cannot load the site. Manifest/icons,
-installation UX and persistent complete-library lifecycle remain separate work.
+coverage. A first-ever offline visit still cannot load the site. OS installation
+evidence and persistent complete-library lifecycle remain separate work.
 The [shell suites](testing-and-release.md) define executable boundaries.
+
+## Web installation metadata and original icons
+
+PLAT-01/06 use a declarative manifest and browser-native installation where
+supported; no custom install prompt, installation detection or forced app handoff.
+Root and configured `open/` HTML link the same manifest, SVG favicon and180px
+Apple touch icon. Production writes the manifest before shell generation;
+the development server serves the same projection without registering a worker.
+The manifest is cached with the interface, not the Library snapshot.
+
+The configured directory `base` is the stable manifest `id`, `start_url` and
+`scope`. Changes to that base require identity/hosting compatibility review.
+Standalone display is requested, not guaranteed by every browser. Name, short
+name, description and manifest language come from the Shared catalog's configured
+default UI language, not a personal preference. Changing UI language/theme does
+not change manifest identity or rewrite installation metadata. Initial manifest
+background/chrome colors use the owned Light palette; mounted browser
+`theme-color` follows the resolved Light/Dark/Warm/Follow device accent.
+Device-color changes make no personal writes.
+
+The original geometric book [SVG template](../resources/app-icon.svg) uses no
+fonts, lyrics or external assets. Owned Light background/accent tokens produce a
+favicon plus180/192/512px PNGs;192/512 advertise both `any` and `maskable`, with
+the complete mark inside the central80% safe circle. These platform-format sizes
+are not product preferences. `npm run icons` uses installed Playwright Chromium's
+native SVG/canvas rasterizer and commits the four generated resources in
+[public](../public/). Regenerate after template/palette/icon-basename changes.
+Normal builds need no rasterizer: they reject a stale SVG, invalid PNG signature/
+header dimensions or missing output before writing the manifest.
+
+No icon images are added to the interface precache or offline lyric packages.
+Browsers/operating systems may separately retain installation artwork.
+An installed icon does not establish full offline lyrics, durable storage or
+snapshot readiness. Chromium manifest parsing/installability diagnostics and
+pixel/geometry tests do not prove OS installation, iOS/Safari/Firefox behavior,
+launcher/update rendering, signed Android association or the full platform matrix.
 
 ## Web typed personal storage v6
 

@@ -25,9 +25,11 @@
     "demoPort": { "type": "integer", "minimum": 1024, "maximum": 65535 },
     "appShell": {
       "type": "object", "additionalProperties": false,
-      "required": ["workerFile", "cacheId", "maxPrecacheBytes", "updateCheckIntervalMs"],
+      "required": ["workerFile", "manifestFile", "iconPrefix", "cacheId", "maxPrecacheBytes", "updateCheckIntervalMs"],
       "properties": {
         "workerFile": { "type": "string", "pattern": "^[A-Za-z0-9_-]+\\.js$" },
+        "manifestFile": { "type": "string", "pattern": "^[A-Za-z0-9_-]+\\.webmanifest$" },
+        "iconPrefix": { "type": "string", "pattern": "^[A-Za-z0-9_-]+$" },
         "cacheId": { "type": "string", "pattern": "^[A-Za-z0-9_-]+$" },
         "maxPrecacheBytes": { "type": "integer", "minimum": 1, "maximum": 67108864 },
         "updateCheckIntervalMs": { "type": "integer", "minimum": 1000, "maximum": 2147483647 }
