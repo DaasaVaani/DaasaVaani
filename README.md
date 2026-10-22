@@ -34,6 +34,11 @@ or last successfully opened lyric in that catalog session and explains when no
 other candidate exists. Selection is not personalized, does not prepare a library
 or save separate choice history; opening the result uses normal reader controls
 and optional Recently opened recording.
+Loaded Website readers also offer focused **Recite**, explicit exit/restorable
+controls and optional screen-awake requests with honest support/lifecycle/error
+feedback. This does not write personal data, reload text, force full screen or
+implement list navigation/Continue recitation. See the
+[focused-reading guide](docs/lyric-preview.md#focused-recite).
 Recently opened retains the configured latest50 distinct typed references across
 restarts, never search queries or lyric copies, and never sends history to a service.
 Both clients' readers also support optional self-assigned Want to learn, Practising

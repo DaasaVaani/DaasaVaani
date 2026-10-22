@@ -86,13 +86,19 @@ See [the storage/name protocol](architecture.md#transactions-names-and-exact-acc
   authoritative; no full offline-shell/device/font coverage is inferred.
   Independent lyric font/density controls in Settings and both readers affect
   body text only and preserve canonical layout/history; onboarding/helper/
-  Recite/Practice/offline preference coverage remains incomplete.
+  list recitation/resume/Practice/offline preference coverage remains incomplete.
 - Learning labels follow the [Shared contract](https://github.com/DaasaVaani/shared/blob/main/docs/learning-labels.md):
   exact typed identity, stable assignment order, explicit linear duplicate check,
   fenced/no-op writes and complete personal accounting. Learning management
   requires no content preparation/network and minimal exports exclude labels.
   Reviewed verse Practice remains explicitly unavailable; do not infer verses,
   progress, scores or offline lyric readiness from assignments.
+- Focused individual Recite (REC-01/02) is independent of list traversal/resume.
+  Preserve the exposed lyric DOM/preferences and successful-open history; mode
+  entry/exit and wake requests write no personal data and fetch no content.
+  Requests are explicit, scoped, truthfully reported and released on departure/
+  background; late acquisition must not reactivate a departed reader. Do not
+  silently reacquire, force full screen or promise OS power-policy control.
 - Shared owns portable contracts/settings/fixtures and UI catalogs/generator/
   committed resources. Library owns source/assets/registries/ingestion/publisher.
   Consumers query published artifacts and pin Shared independently.

@@ -329,9 +329,44 @@ Mutations use the latest complete transaction state. Bound/same-density actions
 are no-ops without a row/revision write; default rendering stores no preferences.
 Changes propagate to peer tabs and survive reload without additional successful
 reader-open/history events or implicit content requests.
-This covers later reading/settings controls only. Onboarding, helper/scripts,
-Recite/Practice, persistent offline use and full device/font accessibility remain
+This covers later reading/settings controls and the individual focused Recite
+surface below. Onboarding, helper/scripts, list recitation/Practice, persistent offline use and full device/font accessibility remain
 separate requirements, not inferred from canonical/fixture browser tests.
+
+### Focused individual Recite and screen awake
+
+REC-01/02 expose an explicit Recite action only for a successfully loaded
+canonical or fixture reader. The mode is session-only and starts with secondary
+details/controls hidden; Exit Recite and Show reading controls remain obvious.
+Restoring controls also restores normal navigation; hiding them returns to
+focused reading. Escape exits while focused. The same lyric DOM, literal line/
+layout identities and existing font/density/theme remain unchanged. The owning
+reader/location key ends mode on replacement/navigation, including Back;
+launch/reload never automatically enters it. No personal/schema/default write,
+implicit content request or additional successful-open event occurs.
+
+The focused body marker hides only secondary header/notices/footer/back links;
+explicit errors remain visible. It is owned by the mounted reader and restores
+the prior marker on mode change/unmount, not a persisted preference. Normal
+controls stay mounted, avoiding accidental draft loss or text re-creation.
+
+Browser screen awake is optional, secure-context/feature-detected and initially
+off. The lifecycle controller tracks the actual Screen Wake Lock sentinel,
+single-flight acquisition, release events and confirmed release. Pending or
+rejected operations cannot fabricate an active/off state. Exit/navigation,
+pagehide and hidden visibility release its own request; returning visible never
+silently reacquires. A generation fence releases late cancelled acquisitions
+without overwriting newer state. Concurrent release signals share pending work;
+failed/unconfirmed releases retain actual ownership for explicit retry.
+Failures are shown explicitly and logged, including cleanup failures after the
+reader has departed. Unsupported/failed screen awake never blocks Recite.
+
+This slice does not force full-screen/orientation, load video/audio or promise
+to override OS restrictions. List traversal/boundaries (REC-03), durable latest
+occurrence/Continue recitation (REC-04), selected-script generation and persistent
+offline content remain separate open work.
+
+### Personal schema refusal
 
 Reject future/unknown versions, extra/missing stores, unexpected indexes/keypaths,
 invalid rows, duplicate identities and invalid capacities; do not delete, reset,

@@ -20,6 +20,13 @@ verification. A preflight pass or main push alone is not deployment evidence.
 The [guarded manual-main recovery](maintenance.md#current-operating-policy)
 does not waive any validation gate.
 
+The Website's [focused individual Recite](lyric-preview.md#focused-recite) adds
+bounded REC-01/02 entry/exit/restorable controls and optional scoped screen-awake
+requests to loaded canonical/fixture readers. No schema/preference/history or
+content-lifecycle change accompanies it. Native adoption, REC-03/04 list
+traversal/Continue recitation, reviewed verse Practice and persistent offline
+content remain open; this is not complete recitation.
+
 ## Current implementation coverage
 
 | Surface | Available | Still incomplete |
@@ -152,7 +159,7 @@ readers and Settings. Default platform rendering (Website28px/native28sp,
 Normal density) and literal line/layout
 identities are preserved. Latest-state transactions, no-op choices, peer updates,
 restart, old-history preservation and actual byte-capacity checks belong to the
-v7/native Room6 slices, with independent native font units and spacing. Onboarding, helper/script coverage, Recite/Practice, persistent offline
+v7/native Room6 slices, with independent native font units and spacing. Onboarding, helper/script coverage, list recitation/resume/Practice, persistent offline
 use and the complete accessibility/font/device matrix remain unimplemented or
 unverified; this is not full UX-14 completion.
 

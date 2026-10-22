@@ -64,7 +64,16 @@ font units (CSS pixels/Android sp) and Shared Compact/Normal/Relaxed density, pr
 UI/theme independence and mounted-reader history. The
 [v7 storage/reading protocol](architecture.md#web-typed-personal-storage-v7)
 defines exact defaults, preserving older inputs and platform-owned spacing.
-Onboarding/helper/Recite/Practice/offline and complete font/device evidence remain open.
+Onboarding/helper/list recitation/resume/Practice/offline and complete font/device evidence remain open.
+
+The Website's [individual Recite lifecycle](architecture.md#focused-individual-recite-and-screen-awake)
+implements only REC-01/02 for exposed canonical/fixture text: explicit focused
+entry/exit, restorable controls and optional truthful screen-awake requests.
+It reuses current reading preferences without extra personal writes/history or
+content requests and ends on reader departure. Screen awake never blocks reading,
+silently reacquires or promises control over OS restrictions. REC-03/04 list
+traversal/latest-occurrence resume, reviewed verse Practice and durable offline
+content remain open; no automatic entry or verse inference is authorized.
 
 The [Shared learning-label contract](https://github.com/DaasaVaani/shared/blob/main/docs/learning-labels.md)
 defines only optional Want to learn, Practising and Comfortable reciting

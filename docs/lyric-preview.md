@@ -158,6 +158,25 @@ list/occurrence IDs or raw legacy values. Transport families remain independent:
 v1 previews can re-export unchanged; confirmed v1 imports adapt to typed legacy
 records, and all saved-list exports use minimal v2 without local IDs/lyric copies.
 
+## Focused Recite
+
+Loaded canonical and fixture readers offer explicit focused Recite with an
+obvious exit and restorable reading controls. The same literal text/layout,
+font/density/theme and normal reader remain in place. Entering/exiting does not
+write preferences, labels, history or other personal data and requests no
+content. Replacing/leaving the reader ends mode; restart never auto-enters it.
+The [Recite lifecycle](architecture.md#focused-individual-recite-and-screen-awake)
+owns exact focus/control visibility and optional screen-awake handling.
+
+Screen awake is an explicit optional request, initially off. Its status reflects
+pending, actual active/released, unsupported or failed adapter state, not a
+guarantee against OS restrictions. Exit/navigation/background release it; late
+acquisition cannot reactivate an abandoned reader and foreground return does not
+silently reacquire. Unsupported/failure paths keep Recite usable.
+Already verified session text remains usable without a network connection, but
+this is not durable offline readiness: reload retains the existing online/
+preparation gate. List traversal and Continue recitation remain unimplemented.
+
 ## Local learning labels
 
 Both clients' canonical and fixture readers offer optional Want to learn, Practising and

@@ -1,5 +1,56 @@
 # Documentation history
 
+## 2026-10-22: focused individual Recite and prior learning publication
+
+- Archived the preceding blanket Recite limitation: no dedicated focused
+  individual-reader mode or screen-awake adapter existed. The new bounded
+  REC-01/02 slice does not complete REC-03/04 list traversal/latest-occurrence
+  Continue recitation, reviewed verse Practice or persistent offline content.
+  Verse bookmarks remain blocked on reviewed public verse locations; no source
+  file, verse split, lyric identity, personal schema or setting is changed.
+- Final learning Websitebb95ddef44d5c79ce8dbda1e04fd8c18d6e33865 published
+  after108 units/330 browsers and ancillary/docs checks. Exact
+  preflight39782360104, main/Pages39784239350 and CodeQL39784243463 passed every
+  actual required job/step. Fresh owned hosted Chromium matched17 exact artifact
+  bodies and12 cache bodies,1002887/8388608 bytes including worker. Actual871
+  catalog/4 Library requests, preserving native60-to70 migration,5 label writes,
+  literal layout digests, Learning focus, personal collections and offline-shell
+  restart management passed. Owned browser/helper/artifact scratch/contained
+  no-PR ref were cleaned; logs retained.
+- Native learning128e9ebfd2edd9debc1100e32b71895f6071953b independently
+  adopted Shared166 and passed48 core/82 connected, zero failures/errors/skips,
+  all builds and both lints (57/58 warnings, zero errors); app JVM NO-SOURCE.
+  Hygiene94/YAML5/actionlint/ShellCheck/whitespace passed. Exact
+  preflight39792047897 and main39793316648 passed every actual required step.
+  Parent checked unchanged tree/pin/baseline/ancestry and live admin/main/
+  no-bypass guard before normal main push. Native released the frozen local
+  slot and preserved user5173/emulator5556. Both mains/pins were clean.
+- Incremental `npm test -- screen-awake` passed7 lifecycle/race/failure units.
+- Shared52564f6bc5954f077749a333cfb6e97bbea59b6f published12 additive
+  bilingual captions without changing prior contracts/settings/defaults.
+  `npm run check` passed36 tests; hygiene75/YAML11/actionlint/ShellCheck/
+  whitespace passed, and21 generated/schema outputs were deterministic.
+  Exact preflight39797232648 and main39798496458 passed every actual job/step.
+  Cached job snapshots initially remained in progress despite completed steps;
+  gates correctly stopped until fresh no-cache REST run/job metadata confirmed
+  complete success. No unfinished job was counted as passed. The owned contained
+  no-PR validation ref was removed after main success.
+- Final Website `npm run check` passed115 units, strict TypeScript/production
+  build and357 browser cases across desktop/Pixel7/320px, zero failures/skips.
+  The27 added browser cases verify canonical/fixture literal layout and complete
+  personal preservation, focus/control restoration, unsupported support,
+  explicit requests/system release, visible request/release failures and retry,
+  pending-acquisition departure races and background cleanup without automatic
+  foreground reacquisition. Controlled platform adapters do not establish
+  OS power-policy or the complete supported-browser/device matrix.
+- `python shared\tools\check_repository.py` passed75 tracked Shared files;
+  strict YAML checked4 workflow/settings files, actionlint1.7.12 with
+  ShellCheck0.11.0 and both git whitespace checks passed. Native received the
+  frozen Website dist/device/HTTP slot only after the complete Website pass;
+  no parent rebuild is permitted during its connected validation.
+- Inline `python -` documentation checks passed17 UTF-8/newline/whitespace/
+  fence-clean files,233 local links/anchors and all153 unique normative IDs.
+
 ## 2026-10-22: local learning-label prerequisite and preserving web storage evolution
 
 - Archived preceding current Website storage v6: native60, four stores

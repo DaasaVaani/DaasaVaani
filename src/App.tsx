@@ -12,6 +12,7 @@ import { AddToList } from "./AddToList";
 import { Lyrics, ReferenceFavorites } from "./Lyrics";
 import { HistoryControls, RecentHistory } from "./RecentHistory";
 import { Learning, LearningControl } from "./Learning";
+import { Recite } from "./Recite";
 import { ReadingPreferences, type ReadingPreferencesProps } from "./ReadingPreferences";
 import { useAppShell } from "./app-shell";
 import type { LyricLibrary } from "./lyric-publication";
@@ -85,23 +86,23 @@ function Reader({ publication, labels, personal, store, toggle, opened, change }
         : origin === "/recent" ? labels.recentHistory : origin === "/learning" ? labels.learning : labels.back}</Link>
     {error && <p role="alert" className={styles.error}>{error}</p>}
     {!item && !error && <p role="status">{labels.loading}</p>}
-    {item && item.videoId === id && <>
-      <header className={styles.readerHeader}>
-        <div><p className={styles.eyebrow}>{labels.canonical}</p><h1 lang="kn">{item.title}</h1></div>
+    {item && item.videoId === id && <Recite key={`${item.videoId}:${location.key}`} labels={labels}
+      heading={<header className={styles.readerHeader}><h1 lang="kn">{item.title}</h1></header>}
+      controls={<><p className={styles.eyebrow}>{labels.canonical}</p>
         <button className={styles.secondary} aria-pressed={hasFavorite(personal, { kind: "legacyVideo", videoId: item.videoId })}
           onClick={() => toggle({ kind: "legacyVideo", videoId: item.videoId })}>
           {hasFavorite(personal, { kind: "legacyVideo", videoId: item.videoId }) ? labels.removeFavorite : labels.addFavorite}
         </button>
-      </header>
       <ReadingPreferences labels={labels} personal={personal} change={change} />
       <LearningControl key={item.videoId} labels={labels} reference={{ kind: "legacyVideo", videoId: item.videoId }}
         label={learningLabelFor(store.learning, { kind: "legacyVideo", videoId: item.videoId })} revision={store.control} />
+      </>}
+      secondary={<><p className={styles.muted}>{item.description}</p>
+        <AddToList key={item.videoId} labels={labels} personal={store} reference={{ kind: "legacyVideo", videoId: item.videoId }} /></>}>
       <div lang="kn" className={styles.lyrics}>
         {item.lines.map(line => <p id={line.id} key={line.id} data-selected={line.id === lineId}>{line.text || "\u00a0"}</p>)}
       </div>
-      <p className={styles.muted}>{item.description}</p>
-      <AddToList key={item.videoId} labels={labels} personal={store} reference={{ kind: "legacyVideo", videoId: item.videoId }} />
-    </>}
+    </Recite>}
   </section>;
 }
 

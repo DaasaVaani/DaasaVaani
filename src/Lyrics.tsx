@@ -9,6 +9,7 @@ import type { PersonalReference } from "./list-transfer-types";
 import { AddToList } from "./AddToList";
 import { ReadingPreferences, type ReadingPreferencesProps } from "./ReadingPreferences";
 import { LearningControl } from "./Learning";
+import { Recite } from "./Recite";
 import { LyricPagination, useLyricPaging } from "./LyricPaging";
 import styles from "./App.module.css";
 
@@ -82,24 +83,24 @@ function LyricReader({ publication, labels, personal, preferences, change, toggl
       {busy ? <button onClick={() => {
         controller.current?.abort(); controller.current = null; setBusy(false); setCancelled(true);
       }}>{labels.cancel}</button> : <button onClick={() => setAttempt(value => value + 1)}>{labels.retry}</button>}
-    </> : <>
-      <header className={styles.readerHeader}>
-        <h1 lang="kn">{item.title}</h1>
+    </> : <Recite key={`${item.lyricId}:${location.key}`} labels={labels}
+      heading={<header className={styles.readerHeader}><h1 lang="kn">{item.title}</h1></header>}
+      controls={<>
         {personal && reference && <button className={styles.secondary} aria-pressed={favorite} onClick={() => toggle(reference)}>
           {favorite ? labels.removeFavorite : labels.addFavorite}
         </button>}
-      </header>
       <AnotherLyric publication={publication} labels={labels} excludedId={item.lyricId} reading />
       {personal && <ReadingPreferences labels={labels} personal={preferences} change={change} />}
       {personal && reference && <LearningControl key={referenceKey(reference)} labels={labels} reference={reference}
         label={learningLabelFor(personal.learning, reference)} revision={personal.control} />}
+      </>}
+      secondary={<><p className={styles.muted}>{labels.lyricNoMedia}</p>
+        {personal && reference ? <AddToList key={item.lyricId} labels={labels} personal={personal} reference={reference} />
+          : <p role="status">{labels.personalUnavailable}</p>}</>}>
       <div lang="kn" className={styles.lyrics}>{item.lines.map((line, index) =>
         <p key={line.kind === "line" ? line.lineId : `layout-${index}`}
           {...(line.kind === "line" ? { id: line.lineId } : { "data-layout": true })}>{line.text || <br />}</p>)}</div>
-      <p className={styles.muted}>{labels.lyricNoMedia}</p>
-      {personal && reference ? <AddToList key={item.lyricId} labels={labels} personal={personal} reference={reference} />
-        : <p role="status">{labels.personalUnavailable}</p>}
-    </>}
+    </Recite>}
   </section>;
 }
 export function ReferenceFavorites({ labels, personal, publication, legacyPublication, toggle }: {
