@@ -240,6 +240,17 @@ exactly one extra byte, including control/header/revision/identity/escaping UTF8
 overhead, plus the actual list-count ceiling and limit+1. Transport-preview
 no-write checks compare every personal table, not just preferences.
 
+Native sharing cases inspect the exact standard chooser/ACTION_SEND/text/plain
+intent and complete validated v1/v2 link, including the actual complete-link
+ceiling. Explicit preview/saved-list actions retain display/copy/document
+fallbacks after dismissal or narrow system failures, refuse over-cap sharing
+without truncation and preserve all personal rows. An emulator smoke case opens
+the actual Sharesheet and returns with Android Back. Intercepted intents and
+chooser display do not prove recipient receipt, provider/device interoperability
+or incoming signed App Links. File export still uses Create Document, not direct
+file sharing. No unreliable activity-result code is treated as a delivery or
+cancellation receipt; see the [native guide](https://github.com/DaasaVaani/AndroidApp/blob/main/README.md).
+
 Android requires Node, JDK21, the configured SDK36/build tools and an API36 emulator
 for current connected evidence. Set JAVA_HOME/ANDROID_HOME and select the intended
 device with ANDROID_SERIAL; do not target another user's device. From Android:
@@ -321,7 +332,7 @@ IDs or a release acceptance declaration.
 | LIB-06, SET-04, QUAL-05 | Web v6/native Room5 default-on device-only typed50-distinct successful-open history, explicit disable/re-enable/clear, retained unresolved refs, exact accounting, migration/failure/no-network and restart checks | Selected-script/offline parity and full personal backup remain incomplete |
 | UX-02/03/14, SET-04 | Website/native canonical/fixture and later Settings lyric-only bounded font/all densities, exact layout preservation, persisted independent native-unit choices, no-op/history and preserving web v6/native Room5 checks; Website peer propagation | Onboarding/helper/Recite/Practice/offline and complete font/device evidence remain open |
 | UX-13 | Web in-session Library/Favorites context and list-origin selected editor state, Back/Forward/reader return with measured scroll/focus; removed-result/direct-reader/reload coverage; native prepared real Library and independent Favorites literal query/pages/viewport and reader/Android Back context, plus Library Settings return | No persistent search history; full production filters/search/Explore and offline continuity remain incomplete |
-| XFER-01/02/03/04/05/06/08 | Bounded web worker/native v1/v2 codecs with independent vectors, explicit previews/transactional new-list saves and saved-v2 exports, actual cross-client v2 codec round trips, catalog-only details, browser share/copy adapters, cancellation/errors/no-write checks | Real sharing-surface delivery, verified App Links and full backups incomplete |
+| XFER-01/02/03/04/05/06/08 | Bounded web worker/native v1/v2 codecs with independent vectors, explicit previews/transactional new-list saves and saved-v2 exports, actual cross-client v2 codec round trips, catalog-only details, browser share/copy adapters and native complete-link chooser/payload/Back/fallback/no-write checks | Real receiving-app/provider/device interoperability, direct native file sharing, verified App Links and full backups incomplete |
 | SET-01/02 | Owned settings/schema guards, Shared policy binding and immutable clean fixture-tool pin | Complete production settings inventory, language/protocol/backup contracts and all compatibility fixtures pending |
 | QUAL-01/02/03 | Semantic browser controls, keyboard focus entrypoint, standalone canonical reading and no video/tracking dependencies | Full keyboard/screen-reader/contrast/scaling/platform journeys remain unverified; no formal conformance claim |
 

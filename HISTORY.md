@@ -1,5 +1,55 @@
 # Documentation history
 
+## 2026-10-22: native explicit link sharing and installation publication evidence
+
+- Website installation batch71ad82a6cdc51623e6eca1905963bde1bc7ac729
+  published unchanged after exact successful preflight39754547654; all actual
+  required jobs/steps passed. Live temporary role5 admin authority, actor admin,
+  no-bypass force/delete guard, clean tree/independent Shared241158f and
+  fast-forward ancestry were verified before normal main push.
+  Main/Pages39755558770 and CodeQL39755559348 passed every actual job/step.
+  The successful29-entry Pages artifact was safely extracted with path/type/
+  bounds guards. Fresh owned hosted Chromium matched17 public resources and12
+  actual cached bodies byte-for-byte with that exact artifact; cache plus worker
+  990569 bytes stayed below8388608. Actual manifest/PNG diagnostics, device/Warm
+  browser chrome, locale-independent identity, offline root/open, cached lazy
+  transfer decoding and window restart preserved all personal data. No Library/
+  demo/compressed/media objects entered the interface cache. Owned browser,
+  helper, extraction directory and contained no-PR validation ref were cleaned;
+  retained logs record hashes. OS installation and offline lyrics remain unproved.
+- Native explicit link sharing committed334dab8a5b1303c115e41901e2e16ead83e849f2
+  with independently pinned Shared44c21b9 unchanged. The common v1/v2/saved-list
+  export surface now offers explicit standard chooser/ACTION_SEND/text/plain
+  handoff of only the complete validated link. Select/copy/Create Document
+  fallbacks remain, with no FileProvider/temp file, network, personal write,
+  automatic action or delivery claim. Archived the preceding native coverage:
+  display/copy and file export existed, but no explicit Sharesheet action.
+  Direct file sharing, signed incoming App Links and actual receiver/provider/
+  device interoperability remain open.
+- Native corrected an initially unquoted PowerShell test selector and the real
+  localized configuration-context/Activity mismatch by using the owning Activity
+  result registry, not NEW_TASK or guessed result meanings. Focused5 device
+  cases and full config/core/all-variant build/lint/connected checks passed:
+  40 core/66 connected, no failures/errors/skips; both lints53 warnings/zero
+  errors; app JVM NO-SOURCE, not a pass. Full Gradle took13m49s. Hygiene85,
+  YAML5, actionlint/ShellCheck and whitespace passed. An actual emulator chooser/
+  Android Back smoke case supplements intercepted exact-intent/failure/fallback/
+  no-write tests; neither establishes receiver delivery. No dependency/source/
+  consumer pin changed. Native released its connected/HTTP slot with all owned
+  helpers complete and user5173/emulator5556 unchanged.
+- Exact native preflight39758561746 and main39759465425 passed every actual
+  config/build/core/lint/hygiene job/step. Parent verified clean exact334dab8,
+  independent Shared44, baseline ancestry, live role5/admin authority and
+  no-bypass force/delete guard before unchanged normal main push. The contained
+  owned no-PR validation ref was cleaned; no signed APK or receiver delivery
+  is claimed. Hosted Actions warn about pinned Node20 action runtimes and
+  setup-java-v4 deprecation; no unrelated toolchain update was bundled.
+- Related Root documentation validation reran full `npm run check`:98 units,
+  strict TypeScript/production build and279 browser cases passed, no skips or
+  retries. Strict YAML4, actionlint/ShellCheck, whitespace and documentation
+  UTF8/newline/local-link checks passed20 files/210 local links/all153 unique
+  normative IDs. Root runtime/dependencies/settings/Shared pin are unchanged.
+
 ## 2026-10-22: declarative PWA installation metadata and original artwork
 
 - Archived the preceding installation status: manifest/icons and installation UX

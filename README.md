@@ -62,7 +62,9 @@ durable lists/independent occurrences, recent history, preferences and locale/th
 Strict v1/v2 file/pasted-link previews can be explicitly saved as independent
 lists; readers and list entries use exact typed identities without guessing.
 Native preview and list management work before preparation;
-verified App Links and real receiving-app delivery remain open.
+explicit complete-link exports can open Android's standard Sharesheet while
+retaining selectable/copyable links and complete-file export. Handoff is not
+delivery confirmation; verified App Links and real receiving-app delivery remain open.
 Production contracts, reviewed transliteration, persistent
 offline snapshots and the remaining product journeys are incomplete.
 Staged implementation and the reviewed owner-text import/publication are authorized.
