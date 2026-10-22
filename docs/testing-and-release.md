@@ -81,6 +81,8 @@ Back/Forward focus/scroll, corrupt-object failure/retry, cancellation, unknown I
 reload reconsent and byte-equivalent personal database snapshots for reading.
 Additional typed-personal journeys cover explicit real favorites/repeated
 reader-to-list saves, unresolved favorites after reload with no implicit download,
+independent real Favorites title filtering and complete configured-size paging,
+new-page/reader-return focus and unchanged personal records,
 mixed v2 preview/re-export/new-list save, UUID-looking legacy separation and
 real list-origin return/focus/unsaved context. Loader units
 cover compatible optional fields versus unsupported capabilities/versions,

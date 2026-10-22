@@ -158,6 +158,7 @@ function Library({ publication, labels, personal, favoritesOnly }: {
         {favoritesOnly ? labels.favorites : labels.library}<span className={styles.count}>
           {favoritesOnly && !searching ? personal.favorites.length : entries.length}</span></h1>
       <p className={styles.muted}>{labels.tagline}</p>
+      {favoritesOnly && <h2>{labels.legacyReference}</h2>}
       {!prepared ? <div className={styles.consent}>
         <p>{labels.searchConsent}</p>
         <button onClick={() => void prepare()} disabled={busy}>{labels.loadSearch} · {Math.ceil(publication.manifest.objects[publication.manifest.named.index]!.encodedBytes / 1024)} KiB</button>

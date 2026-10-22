@@ -64,6 +64,11 @@ attached video or catalog coincidence.
 
 Favorites retain unresolved lyric IDs across reload without preparation or
 automatic requests. Exact titles appear only from the available verified map.
+Real Favorites use independent configured-size pages, with the same literal
+title filter available after preparation, query-reset and new-page focus rules
+as the real catalog. Filtering/paging never writes personal data; unresolved
+references remain available when the filter is cleared. Legacy search is labeled
+separately and does not pretend to search canonical lyrics.
 Unresolved legacy favorites remain visible/removable, not silently discarded.
 List forms offer explicit lyric-ID versus legacy-ID creation and placeholder
 replacement, preserving occurrence IDs/order/user text. A real-reference Read

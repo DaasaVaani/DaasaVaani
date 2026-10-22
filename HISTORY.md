@@ -1,5 +1,41 @@
 # Documentation history
 
+## 2026-10-22: independent real Favorites title browsing
+
+- Archived the preceding real Favorites presentation: it rendered every real
+  reference without paging or a title filter, while the adjacent fixture search
+  was not explicitly headed as legacy search. The real catalog already offered
+  literal title filtering and configured-size pages.
+- Shared the existing catalog paging/focus behavior with real Favorites:
+  independent queries/pages, complete reachability, first-new-result focus,
+  query reset and available reader-return context. Filtering uses only verified
+  in-memory titles; unresolved references remain reachable with an empty query.
+  No implicit download, personal schema/write, source change or language-search
+  claim is introduced. Existing generated English/Kannada labels are reused.
+- Partial requirement coverage: LIB-01/02 and UX-07/13. Production linguistic
+  search, full personal collections and release gates remain open.
+- `npm run build` passed strict TypeScript/production build. The initial full
+  `npm run check` passed82 units and195 browser cases but failed the three new
+  viewport cases because the seeded test preference used invalid capitalized
+  Light rather than the actual lowercase theme value; no application fallback
+  was added. After correcting the fixture, `node
+  node_modules\@playwright\test\cli.js test lyrics --grep
+  'real Favorites have independent'` passed3 cases. Final `npm run check`
+  passed82 units and all198 browser cases with no failed/skipped/cancelled
+  cases. Documentation/bootstrap checks passed20 Markdown files,195 local
+  links,153 unique requirement IDs and4 strict YAML files; actionlint1.7.12/
+  ShellCheck0.11.0 and Git whitespace passed. The Vite chunk warning remains
+  advisory; broad platform/language/performance/release acceptance is not claimed.
+- The preceding Website d2fb1bfe3e6e571948f5e54df5e042c7f0535cbb passed exact
+  preflight39709509872, main39709888619 and managed Pages39709889421.
+  Independent downloads matched the CI artifact's hosted HTML/JS/CSS/notices/
+  Unicode license bytes. Fresh standalone Chromium verified zero owner requests
+  before consent,873 preparation requests for871 lyrics, exact18 canonical/
+  layout rows and line IDs for003cdfdd-bc88-4c61-a120-3a7848aaaab4, unchanged
+  native40 personal tables, visible favorite control, desktop/320px fit and
+  no fixture notice or read-time request. Integrated-browser activation attempts
+  stalled; only the independent successful Chromium run is counted as live proof.
+
 ## 2026-10-22: typed lyric favorites, personal v4 and minimal-list v2
 
 - Archived the preceding current Website limitations: real canonical reading

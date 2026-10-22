@@ -9,6 +9,31 @@ import { AddToList } from "./AddToList";
 import styles from "./App.module.css";
 
 type Labels = typeof messages.en;
+function useLyricPaging(readPrefix: string) {
+  const [query, setQuery] = useState(""), [pages, setPages] = useState(1);
+  const nextFocus = useRef<string | undefined>(undefined), resultsId = useId();
+  useEffect(() => { setPages(1); nextFocus.current = undefined; }, [query]);
+  useEffect(() => {
+    const id = nextFocus.current;
+    if (!id) return;
+    nextFocus.current = undefined;
+    const frame = requestAnimationFrame(() => document.getElementById(`${readPrefix}-${id}`)?.focus());
+    return () => cancelAnimationFrame(frame);
+  }, [pages, readPrefix]);
+  return { query, setQuery, resultsId, limit: pages * __WEB_CONFIG__.lyricPreview.pageSize,
+    readId: (id: string) => `${readPrefix}-${id}`,
+    more: (id: string | undefined) => { nextFocus.current = id; setPages(value => value + 1); } };
+}
+function LyricPagination({ count, nextId, paging, labels }: {
+  count: number; nextId?: string; paging: ReturnType<typeof useLyricPaging>; labels: Labels;
+}) {
+  if (count <= __WEB_CONFIG__.lyricPreview.pageSize) return null;
+  const shown = Math.min(count, paging.limit);
+  return <div>
+    <p role="status">{labels.resultCount.replace("{shown}", String(shown)).replace("{total}", String(count))}</p>
+    {shown < count && <button aria-controls={paging.resultsId} onClick={() => paging.more(nextId)}>{labels.showMoreResults}</button>}
+  </div>;
+}
 function LyricReader({ publication, labels, personal, toggle }: {
   publication: PreparedLyrics; labels: Labels; personal?: PersonalStore; toggle: (reference: PersonalReference) => void;
 }) {
@@ -47,6 +72,7 @@ export function ReferenceFavorites({ labels, personal, publication, legacyPublic
   toggle: (reference: PersonalReference) => void;
 }) {
   const location = useLocation();
+  const paging = useLyricPaging("lyric-favorite-read");
   const restoreFocus = useRef(false), heading = useRef<HTMLHeadingElement>(null);
   useEffect(() => {
     if (restoreFocus.current) {
@@ -60,20 +86,33 @@ export function ReferenceFavorites({ labels, personal, publication, legacyPublic
     { kind: "legacyVideo", label: labels.legacyReference, pending: !legacyPublication,
       entries: favorites.filter(reference => reference.kind === "legacyVideo" && !legacyPublication?.summary(reference.videoId)) },
   ].filter(group => group.entries.length);
-  return <div hidden={location.pathname !== "/favorites"}>{groups.map((group, index) => <section key={group.kind} aria-label={group.label}>
+  return <div hidden={location.pathname !== "/favorites"}>{groups.map((group, index) => {
+    const entries = group.kind === "lyric" ? group.entries.filter(reference => reference.kind === "lyric" &&
+      (!paging.query || publication?.item(reference.lyricId)?.title.includes(paging.query))) : group.entries;
+    const shown = group.kind === "lyric" ? entries.slice(0, paging.limit) : entries;
+    const next = entries[paging.limit];
+    return <section key={group.kind} aria-label={group.label}>
     <h2 tabIndex={-1} ref={index === 0 ? heading : undefined}>{group.label}</h2>
     {group.kind === "lyric" && <p>{publication ? labels.lyricPersonalLimits : labels.lyricCatalogPending}</p>}
-    <div className={styles.grid}>{group.entries.map(reference => {
+    {group.kind === "lyric" && publication && <label>{labels.lyricTitleFilter}
+      <input type="search" value={paging.query} onChange={event => paging.setQuery(event.target.value)} />
+    </label>}
+    <div id={group.kind === "lyric" ? paging.resultsId : undefined} className={styles.grid}>{shown.map(reference => {
       const item = reference.kind === "lyric" ? publication?.item(reference.lyricId) : undefined;
       return <article className={styles.card} key={referenceKey(reference)}>
         {item ? <h3 lang="kn">{item.title}</h3> : <p>{group.pending ? labels.referencePending : labels.lyricsUnavailable}</p>}
         <code>{reference.kind === "lyric" ? reference.lyricId : reference.videoId}</code>
-        {reference.kind === "lyric" && <Link className={styles.readLink} to={`/lyrics/${reference.lyricId}`} state={{ browseFrom: "/favorites" }}
+        {reference.kind === "lyric" && <Link id={paging.readId(reference.lyricId)} className={styles.readLink}
+          to={`/lyrics/${reference.lyricId}`} state={{ browseFrom: "/favorites" }}
           onClick={event => event.currentTarget.focus({ preventScroll: true })}>{labels.open}</Link>}
         <button className={styles.secondary} onClick={() => { restoreFocus.current = true; toggle(reference); }}>{labels.removeFavorite}</button>
       </article>;
     })}</div>
-  </section>)}</div>;
+    {!entries.length && <p role="status">{labels.noResults}</p>}
+    {group.kind === "lyric" && <LyricPagination count={entries.length} nextId={next?.kind === "lyric" ? next.lyricId : undefined}
+      paging={paging} labels={labels} />}
+  </section>;
+  })}</div>;
 }
 export function Lyrics({ labels, publication, onPrepared, personal, toggle }: {
   labels: Labels; publication?: PreparedLyrics; onPrepared: (publication: PreparedLyrics) => void;
@@ -84,18 +123,9 @@ export function Lyrics({ labels, publication, onPrepared, personal, toggle }: {
   const catalogActive = /^\/lyrics\/?$/u.test(location.pathname);
   const [busy, setBusy] = useState(false), [error, setError] = useState("");
   const [progress, setProgress] = useState<{ done: number; total: number }>();
-  const [query, setQuery] = useState(""), [pages, setPages] = useState(1);
-  const controller = useRef<AbortController | null>(null), nextFocus = useRef<string | undefined>(undefined);
-  const resultsId = useId();
+  const paging = useLyricPaging("lyric-read");
+  const controller = useRef<AbortController | null>(null);
   useEffect(() => () => controller.current?.abort(), []);
-  useEffect(() => { setPages(1); nextFocus.current = undefined; }, [query]);
-  useEffect(() => {
-    const id = nextFocus.current;
-    if (!id) return;
-    nextFocus.current = undefined;
-    const frame = requestAnimationFrame(() => document.getElementById(`lyric-read-${id}`)?.focus());
-    return () => cancelAnimationFrame(frame);
-  }, [pages]);
   function prepare() {
     const request = new AbortController();
     controller.current?.abort(); controller.current = request;
@@ -110,8 +140,8 @@ export function Lyrics({ labels, publication, onPrepared, personal, toggle }: {
       if (controller.current === request) { controller.current = null; setBusy(false); setProgress(undefined); }
     });
   }
-  const entries = publication?.catalog.filter(entry => entry.title.includes(query)) ?? [];
-  const shown = entries.slice(0, pages * __WEB_CONFIG__.lyricPreview.pageSize);
+  const entries = publication?.catalog.filter(entry => entry.title.includes(paging.query)) ?? [];
+  const shown = entries.slice(0, paging.limit);
   return <section hidden={!active}>
     <aside className={styles.notice}><p>{labels.lyricPreviewNotice}</p><p>{labels.lyricPersonalLimits}</p></aside>
     {!publication && <section className={styles.reader}>
@@ -124,21 +154,16 @@ export function Lyrics({ labels, publication, onPrepared, personal, toggle }: {
     {publication && <>
       <div hidden={!catalogActive}>
         <section className={styles.hero}><h1>{labels.ownerLyrics}<span className={styles.count}>{publication.catalog.length}</span></h1>
-          <label>{labels.lyricTitleFilter}<input type="search" value={query} onChange={event => setQuery(event.target.value)} /></label>
+          <label>{labels.lyricTitleFilter}<input type="search" value={paging.query} onChange={event => paging.setQuery(event.target.value)} /></label>
         </section>
-        <section id={resultsId} className={styles.grid} aria-label={labels.ownerLyrics}>
+        <section id={paging.resultsId} className={styles.grid} aria-label={labels.ownerLyrics}>
           {shown.map(entry => <article className={styles.card} key={entry.lyricId}>
-            <h2 lang="kn">{entry.title}</h2><Link id={`lyric-read-${entry.lyricId}`} className={styles.readLink}
+            <h2 lang="kn">{entry.title}</h2><Link id={paging.readId(entry.lyricId)} className={styles.readLink}
               to={`/lyrics/${entry.lyricId}`} state={{ browseFrom: "/lyrics" }}>{labels.open}</Link>
           </article>)}
         </section>
         {!entries.length && <p role="status">{labels.noResults}</p>}
-        {entries.length > __WEB_CONFIG__.lyricPreview.pageSize && <div>
-          <p role="status">{labels.resultCount.replace("{shown}", String(shown.length)).replace("{total}", String(entries.length))}</p>
-          {shown.length < entries.length && <button aria-controls={resultsId} onClick={() => {
-            nextFocus.current = entries[shown.length]?.lyricId; setPages(value => value + 1);
-          }}>{labels.showMoreResults}</button>}
-        </div>}
+        <LyricPagination count={entries.length} nextId={entries[shown.length]?.lyricId} paging={paging} labels={labels} />
       </div>
       <Routes>
         <Route path="/lyrics" element={null} />

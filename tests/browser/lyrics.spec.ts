@@ -45,6 +45,67 @@ async function personalSnapshot(page: Page) {
     } finally { database.close(); }
   }, config.databaseName);
 }
+test("real Favorites have independent complete title paging and preserve context without personal writes", async ({ page }) => {
+  const count = config.lyricPreview.pageSize * 2 + 1, fixture = lyricFixture(count);
+  const requests = await serve(page, fixture);
+  await page.goto("/#/settings");
+  await expect(page.getByRole("button", { name: labels.light, exact: true })).toBeVisible();
+  await page.evaluate(async ({ databaseName, ids }) => {
+    const database = await new Promise<IDBDatabase>((resolve, reject) => {
+      const request = indexedDB.open(databaseName);
+      request.onsuccess = () => resolve(request.result);
+      request.onerror = () => reject(request.error);
+    });
+    try {
+      await new Promise<void>((resolve, reject) => {
+        const transaction = database.transaction("personal", "readwrite"), store = transaction.objectStore("personal");
+        const request = store.get("personal");
+        request.onsuccess = () => store.put({ id: "personal", language: "en", theme: "light", ...request.result,
+          favorites: ids.map(lyricId => ({ kind: "lyric", lyricId })) });
+        transaction.oncomplete = () => resolve();
+        transaction.onerror = () => reject(transaction.error);
+        transaction.onabort = () => reject(transaction.error);
+      });
+    } finally { database.close(); }
+  }, { databaseName: config.databaseName, ids: fixture.manifest.catalog.map(entry => entry.lyricId) });
+  await page.reload();
+  await page.getByRole("link", { name: labels.favorites, exact: true }).click();
+  const favorites = page.getByRole("region", { name: labels.ownerLyrics, exact: true });
+  await expect(favorites.getByRole("article")).toHaveCount(config.lyricPreview.pageSize);
+  await expect(favorites.getByRole("searchbox")).toHaveCount(0);
+  const before = await personalSnapshot(page);
+  expect(requests).toHaveLength(0);
+  await page.getByRole("link", { name: labels.ownerLyrics, exact: true }).click();
+  await page.getByRole("button", { name: labels.prepareLibrary }).click();
+  await expect(page.getByRole("article")).toHaveCount(config.lyricPreview.pageSize);
+  await page.getByRole("link", { name: labels.favorites, exact: true }).click();
+  const query = favorites.getByRole("searchbox", { name: labels.lyricTitleFilter, exact: true });
+  await query.fill("synthetic");
+  for (let pageIndex = 1; pageIndex <= 2; pageIndex++) {
+    await favorites.getByRole("button", { name: labels.showMoreResults, exact: true }).click();
+    await expect(favorites.getByRole("article")).toHaveCount(Math.min(count, (pageIndex + 1) * config.lyricPreview.pageSize));
+    await expect(favorites.getByRole("article").nth(pageIndex * config.lyricPreview.pageSize)
+      .getByRole("link", { name: labels.open, exact: true })).toBeFocused();
+  }
+  const last = favorites.getByRole("article").last().getByRole("link", { name: labels.open, exact: true });
+  await last.press("Enter");
+  await page.getByRole("link", { name: labels.favorites, exact: false }).filter({ hasText: "←" }).click();
+  await expect(last).toBeFocused();
+  await expect(query).toHaveValue("synthetic");
+  await expect(favorites.getByRole("article")).toHaveCount(count);
+  const title = fixture.manifest.catalog.at(-1)?.title;
+  if (!title) throw new Error("Missing synthetic final title");
+  await query.fill(title);
+  await expect(favorites.getByRole("article")).toHaveCount(1);
+  await query.fill("no synthetic match");
+  await expect(favorites.getByRole("article")).toHaveCount(0);
+  await expect(favorites.getByRole("status")).toHaveText(labels.noResults);
+  await query.fill("");
+  await expect(favorites.getByRole("article")).toHaveCount(config.lyricPreview.pageSize);
+  expect(requests).toHaveLength(count + 2);
+  expect(await personalSnapshot(page)).toEqual(before);
+  expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(true);
+});
 test("explicit real favorites and repeated reader-to-list saves persist without implicit preparation or identity remapping", async ({ page }) => {
   const requests = await serve(page);
   await page.goto("/#/lists");
