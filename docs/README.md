@@ -20,8 +20,9 @@ actual coverage and remaining gates; guides do not prove provider permission.
 The approved [lyric identity and optional media contract](https://github.com/DaasaVaani/shared/blob/main/docs/lyric-identity.md)
 defines video-independent identity and legacy compatibility.
 The [real lyric preview](lyric-preview.md) reads the reviewed text-only publication
-separately from unchanged fixture personal/transfer formats. Its limited
-in-memory lifecycle does not establish production offline/personal conformance.
+separately from fixture content, with typed local favorites/lists and preserving
+legacy adapters. Its limited in-memory content lifecycle does not establish
+production offline/full-personal conformance.
 
 ## Owners
 

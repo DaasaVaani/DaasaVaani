@@ -37,9 +37,10 @@ archive of questionnaires, alternatives, changes and dated observations.
 The [approved lyric identity contract](https://github.com/DaasaVaani/shared/blob/main/docs/lyric-identity.md)
 owns typed lyric/legacy references, target minimal-list v2, text-only publication
 eligibility and staged compatibility. Real source/publication schemas and separate
-canonical readers implement the initial text-only slice. Fixture/v1 formats remain
-legacy-only; typed personal/transfer migrations and full production adapters remain
-open. The [preview guide](lyric-preview.md) defines the current narrower lifecycle,
+canonical readers implement the initial text-only slice. Website typed personal
+v4/v2 transfers preserve old identities through structural legacy adapters;
+fixture/v1 formats remain legacy-only. Full personal collections/backup and
+production adapters remain open. The [preview guide](lyric-preview.md) defines the current narrower lifecycle,
 not a change to approved production PWA on-demand reading/offline behavior.
 
 ## Current readiness gates

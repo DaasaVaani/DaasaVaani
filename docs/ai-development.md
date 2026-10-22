@@ -27,7 +27,7 @@ demonstrations do not close remaining production contracts or prove full readine
 
 | Surface | Current capability |
 | --- | --- |
-| Website | Separate consented real text-only in-memory preparation/catalog/UUID reader; responsive fixture reader/complete paged search, browsing/list-reader continuity, favorites/preferences, worker transfer/export and transactional lists/occurrences |
+| Website | Consented real text-only in-memory preparation/catalog/UUID reading with typed favorites/lists; separate fixture reader/search, browsing/list-reader continuity, preferences, preserving personal v4 upgrade and worker v1/v2 transfer/export |
 | Shared | Lyric/source/publication and fixture/minimal-list/logical-list contracts, official Unicode16 name-matching resources, portable settings and generated web/Android UI catalogs |
 | Library | Reviewed owner-text import with stable identities/held exceptions, complete empty authoring fields, canonical text-only post-merge publication; separate synthetic indexed fixture publisher |
 | Android | Separate real canonical preparation/reading; native fixture reading/search, durable Room favorites/preferences, locale/theme and bounded list preview/re-export; production persistence/parity remain incomplete |
@@ -37,7 +37,7 @@ demonstrations do not close remaining production contracts or prove full readine
 | Approval | Staged implementation authorized; production language/lifecycle/personal/publication gates and release evidence remain incomplete |
 
 Website/native personal-name matching uses the official Shared Unicode16 profile.
-Website v3 stores only raw names and computes explicit-profile keys on demand:
+Website v4 stores only raw names and computes explicit-profile keys on demand:
 there is no stored cache to rewrite or schema migration to invent. Keep existing
 names/IDs/contents unchanged and never auto-merge/rename newly equivalent lists.
 See [the storage/name protocol](architecture.md#transactions-names-and-exact-accounting).
@@ -52,13 +52,15 @@ See [the storage/name protocol](architecture.md#transactions-names-and-exact-acc
   local/uncommitted and exceptions held; the footer adapter preserves explicitly
   structured credits as provenance rather than inventing registry/media facts.
   Real UUIDs must never enter fixture `videoId` fields. Follow the
-  [preview boundary](lyric-preview.md) until typed personal migrations exist.
+  [preview boundary](lyric-preview.md) and preserving typed personal protocol.
+  Structural v1/v2/v3-to-v4 adaptation changes only legacy discriminants, never
+  legacy-to-lyric identity mappings.
 - Kannada canonical; transliterate never translate. UI locale and lyric script
   independent; first-use UI follows supported browser preferences with configured
   fallback, and explicit stored override wins. Uncertain lyrics held, corrections
   and identities preserved.
 - Website appearance uses persisted Light/Dark/Warm/Follow device, strict
-  non-destructive fixture personal v1/v2-to-v3 migration and color-only system
+  non-destructive personal v1/v2/v3-to-v4 migration and color-only system
   updates. Portable defaults/allowed choices and owned palette settings remain
   authoritative; no full offline-shell/device/font coverage is inferred.
 - Shared owns portable contracts/settings/fixtures and UI catalogs/generator/

@@ -10,9 +10,10 @@ import { listNameHint, useListSave } from "./ListSave";
 import { ListExport, transferMessage, type ExportSource } from "./ListExport";
 import { ListEntryView } from "./ListEntryView";
 import type { Publication } from "./artifacts";
+import type { PreparedLyrics } from "./lyric-publication";
 
-export function ListPreview({ labels, initialLink, personal, publication }: {
-  labels: typeof messages.en; initialLink?: string; personal?: PersonalStore; publication?: Publication;
+export function ListPreview({ labels, initialLink, personal, publication, lyrics }: {
+  labels: typeof messages.en; initialLink?: string; personal?: PersonalStore; publication?: Publication; lyrics?: PreparedLyrics;
 }) {
   const id = useId();
   const [link, setLink] = useState("");
@@ -67,7 +68,7 @@ export function ListPreview({ labels, initialLink, personal, publication }: {
       <h3>{snapshot.name}</h3><p>{labels.catalogNotice}</p>
       {!snapshot.entries.length ? <p>{labels.transferEmpty}</p> : <ol>
         {snapshot.entries.map((entry, position) => <li key={position}>
-          <ListEntryView entry={entry} labels={labels} publication={publication} />
+          <ListEntryView entry={entry} labels={labels} publication={publication} lyrics={lyrics} />
         </li>)}
       </ol>}
       {source && <ListExport source={source} labels={labels} disabled={busy || save.busy} onBusyChange={setExportBusy} onStart={save.reset} />}

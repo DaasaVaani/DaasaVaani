@@ -78,7 +78,7 @@ test("malformed, newer and oversized inputs show errors and leave personal data 
   await page.goto("/#/settings");
   await expect(page.getByRole("heading", { name: "List snapshot preview" })).toBeVisible();
   const before = await records(page);
-  for (const buffer of [Buffer.from("not gzip"), gzipSync(JSON.stringify({ ...snapshot, formatVersion: 2 }))]) {
+  for (const buffer of [Buffer.from("not gzip"), gzipSync(JSON.stringify({ ...snapshot, formatVersion: 3 }))]) {
     await page.getByLabel("Choose a list file").setInputFiles(file(buffer));
     await expect(page.getByRole("alert")).toContainText("Invalid or unsupported");
     await expect(page.getByRole("heading", { level: 3 })).toHaveCount(0);

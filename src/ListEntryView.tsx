@@ -1,22 +1,27 @@
 import { Link } from "react-router-dom";
 import type messages from "../shared/generated/web/ui.json";
 import type { Publication } from "./artifacts";
-import type { ListSnapshot } from "./list-transfer-types";
+import { typedEntry, type ListSnapshot } from "./list-transfer-types";
+import type { PreparedLyrics } from "./lyric-publication";
 
-export function ListEntryView({ entry, labels, publication, readable = false }: {
-  entry: ListSnapshot["entries"][number]; labels: typeof messages.en; publication?: Publication; readable?: boolean;
+export function ListEntryView({ entry, labels, publication, lyrics, readable = false }: {
+  entry: ListSnapshot["entries"][number]; labels: typeof messages.en; publication?: Publication; lyrics?: PreparedLyrics; readable?: boolean;
 }) {
-  const summary = entry.kind === "item" ? publication?.summary(entry.videoId) : undefined;
+  const value = typedEntry(entry);
+  const summary = value.kind === "legacyVideo" ? publication?.summary(value.videoId)
+    : value.kind === "lyric" ? lyrics?.item(value.lyricId) : undefined;
   return <>
-    <span>{entry.kind === "item" ? labels.transferReference : labels.transferPlaceholder}: </span>
-    {entry.kind === "placeholder" ? <><span>{entry.text}</span><p>{labels.lyricsUnavailable}</p></> : <>
-      <code>{entry.videoId}</code>
-      {entry.fallback !== undefined && <p>{entry.fallback}</p>}
+    <span>{value.kind === "placeholder" ? labels.transferPlaceholder : value.kind === "lyric" ? labels.lyricReference : labels.legacyReference}: </span>
+    {value.kind === "placeholder" ? <><span>{value.text}</span><p>{labels.lyricsUnavailable}</p></> : <>
+      <code>{value.kind === "lyric" ? value.lyricId : value.videoId}</code>
+      {value.fallback !== undefined && <p>{value.fallback}</p>}
       {summary ? <>
         <p lang="kn">{summary.title}</p><p>{labels.referenceKnown}</p>
-        {readable && <Link to={`/item/${encodeURIComponent(entry.videoId)}`} state={{ browseFrom: "/lists" }}
-          onClick={event => event.currentTarget.focus({ preventScroll: true })}>{labels.open}</Link>}
-      </> : <p>{publication ? labels.lyricsUnavailable : labels.referencePending}</p>}
+      </> : <p>{value.kind === "lyric" ? lyrics ? labels.lyricsUnavailable : labels.lyricCatalogPending
+        : publication ? labels.lyricsUnavailable : labels.referencePending}</p>}
+      {readable && (summary || value.kind === "lyric") && <Link
+        to={value.kind === "lyric" ? `/lyrics/${value.lyricId}` : `/item/${encodeURIComponent(value.videoId)}`}
+        state={{ browseFrom: "/lists" }} onClick={event => event.currentTarget.focus({ preventScroll: true })}>{labels.open}</Link>}
     </>}
   </>;
 }

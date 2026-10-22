@@ -7,10 +7,13 @@ import styles from "./App.module.css";
 import { ListExport, type ExportSource } from "./ListExport";
 import type { Publication } from "./artifacts";
 import { ListEntryView } from "./ListEntryView";
+import type { PreparedLyrics } from "./lyric-publication";
 
-interface EntryDraft { id?: string; kind: "item" | "placeholder"; videoId: string; text: string; fallback: string }
+interface EntryDraft { id?: string; kind: ListEntry["kind"]; identifier: string; text: string; fallback: string }
 
-export function Lists({ labels, personal, publication }: { labels: typeof messages.en; personal: PersonalStore; publication?: Publication }) {
+export function Lists({ labels, personal, publication, lyrics }: {
+  labels: typeof messages.en; personal: PersonalStore; publication?: Publication; lyrics?: PreparedLyrics;
+}) {
   const id = useId();
   const [name, setName] = useState("");
   const [newName, setNewName] = useState("");
@@ -41,9 +44,9 @@ export function Lists({ labels, personal, publication }: { labels: typeof messag
   }
   function startEntry(kind: EntryDraft["kind"], entry?: ListEntry) {
     save.reset(); setError(""); setDeleting(false); setEntrySaved(false);
-    setEditor({ id: entry?.id, kind, videoId: entry?.kind === "item" ? entry.videoId : "",
+    setEditor({ id: entry?.id, kind, identifier: entry?.kind === "legacyVideo" ? entry.videoId : entry?.kind === "lyric" ? entry.lyricId : "",
       text: entry?.kind === "placeholder" ? entry.text : "",
-      fallback: entry?.kind === "item" ? entry.fallback ?? "" : entry?.text ?? "" });
+      fallback: entry && entry.kind !== "placeholder" ? entry.fallback ?? "" : entry?.text ?? "" });
   }
   async function mutate(make: (record: ListRecord) => ListRecord, focusId?: string) {
     if (!selected) return;
@@ -67,7 +70,7 @@ export function Lists({ labels, personal, publication }: { labels: typeof messag
     {!personal.lists.length && <p>{labels.emptyLists}</p>}
     <form aria-label={labels.createList} onSubmit={event => {
       event.preventDefault();
-      void save.run(() => newList({ format: "daasavaani-list", formatVersion: 1, name: newName, entries: [] }), personal.control);
+      void save.run(() => newList({ format: "daasavaani-list", formatVersion: 2, name: newName, entries: [] }), personal.control);
     }}>
       <label htmlFor={`${id}-name`}>{labels.listName}</label>
       <p id={`${id}-hint`}>{listNameHint(labels)}</p>
@@ -93,13 +96,16 @@ export function Lists({ labels, personal, publication }: { labels: typeof messag
       <p>{labels.catalogNotice}</p>
       {!selected.record.entries.length ? <p>{labels.transferEmpty}</p> : <ol>
         {selected.record.entries.map((entry, index) => <li key={entry.id}>
-          <ListEntryView entry={entry} labels={labels} publication={publication} readable />
+          <ListEntryView entry={entry} labels={labels} publication={publication} lyrics={lyrics} readable />
           <div role="group" tabIndex={-1} ref={element => {
             if (element) entryGroups.current.set(entry.id, element);
             else entryGroups.current.delete(entry.id);
           }} aria-label={labels.entryNumber.replace("{position}", String(index + 1)).replace("{total}", String(selected.record.entries.length))}>
             <button disabled={working} onClick={() => startEntry(entry.kind, entry)}>{labels.editEntry}</button>
-            {entry.kind === "placeholder" && <button disabled={working} onClick={() => startEntry("item", entry)}>{labels.replaceEntry}</button>}
+            {entry.kind === "placeholder" && <>
+              <button disabled={working} onClick={() => startEntry("legacyVideo", entry)}>{labels.replaceEntry}</button>
+              <button disabled={working} onClick={() => startEntry("lyric", entry)}>{labels.replaceWithLyric}</button>
+            </>}
             <button disabled={working || index === 0} onClick={() => void mutate(record => moveEntry(record, entry.id, -1), entry.id)}>{labels.moveUp}</button>
             <button disabled={working || index === selected.record.entries.length - 1} onClick={() => void mutate(record => moveEntry(record, entry.id, 1), entry.id)}>{labels.moveDown}</button>
             <button disabled={working} onClick={() => void mutate(record => removeEntry(record, entry.id),
@@ -107,12 +113,14 @@ export function Lists({ labels, personal, publication }: { labels: typeof messag
           </div>
         </li>)}
       </ol>}
-      <button disabled={working} onClick={() => startEntry("item")}>{labels.addReference}</button>
+      <button disabled={working} onClick={() => startEntry("legacyVideo")}>{labels.addReference}</button>
+      <button disabled={working} onClick={() => startEntry("lyric")}>{labels.addLyricReference}</button>
       <button disabled={working} onClick={() => startEntry("placeholder")}>{labels.addPlaceholder}</button>
       {editor && <form aria-label={labels.editEntry} onSubmit={event => {
         event.preventDefault();
         const value = editor.kind === "placeholder" ? { kind: "placeholder" as const, text: editor.text }
-          : { kind: "item" as const, videoId: editor.videoId, ...(editor.fallback === "" ? {} : { fallback: editor.fallback }) };
+          : editor.kind === "lyric" ? { kind: "lyric" as const, lyricId: editor.identifier, ...(editor.fallback === "" ? {} : { fallback: editor.fallback }) }
+          : { kind: "legacyVideo" as const, videoId: editor.identifier, ...(editor.fallback === "" ? {} : { fallback: editor.fallback }) };
         void mutate(record => editEntry(record, editor.id, value), editor.id);
       }}>
         <p id={`${id}-entry-hint`}>{labels.entryTextHint.replace("{limit}", String(__PERSONAL_LIMITS__.maxEntryTextCodePoints))}</p>
@@ -121,9 +129,9 @@ export function Lists({ labels, personal, publication }: { labels: typeof messag
           <input id={`${id}-text`} value={editor.text} disabled={working} aria-describedby={`${id}-entry-hint`}
             onChange={event => setEditor({ ...editor, text: event.target.value })} />
         </> : <>
-          <label htmlFor={`${id}-video`}>{labels.videoId}</label>
-          <input id={`${id}-video`} value={editor.videoId} disabled={working}
-            onChange={event => setEditor({ ...editor, videoId: event.target.value })} />
+          <label htmlFor={`${id}-video`}>{editor.kind === "lyric" ? labels.lyricIdentifier : labels.videoId}</label>
+          <input id={`${id}-video`} value={editor.identifier} disabled={working}
+            onChange={event => setEditor({ ...editor, identifier: event.target.value })} />
           <label htmlFor={`${id}-fallback`}>{labels.fallbackLabel}</label>
           <input id={`${id}-fallback`} value={editor.fallback} disabled={working} aria-describedby={`${id}-entry-hint`}
             onChange={event => setEditor({ ...editor, fallback: event.target.value })} />

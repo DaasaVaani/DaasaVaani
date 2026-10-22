@@ -55,19 +55,39 @@ The catalog/query/expanded page and available focus/scroll survive in-session
 reader return and Back/Forward. Reload resets this context and needs consent again.
 
 The real route hides fixture notices/errors and synthetic preparation messages.
-Personal-storage errors remain explicit. Existing fixture personal/transfer
-formats remain separate: there are no real-lyric favorite/list/save controls,
-UUIDs written to `videoId`, inferred legacy mappings or personal migrations.
+Personal-storage errors remain explicit. Explicit reader controls save typed
+lyric favorites and new independent list occurrences; merely preparing/reading
+never changes personal data. A lyric reference uses `kind:"lyric",lyricId`;
+legacy fixture/video references retain `kind:"legacyVideo",videoId`, even for
+UUID-looking old values. No reference is matched or rewritten from a title,
+attached video or catalog coincidence.
+
+Favorites retain unresolved lyric IDs across reload without preparation or
+automatic requests. Exact titles appear only from the available verified map.
+Unresolved legacy favorites remain visible/removable, not silently discarded.
+List forms offer explicit lyric-ID versus legacy-ID creation and placeholder
+replacement, preserving occurrence IDs/order/user text. A real-reference Read
+can reach the consent gate before preparation; neither preview/save/export nor
+opening that gate downloads lyrics. Reading after explicit preparation continues
+to the requested UUID, not a guessed substitute. List/Favorites origins restore
+available focus/scroll and the selected unsaved list editor in the same session.
+
+The [personal v4 protocol](architecture.md#web-typed-personal-storage-v4) validates
+and structurally upgrades old local schemas atomically without changing existing
+list/occurrence IDs or raw legacy values. Transport families remain independent:
+v1 previews can re-export unchanged; confirmed v1 imports adapt to typed legacy
+records, and all saved-list exports use minimal v2 without local IDs/lyric copies.
 
 ## Coverage and open work
 
 This slice provides partial DATA-01/02/04/05, UX-07/13, OFF-02 and SET-01/02
-coverage. See [validation commands and obligations](testing-and-release.md) and
+coverage, with partial LIB-01/02/03/04/05/08/09/10/11 and XFER-01/02/03/04/05/06/08
+for the Website typed personal slice. See [validation commands and obligations](testing-and-release.md) and
 the [roadmap](implementation-roadmap.md). The native application independently
 implements a read-only full-preparation preview with the same media independence.
 
-Still open: production individual PWA item reading, typed personal references/
-transfers, favorites/bookmarks/recitation for real UUIDs, full linguistic search/
+Still open: production individual PWA item reading, bookmarks/recents/learning/
+recitation for real UUIDs, full personal backups, full linguistic search/
 profiles/helpers, populated classification/context/verse/media/eligible-Latin
 public adapters, rights/registry closure, persistent offline activation/repair,
 publication ledger/date/ZIP protocols and release/platform acceptance.

@@ -1,14 +1,17 @@
 import { describe, expect, test } from "vitest";
 import {
-  defaultPersonal, editEntry, exportListSnapshot, jsonBytes, listNameKey, listSnapshot, migratePersonalV1, migrateStoreV2, moveEntry, newControl, newList, nextRevision, parseStore, removeEntry,
+  defaultPersonal, editEntry, exportListSnapshot, hasFavorite, jsonBytes, listNameKey, listSnapshot, migratePersonalV1, migrateStoreV2, migrateStoreV3, moveEntry, newControl, newList, nextRevision, parseStore, removeEntry, toggleFavorite,
   PersonalError, saveRecord, storageBytes, validatePersonal, validateStore, type PersonalStore,
 } from "./personal-model";
-import type { ListSnapshot } from "./list-transfer-types";
+import { typedEntry, type ListSnapshotV1, type ListTransferV2 } from "./list-transfer-types";
 
-const snapshot: ListSnapshot = { format: "daasavaani-list", formatVersion: 1, name: "  Synthetic  ", entries: [
+const legacySnapshot: ListSnapshotV1 = { format: "daasavaani-list", formatVersion: 1, name: "  Synthetic  ", entries: [
   { kind: "item", videoId: "fixture_ref", fallback: "  User label  " },
   { kind: "placeholder", text: "<b>Plain text</b>" }, { kind: "item", videoId: "fixture_ref" },
 ] };
+const snapshot: ListTransferV2 = { ...legacySnapshot, formatVersion: 2, entries: legacySnapshot.entries.map(typedEntry) };
+const legacyList = () => ({ id: crypto.randomUUID(), name: legacySnapshot.name,
+  entries: legacySnapshot.entries.map(entry => ({ ...entry, id: crypto.randomUUID() })) });
 const empty = (): PersonalStore => ({ control: newControl(), lists: [] });
 function code(action: () => unknown, expected: string) {
   try { action(); throw new Error("Expected an explicit personal error"); }
@@ -18,15 +21,85 @@ function code(action: () => unknown, expected: string) {
   }
 }
 describe("transactional personal model", () => {
-  test("v2 migration preserves every personal/list/occurrence value and creates a fresh v3 fence without mutating input", () => {
+  test("typed favorites compare kind plus identity, preserve order and never reinterpret UUID-looking legacy values", () => {
+    const id = "abcdef01-2345-4678-9abc-def012345678";
+    const lyric = { kind: "lyric" as const, lyricId: id }, legacy = { kind: "legacyVideo" as const, videoId: id };
+    const emptyPersonal = defaultPersonal(), one = toggleFavorite(emptyPersonal, legacy), both = toggleFavorite(one, lyric);
+    expect(both.favorites).toEqual([legacy, lyric]);
+    expect(hasFavorite(one, lyric)).toBe(false);
+    expect(hasFavorite(both, lyric)).toBe(true);
+    expect(toggleFavorite(both, legacy).favorites).toEqual([lyric]);
+    expect(one.favorites).toEqual([legacy]); expect(emptyPersonal.favorites).toEqual([]);
+    expect(() => validatePersonal(both)).not.toThrow();
+    code(() => validatePersonal({ ...both, favorites: [lyric, lyric] }), "invalid");
+    code(() => validatePersonal({ ...both, favorites: [{ ...lyric, videoId: id }] }), "invalid");
+    code(() => validatePersonal({ ...both, favorites: [{ ...lyric, lyricId: id.toUpperCase() }] }), "invalid");
+    expect(() => validatePersonal(both, { ...__PERSONAL_LIMITS__, maxFavorites: 2 })).not.toThrow();
+    code(() => validatePersonal(both, { ...__PERSONAL_LIMITS__, maxFavorites: 1 }), "capacity");
+  });
+  test("the actual typed favorite ceiling accepts every distinct reference and rejects limit plus one", () => {
+    const personal = { ...defaultPersonal(), favorites: Array.from({ length: __PERSONAL_LIMITS__.maxFavorites },
+      (_, index) => ({ kind: "legacyVideo" as const, videoId: `synthetic_${index}` })) };
+    expect(() => validatePersonal(personal)).not.toThrow();
+    code(() => validatePersonal({ ...personal, favorites: [...personal.favorites,
+      { kind: "lyric", lyricId: "abcdef01-2345-4678-9abc-def012345678" }] }), "capacity");
+  });
+  test("v3 structural upgrade preserves raw names, IDs, repetitions, fallbacks, all themes and UUID-looking legacy references", () => {
+    const id = "abcdef01-2345-4678-9abc-def012345678";
+    const control = { ...newControl(), formatVersion: 3, revision: 19 };
+    const list = legacyList(); list.entries.push({ id: crypto.randomUUID(), kind: "item", videoId: id });
+    for (const theme of __WEB_CONFIG__.uiThemes) {
+      const personal = { ...defaultPersonal(), theme, favorites: [id, "Case_Sensitive"] };
+      const before = structuredClone({ control, personal, list });
+      const next = migrateStoreV3([control], [personal], [list]);
+      expect(next.control).toMatchObject({ formatVersion: 4, revision: 0 });
+      expect(next.control.epoch).not.toBe(control.epoch);
+      expect(next.personal).toEqual({ ...personal, favorites: personal.favorites.map(videoId => ({ kind: "legacyVideo", videoId })) });
+      expect(next.lists).toEqual([{ ...list, entries: list.entries.map(entry => ({ ...typedEntry(entry), id: entry.id })) }]);
+      expect({ control, personal, list }).toEqual(before);
+      code(() => exportListSnapshot(next, list.id, control), "stale");
+    }
+    code(() => migrateStoreV3([control], [{ ...defaultPersonal(), favorites: [{ kind: "lyric", lyricId: id }] }], [list]), "invalid");
+    code(() => migrateStoreV3([control], [], [newList(snapshot)]), "invalid");
+    code(() => migrateStoreV3([{ ...control, formatVersion: 4 }], [], []), "invalid");
+  });
+  test("migration accounts for both old and larger typed envelopes and fails at exact capacity minus one without mutation", () => {
+    const control = { ...newControl(), formatVersion: 3 }, personal = { ...defaultPersonal(), favorites: ["fixture_ref"] };
+    const list = legacyList(), before = structuredClone({ control, personal, list });
+    const target = migrateStoreV3([control], [personal], [list]), bytes = storageBytes(target);
+    expect(() => migrateStoreV3([control], [personal], [list], { ...__PERSONAL_LIMITS__, maxPersonalStoredBytes: bytes })).not.toThrow();
+    code(() => migrateStoreV3([control], [personal], [list], { ...__PERSONAL_LIMITS__, maxPersonalStoredBytes: bytes - 1 }), "capacity");
+    const transferBytes = jsonBytes(listSnapshot(target.lists[0]!));
+    expect(() => migrateStoreV3([control], [personal], [list], { ...__PERSONAL_LIMITS__, maxListDecodedBytes: transferBytes })).not.toThrow();
+    code(() => migrateStoreV3([control], [personal], [list], { ...__PERSONAL_LIMITS__, maxListDecodedBytes: transferBytes - 1 }), "capacity");
+    expect({ control, personal, list }).toEqual(before);
+  });
+  test("v1 import adapts only the discriminant and v2 lyric edits/export retain every occurrence without local or catalog fields", () => {
+    const imported = newList(legacySnapshot), first = imported.entries[0]!;
+    expect(listSnapshot(imported)).toEqual(snapshot);
+    const lyric = { kind: "lyric" as const, lyricId: "00000000-0000-4000-8000-000000000001", fallback: "  User text  " };
+    const edited = editEntry(imported, first.id, lyric);
+    const repeated = editEntry(edited, undefined, lyric), exported = listSnapshot(repeated);
+    expect(repeated.entries[0]).toEqual({ ...lyric, id: first.id });
+    expect(repeated.entries.at(-1)?.id).not.toBe(first.id);
+    expect(exported.formatVersion).toBe(2); expect(exported.entries[0]).toEqual(lyric);
+    expect(exported.entries.at(-1)).toEqual(lyric);
+    for (const id of [repeated.id, ...repeated.entries.map(entry => entry.id)]) expect(JSON.stringify(exported)).not.toContain(id);
+    const independent = newList(exported);
+    expect(listSnapshot(independent)).toEqual(exported);
+    expect(independent.id).not.toBe(repeated.id);
+    expect(independent.entries.every(entry => !repeated.entries.some(other => other.id === entry.id))).toBe(true);
+  });
+  test("v2 migration preserves every identity/value while structurally typing references behind a fresh v4 fence", () => {
     const control = { ...newControl(), formatVersion: 2, revision: 7 };
-    const personal = { ...defaultPersonal(), favorites: ["fixture_ref"] }, lists = [newList(snapshot), newList(snapshot)];
+    const personal = { ...defaultPersonal(), favorites: ["fixture_ref"] }, lists = [legacyList(), legacyList()];
     const before = structuredClone({ control, personal, lists });
     const migrated = migrateStoreV2([control], [personal], lists);
-    expect(migrated.personal).toEqual(personal); expect(migrated.lists).toEqual(lists);
-    expect(migrated.control).toMatchObject({ id: "state", formatVersion: 3, revision: 0 });
+    expect(migrated.personal).toEqual({ ...personal, favorites: [{ kind: "legacyVideo", videoId: "fixture_ref" }] });
+    expect(migrated.lists).toEqual(lists.map(list => ({ ...list, entries: list.entries.map(entry => ({ ...typedEntry(entry), id: entry.id })) })));
+    expect(migrated.control).toMatchObject({ id: "state", formatVersion: 4, revision: 0 });
     expect(migrated.control.epoch).not.toBe(control.epoch);
-    expect(parseStore([migrated.control], [personal], migrated.lists)).toEqual(migrated);
+    expect(parseStore([migrated.control], [migrated.personal], migrated.lists)).toEqual(migrated);
     code(() => exportListSnapshot(migrated, lists[0]!.id, control), "stale");
     expect({ control, personal, lists }).toEqual(before);
   });
@@ -44,7 +117,7 @@ describe("transactional personal model", () => {
     code(() => migrateStoreV2([{ ...control, formatVersion: 3 }], [personal], []), "invalid");
     code(() => parseStore([control], [personal], []), "invalid");
   });
-  test("all declared theme tokens are valid v3 personal values and exact accounting includes the longer device token", () => {
+  test("all declared theme tokens are valid current personal values and exact accounting includes the longer device token", () => {
     const personal = defaultPersonal(); personal.theme = "light";
     const state = { ...empty(), personal }, bytes = storageBytes(state);
     for (const theme of __WEB_CONFIG__.uiThemes) {
@@ -84,8 +157,8 @@ describe("transactional personal model", () => {
     expect(edited.entries[1]).toEqual({ id: placeholder.id, kind: "placeholder", text: "  Edited  " });
     const moved = moveEntry(edited, placeholder.id, -1);
     expect(moved.entries.map(entry => entry.id)).toEqual([placeholder.id, first.id, last.id]);
-    const replaced = editEntry(moved, placeholder.id, { kind: "item", videoId: "replacement", fallback: "  Edited  " });
-    expect(replaced.entries[0]).toEqual({ id: placeholder.id, kind: "item", videoId: "replacement", fallback: "  Edited  " });
+    const replaced = editEntry(moved, placeholder.id, { kind: "legacyVideo", videoId: "replacement", fallback: "  Edited  " });
+    expect(replaced.entries[0]).toEqual({ id: placeholder.id, kind: "legacyVideo", videoId: "replacement", fallback: "  Edited  " });
     const removed = removeEntry(replaced, first.id);
     expect(removed.entries.map(entry => entry.id)).toEqual([placeholder.id, last.id]);
     expect(removed.entries[1]).toEqual(last);
@@ -169,6 +242,7 @@ describe("transactional personal model", () => {
       code(() => validatePersonal(bad), "invalid");
     }
     code(() => parseStore([], [], []), "invalid");
+    code(() => parseStore([state.control], [undefined], []), "invalid");
     code(() => parseStore([state.control], [personal, personal], []), "invalid");
     code(() => parseStore([{ ...state.control, revision: -1 }], [], []), "invalid");
     code(() => parseStore([{ ...state.control, ignored: true }], [], []), "invalid");
@@ -191,6 +265,10 @@ describe("transactional personal model", () => {
   });
   test("actual production personal byte ceiling accepts a complete valid envelope and rejects exactly one more byte", () => {
     const state = empty();
+    state.personal = { ...defaultPersonal(), favorites: [
+      { kind: "lyric", lyricId: "abcdef01-2345-4678-9abc-def012345678" },
+      { kind: "legacyVideo", videoId: "abcdef01-2345-4678-9abc-def012345678" },
+    ] };
     const total = 40000;
     let identity = 0;
     const id = () => `00000000-0000-4000-8000-${(++identity).toString(16).padStart(12, "0")}`;

@@ -3,7 +3,8 @@ import { gzipSync, gunzipSync, deflateRawSync } from "node:zlib";
 import { createHash } from "node:crypto";
 import { readFileSync } from "node:fs";
 import { strictYaml } from "../../shared/tools/generate-catalog.mjs";
-import type { ListSnapshot } from "../../src/list-transfer-types";
+import { typedEntry, type ListSnapshot } from "../../src/list-transfer-types";
+import messages from "../../shared/generated/web/ui.json" with { type: "json" };
 
 const web = strictYaml(readFileSync(new URL("../../settings/web.yml", import.meta.url), "utf8"));
 const limits = strictYaml(readFileSync(new URL("../../shared/settings/personal-transfer.yml", import.meta.url), "utf8"));
@@ -30,6 +31,7 @@ const snapshot: ListSnapshot = { format: "daasavaani-list", formatVersion: 1, na
   { kind: "item", videoId: "fixture_ref", fallback: "  User note  " },
   { kind: "placeholder", text: "<b>Plain text</b>" }, { kind: "item", videoId: "fixture_ref" },
 ] };
+const storedSnapshot = (value: ListSnapshot) => ({ ...value, formatVersion: 2, entries: value.entries.map(typedEntry) });
 declare global {
   interface Window {
     syntheticShares: { url?: string; files?: { name: string; type: string; bytes: number[] }[] }[];
@@ -141,7 +143,7 @@ test("platform sharing dismisses pending duplicate confirmation and saved snapsh
   await expect(page.getByRole("status")).toContainText("Delivery is not confirmed.");
   const bytes = await page.evaluate(() => window.syntheticShares.at(-1)?.files?.[0]?.bytes);
   if (!bytes) throw new Error("Missing saved snapshot file handoff");
-  expect(JSON.parse(gunzipSync(Buffer.from(bytes)).toString("utf8"))).toEqual(snapshot);
+  expect(JSON.parse(gunzipSync(Buffer.from(bytes)).toString("utf8"))).toEqual(storedSnapshot(snapshot));
   expect(await records(page)).toEqual(before);
 });
 test("absent platform APIs keep selectable links and complete downloads available", async ({ page }) => {
@@ -182,7 +184,9 @@ async function records(page: Page) {
     } finally { database.close(); }
   }, databaseName);
 }
-const listIdentities = (value: unknown) => JSON.stringify(value).match(/[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}/g) ?? [];
+const listIdentities = (value: unknown) => [...JSON.stringify(value).matchAll(
+  /"id":"([0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12})"/g,
+)].map(match => match[1]);
 async function upload(page: Page, value = snapshot, canSave = true) {
   await page.goto("/#/settings");
   await page.getByLabel("Choose a list file").setInputFiles({ name: "synthetic.gz", mimeType: "application/gzip", buffer: gzipSync(JSON.stringify(value)) });
@@ -222,13 +226,13 @@ async function seedLegacy(page: Page, value: unknown, version = 10) {
   }, { name: databaseName, value, version });
   await page.unroute("**/personal-fixture-seed");
 }
-async function seedVersion2(page: Page, theme = "dark", unexpectedIndex = false) {
+async function seedVersion2(page: Page, theme = "dark", unexpectedIndex = false, version: 2 | 3 = 2) {
   await page.route("**/personal-v2-seed", route => route.fulfill({ contentType: "text/html",
     body: "<!doctype html><title>Synthetic personal v2 fixture</title>" }));
   await page.goto("/personal-v2-seed");
   await page.evaluate(async input => {
     const db = await new Promise<IDBDatabase>((resolve, reject) => {
-      const request = indexedDB.open(input.name, 20);
+      const request = indexedDB.open(input.name, input.version * 10);
       request.onupgradeneeded = () => {
         request.result.createObjectStore("personal", { keyPath: "id" });
         request.result.createObjectStore("control", { keyPath: "id" });
@@ -240,7 +244,7 @@ async function seedVersion2(page: Page, theme = "dark", unexpectedIndex = false)
     try {
       await new Promise<void>((resolve, reject) => {
         const tx = db.transaction(["control", "personal", "lists"], "readwrite");
-        tx.objectStore("control").put({ id: "state", formatVersion: 2, revision: 7,
+        tx.objectStore("control").put({ id: "state", formatVersion: input.version, revision: 7,
           epoch: "00000000-0000-4000-8000-000000000001" });
         tx.objectStore("personal").put({ id: "personal", favorites: ["fixture-one"], language: "en", theme: input.theme });
         tx.objectStore("lists").put({ id: "00000000-0000-4000-8000-000000000002", name: "Synthetic v2 list", entries: [
@@ -251,9 +255,94 @@ async function seedVersion2(page: Page, theme = "dark", unexpectedIndex = false)
         tx.oncomplete = () => resolve(); tx.onerror = () => reject(tx.error); tx.onabort = () => reject(tx.error);
       });
     } finally { db.close(); }
-  }, { name: databaseName, theme, unexpectedIndex });
+  }, { name: databaseName, theme, unexpectedIndex, version });
   await page.unroute("**/personal-v2-seed");
 }
+for (const theme of ["warm", "device"]) {
+  test(`v3 typed upgrade retains ${theme} preferences, every occurrence and raw user text behind a fresh writer fence`, async ({ page }) => {
+    await seedVersion2(page, theme, false, 3);
+    const before = await records(page);
+    expect(before.version).toBe(30);
+    await page.goto("/#/lists");
+    await expect(page.getByRole("heading", { name: "Lists", exact: true })).toBeVisible();
+    const after = await records(page);
+    expect(after.version).toBe(40); expect(after.layout).toEqual(before.layout);
+    expect(after.values.personal).toEqual([{ id: "personal", favorites: [{ kind: "legacyVideo", videoId: "fixture-one" }], language: "en", theme }]);
+    expect(after.values.control).toMatchObject([{ id: "state", formatVersion: 4, revision: 0 }]);
+    expect(after.values.control).not.toEqual(before.values.control);
+    expect(listIdentities(after.values.lists)).toEqual(listIdentities(before.values.lists));
+    expect(after.values.lists).toMatchObject([{ name: "Synthetic v2 list", entries: [
+      { kind: "legacyVideo", videoId: "fixture-one", fallback: "  Preserve this  " },
+      { kind: "placeholder", text: "<b>Keep literal</b>" }, { kind: "legacyVideo", videoId: "fixture-one" },
+    ] }]);
+    await page.reload(); await expect(page.getByRole("heading", { name: "Lists", exact: true })).toBeVisible();
+    expect(await records(page)).toEqual(after);
+  });
+}
+test("v3 migration rejects typed favorites mislabeled as legacy and rolls every store and native version back", async ({ page }) => {
+  await seedVersion2(page, "warm", false, 3);
+  await page.evaluate(async name => {
+    const database = await new Promise<IDBDatabase>((resolve, reject) => {
+      const request = indexedDB.open(name, 30);
+      request.onsuccess = () => resolve(request.result); request.onerror = () => reject(request.error);
+    });
+    try {
+      const tx = database.transaction("personal", "readwrite");
+      const done = new Promise<void>((resolve, reject) => {
+        tx.oncomplete = () => resolve(); tx.onerror = () => reject(tx.error); tx.onabort = () => reject(tx.error);
+      });
+      tx.objectStore("personal").put({ id: "personal", favorites: [
+        { kind: "lyric", lyricId: "00000000-0000-4000-8000-000000000001" },
+      ], language: "en", theme: "warm" });
+      await done;
+    } finally { database.close(); }
+  }, databaseName);
+  const before = await records(page);
+  await page.goto("/#/lists");
+  await expect(page.getByRole("alert")).toContainText("Invalid personal database record");
+  expect(await records(page)).toEqual(before);
+});
+test("explicit lyric editing and placeholder replacement retain occurrence identities and literal user fallback text", async ({ page }) => {
+  const labels = messages.en, lyricId = "abcdef01-2345-4678-9abc-def012345678";
+  await page.goto("/#/lists"); await create(page, "Synthetic typed editor");
+  await page.getByRole("list", { name: labels.lists, exact: true }).getByRole("button", { name: "Synthetic typed editor", exact: true }).click();
+  const editor = page.getByRole("form", { name: labels.editEntry, exact: true }), before = await records(page);
+  await page.getByRole("button", { name: labels.addLyricReference, exact: true }).click();
+  await editor.getByLabel(labels.lyricIdentifier, { exact: true }).fill("fixture_ref");
+  await editor.getByRole("button", { name: labels.saveEntry, exact: true }).click();
+  await expect(page.getByRole("alert")).toHaveText(labels.listInvalid);
+  expect(await records(page)).toEqual(before);
+  await editor.getByLabel(labels.lyricIdentifier, { exact: true }).fill(lyricId);
+  await editor.getByLabel(labels.fallbackLabel, { exact: true }).fill("  User fallback  ");
+  await editor.getByRole("button", { name: labels.saveEntry, exact: true }).click();
+  await expect(page.locator("main ol > li")).toHaveCount(1);
+  const first = listIdentities((await records(page)).values.lists);
+  await page.getByRole("button", { name: labels.addPlaceholder, exact: true }).click();
+  await editor.getByLabel(labels.placeholderText, { exact: true }).fill("<b>Only text</b>");
+  await editor.getByRole("button", { name: labels.saveEntry, exact: true }).click();
+  await expect(page.locator("main ol > li")).toHaveCount(2);
+  const added = await records(page), addedIds = listIdentities(added.values.lists);
+  expect(addedIds.slice(0, 2)).toEqual(first);
+  await page.getByRole("group", { name: "Entry 2 of 2", exact: true }).getByRole("button", { name: labels.replaceWithLyric, exact: true }).click();
+  await expect(editor.getByLabel(labels.fallbackLabel, { exact: true })).toHaveValue("<b>Only text</b>");
+  await editor.getByLabel(labels.lyricIdentifier, { exact: true }).fill(lyricId);
+  await editor.getByRole("button", { name: labels.saveEntry, exact: true }).click();
+  await expect(page.locator("main ol > li").last().locator("code")).toHaveText(lyricId);
+  const replaced = await records(page);
+  expect(listIdentities(replaced.values.lists)).toEqual(addedIds);
+  expect(replaced.values.lists).toMatchObject([{ entries: [
+    { kind: "lyric", lyricId, fallback: "  User fallback  " }, { kind: "lyric", lyricId, fallback: "<b>Only text</b>" },
+  ] }]);
+  await expect(page.locator("main b")).toHaveCount(0);
+  await page.getByRole("group", { name: "Entry 1 of 2", exact: true }).getByRole("button", { name: labels.editEntry, exact: true }).click();
+  await expect(editor.getByLabel(labels.lyricIdentifier, { exact: true })).toHaveValue(lyricId);
+  await editor.getByLabel(labels.lyricIdentifier, { exact: true }).fill(lyricId.toUpperCase());
+  await editor.getByRole("button", { name: labels.saveEntry, exact: true }).click();
+  await expect(page.getByRole("alert")).toHaveText(labels.listInvalid);
+  expect(await records(page)).toEqual(replaced);
+  await editor.getByRole("button", { name: labels.cancel, exact: true }).click();
+  expect(await records(page)).toEqual(replaced);
+});
 test("appearance follows device changes only when chosen and preserves every personal table without automatic writes", async ({ page }) => {
   await page.emulateMedia({ colorScheme: "dark" }); await page.goto("/#/settings");
   const root = page.locator("html");
@@ -289,16 +378,21 @@ test("v2 migration retains every favorite list and occurrence while fencing old 
   await page.goto("/#/settings");
   await expect(page.getByRole("button", { name: "Dark", exact: true })).toHaveAttribute("aria-pressed", "true");
   const migrated = await records(page);
-  expect(migrated.version).toBe(30);
-  expect(migrated.values.personal).toEqual(before.values.personal); expect(migrated.values.lists).toEqual(before.values.lists);
+  expect(migrated.version).toBe(40);
+  expect(migrated.values.personal).toEqual([{ id: "personal", favorites: [{ kind: "legacyVideo", videoId: "fixture-one" }], language: "en", theme: "dark" }]);
+  expect(migrated.values.lists).toEqual([{ id: "00000000-0000-4000-8000-000000000002", name: "Synthetic v2 list", entries: [
+    { id: "00000000-0000-4000-8000-000000000003", kind: "legacyVideo", videoId: "fixture-one", fallback: "  Preserve this  " },
+    { id: "00000000-0000-4000-8000-000000000004", kind: "placeholder", text: "<b>Keep literal</b>" },
+    { id: "00000000-0000-4000-8000-000000000005", kind: "legacyVideo", videoId: "fixture-one" },
+  ] }]);
   expect(migrated.layout).toEqual(before.layout);
-  expect(migrated.values.control).toMatchObject([{ id: "state", formatVersion: 3, revision: 0 }]);
+  expect(migrated.values.control).toMatchObject([{ id: "state", formatVersion: 4, revision: 0 }]);
   expect(JSON.stringify(migrated.values.control)).not.toContain("00000000-0000-4000-8000-000000000001");
   await page.getByRole("button", { name: "Warm", exact: true }).click();
   await expect(page.locator("html")).toHaveAttribute("data-theme", "warm");
   const changed = await records(page);
-  expect(changed.values.lists).toEqual(before.values.lists);
-  expect(changed.values.personal).toMatchObject([{ favorites: ["fixture-one"], language: "en", theme: "warm" }]);
+  expect(changed.values.lists).toEqual(migrated.values.lists);
+  expect(changed.values.personal).toMatchObject([{ favorites: [{ kind: "legacyVideo", videoId: "fixture-one" }], language: "en", theme: "warm" }]);
   expect(changed.values.control).toMatchObject([{ revision: 1 }]);
   await page.reload(); await expect(page.getByRole("button", { name: "Warm", exact: true })).toHaveAttribute("aria-pressed", "true");
   await page.getByRole("link", { name: "Lists", exact: true }).click();
@@ -359,7 +453,7 @@ test("official Unicode16 separates an old-package collision, retains rename conf
   await page.getByRole("button", { name: "Cancel", exact: true }).click();
   expect(await records(page)).toEqual(before);
 });
-test("new Unicode16 equivalence never rewrites existing lists, identities or the v3 database before explicit independent reuse", async ({ page }) => {
+test("new Unicode16 equivalence never rewrites existing lists, identities or the current database before explicit independent reuse", async ({ page }) => {
   await page.goto("/#/lists");
   await expect(page.getByRole("form", { name: "Create empty list", exact: true })).toBeVisible();
   const before = await records(page), names = [String.fromCodePoint(0x105c9), String.fromCodePoint(0x105d2, 0x307)];
@@ -368,7 +462,7 @@ test("new Unicode16 equivalence never rewrites existing lists, identities or the
   ] }));
   await page.evaluate(async input => {
     const database = await new Promise<IDBDatabase>((resolve, reject) => {
-      const request = indexedDB.open(input.name, 30);
+      const request = indexedDB.open(input.name, 40);
       request.onsuccess = () => resolve(request.result); request.onerror = () => reject(request.error);
     });
     try {
@@ -460,8 +554,8 @@ test("occurrence editing, movement, manual replacement and removal retain IDs, t
   const saved = await records(page);
   expect(listIdentities(saved.values.lists)).toEqual([ids[0], ids[2], added[4], ids[3]]);
   expect(saved.values.lists).toMatchObject([{ entries: [
-    { kind: "item", videoId: "replacement_ref", fallback: "  Replacement label  " },
-    { kind: "placeholder", text: "<b>Plain text</b>" }, { kind: "item", videoId: "fixture_ref" },
+    { kind: "legacyVideo", videoId: "replacement_ref", fallback: "  Replacement label  " },
+    { kind: "placeholder", text: "<b>Plain text</b>" }, { kind: "legacyVideo", videoId: "fixture_ref" },
   ] }]);
   expect(saved.values.personal).toEqual(before.values.personal);
   await expect(page.locator("main b")).toHaveCount(0);
@@ -530,7 +624,7 @@ test("saved-list exports use the stored name and exact minimal snapshot without 
   const [download] = await Promise.all([page.waitForEvent("download"),
     page.getByRole("link", { name: "Download list file", exact: true }).click()]);
   const path = await download.path(); if (!path) throw new Error("Saved-list download did not complete");
-  expect(JSON.parse(gunzipSync(readFileSync(path)).toString("utf8"))).toEqual(snapshot);
+  expect(JSON.parse(gunzipSync(readFileSync(path)).toString("utf8"))).toEqual(storedSnapshot(snapshot));
   await page.getByRole("button", { name: "Create snapshot link", exact: true }).click();
   const output = page.locator("input[readonly]"); await expect(output).toBeVisible();
   const url = new URL(await output.inputValue()); expect(url.protocol).toBe("https:");
@@ -591,7 +685,7 @@ test("available catalog resolves only exact known references without lyric reque
   await expect(page.getByText("ರಾಮ ಕೃಷ್ಣ", { exact: true })).toBeVisible();
   expect(requests).toHaveLength(2);
   const saved = await records(page);
-  expect(saved.values.lists).toMatchObject([{ entries: value.entries }]);
+  expect(saved.values.lists).toMatchObject([{ entries: value.entries.map(typedEntry) }]);
   expect(JSON.stringify(saved.values.lists)).not.toContain("ಕನ್ನಡ ಓದು");
   expect(saved.values.personal).toEqual(before.values.personal);
 });
@@ -659,7 +753,7 @@ test("reader adds repeated independent references only after explicit list selec
   await form.getByRole("button", { name: "Add this occurrence", exact: true }).click();
   await expect(page.getByRole("status")).toHaveText("A new independent occurrence was added to the selected list.");
   const saved = await records(page);
-  expect(saved.values.lists).toMatchObject([{ entries: [{ kind: "item", videoId: "fixture-one" }, { kind: "item", videoId: "fixture-one" }] }]);
+  expect(saved.values.lists).toMatchObject([{ entries: [{ kind: "legacyVideo", videoId: "fixture-one" }, { kind: "legacyVideo", videoId: "fixture-one" }] }]);
   const ids = listIdentities(saved.values.lists); expect(ids).toHaveLength(3); expect(new Set(ids).size).toBe(3);
   expect(JSON.stringify(saved.values.lists)).not.toContain("ಕನ್ನಡ ಓದು");
   expect(saved.values.personal).toEqual(before.values.personal);
@@ -738,7 +832,7 @@ test("oversized saved links retain a lossless file fallback without database wri
   const [download] = await Promise.all([page.waitForEvent("download"),
     page.getByRole("link", { name: "Download list file", exact: true }).click()]);
   const path = await download.path(); if (!path) throw new Error("Lossless fallback download did not complete");
-  expect(JSON.parse(gunzipSync(readFileSync(path)).toString("utf8"))).toEqual(large);
+  expect(JSON.parse(gunzipSync(readFileSync(path)).toString("utf8"))).toEqual(storedSnapshot(large));
   expect(await records(page)).toEqual(before);
 });
 test("rename, independent duplication and confirmed deletion preserve unrelated lists", async ({ page }) => {
@@ -787,8 +881,38 @@ test("v1 migration preserves favorites and preferences", async ({ page }) => {
   await expect(page.locator("html")).toHaveAttribute("lang", "kn");
   await expect(page.getByRole("heading", { name: "ಪಟ್ಟಿಗಳು", exact: true })).toBeVisible();
   const after = await records(page);
-  expect(after.version).toBe(30); expect(after.values.personal).toEqual([value]);
+  expect(after.version).toBe(40);
+  expect(after.values.personal).toEqual([{ ...value, favorites: [{ kind: "legacyVideo", videoId: "fixture_ref" }] }]);
   expect(after.values.lists).toEqual([]); expect(after.values.control).toHaveLength(1);
+});
+test("UUID-looking legacy favorites remain visible and removable without inferred lyric resolution or downloads", async ({ page }) => {
+  const id = "abcdef01-2345-4678-9abc-def012345678", labels = messages.en, requests: string[] = [];
+  page.on("request", request => { if (request.url().includes("/library/lyrics/")) requests.push(request.url()); });
+  await seedLegacy(page, { id: "personal", favorites: [id], language: "en", theme: "dark" });
+  await page.goto("/#/favorites");
+  const region = page.getByRole("region", { name: labels.legacyReference, exact: true });
+  await expect(region.locator("code")).toHaveText(id);
+  await expect(region.getByText(labels.lyricsUnavailable, { exact: true })).toBeVisible();
+  await expect(region.getByRole("link")).toHaveCount(0);
+  await expect(page.getByRole("region", { name: labels.ownerLyrics, exact: true })).toHaveCount(0);
+  const before = await records(page);
+  expect(before.values.personal).toMatchObject([{ favorites: [{ kind: "legacyVideo", videoId: id }] }]);
+  await region.getByRole("button", { name: labels.removeFavorite, exact: true }).click();
+  await expect(page.getByText(labels.emptyFavorites, { exact: true })).toBeVisible();
+  await expect(page.getByRole("heading", { name: /^Favorites/, level: 1 })).toBeFocused();
+  const after = await records(page);
+  expect(after.values.personal).toMatchObject([{ favorites: [], language: "en", theme: "dark" }]);
+  expect(after.values.lists).toEqual(before.values.lists); expect(requests).toEqual([]);
+});
+test("over-capacity legacy favorites refuse migration without partially upgrading any personal stores", async ({ page }) => {
+  if (!("maxFavorites" in limits) || typeof limits.maxFavorites !== "number") throw new Error("Invalid configured favorite ceiling");
+  const personal = { id: "personal", favorites: Array.from({ length: limits.maxFavorites + 1 },
+    (_, index) => `synthetic_${index}`), language: "en", theme: "dark" };
+  await seedLegacy(page, personal);
+  const before = await records(page);
+  await page.goto("/#/lists");
+  await expect(page.getByRole("alert")).toContainText("Personal storage or collection limit reached");
+  expect(await records(page)).toEqual(before); expect(before.version).toBe(10);
 });
 test("invalid legacy migration rolls back the schema and refuses personal writes", async ({ page }) => {
   const value = { id: "personal", favorites: ["duplicate", "duplicate"], language: "en", theme: "light" };
@@ -803,7 +927,7 @@ test("invalid legacy migration rolls back the schema and refuses personal writes
   expect(await records(page)).toEqual(before);
 });
 test("newer personal schemas are refused without deleting unfamiliar stores", async ({ page }) => {
-  await seedLegacy(page, { id: "personal", favorites: [], language: "en", theme: "light" }, 40);
+  await seedLegacy(page, { id: "personal", favorites: [], language: "en", theme: "light" }, 50);
   const before = await records(page);
   await page.goto("/#/settings");
   await expect(page.getByRole("alert")).toContainText("newer personal database schema");
@@ -817,7 +941,7 @@ test("an already-open old client cannot commit a pending confirmation into a fut
   await expect(page.getByRole("button", { name: "Save with same name", exact: true })).toBeVisible();
   await page.evaluate(async name => {
     const database = await new Promise<IDBDatabase>((resolve, reject) => {
-      const request = indexedDB.open(name, 40);
+      const request = indexedDB.open(name, 50);
       request.onupgradeneeded = () => request.result.createObjectStore("future", { keyPath: "id" }).put({ id: "synthetic-future" });
       request.onsuccess = () => resolve(request.result); request.onerror = () => reject(request.error);
     });
@@ -841,7 +965,7 @@ test("a blocked non-destructive migration reports recovery and can retry after t
     await held.evaluate(database => database.close());
     await app.getByRole("button", { name: "Try again", exact: true }).click();
     await expect(app.getByRole("heading", { name: /^Library/, level: 1 })).toBeVisible();
-    expect((await records(app)).values.personal).toEqual([value]);
+    expect((await records(app)).values.personal).toEqual([{ ...value, favorites: [{ kind: "legacyVideo", videoId: "fixture_ref" }] }]);
   } finally { await held.evaluate(database => database.close()); await held.dispose(); }
 });
 test("the actual configured list-count ceiling accepts the last list then rejects limit plus one without mutation", async ({ page }) => {

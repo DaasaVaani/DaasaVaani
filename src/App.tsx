@@ -9,21 +9,26 @@ import { NavigationContinuity } from "./navigation";
 import { ListPreview } from "./ListPreview";
 import { Lists } from "./Lists";
 import { AddToList } from "./AddToList";
-import { Lyrics } from "./Lyrics";
+import { Lyrics, ReferenceFavorites } from "./Lyrics";
+import type { PreparedLyrics } from "./lyric-publication";
+import type { PersonalReference } from "./list-transfer-types";
+import { hasFavorite, toggleFavorite } from "./personal-model";
 import styles from "./App.module.css";
 
 type Labels = typeof messages.en;
 function FixtureOnly({ children }: { children: ReactNode }) {
   return /^\/lyrics(?:\/|$)/u.test(useLocation().pathname) ? null : children;
 }
-function ListRoute({ labels, personal, publication }: { labels: Labels; personal?: PersonalStore; publication?: Publication }) {
+function ListRoute({ labels, personal, publication, lyrics }: {
+  labels: Labels; personal?: PersonalStore; publication?: Publication; lyrics?: PreparedLyrics;
+}) {
   const location = useLocation();
   const link = new URL(__WEB_CONFIG__.listLinkPath, __WEB_CONFIG__.canonicalBaseUrl).href +
     "#" + location.pathname + location.search + location.hash;
-  return <section className={styles.reader}><ListPreview labels={labels} personal={personal} publication={publication} initialLink={link} /></section>;
+  return <section className={styles.reader}><ListPreview labels={labels} personal={personal} publication={publication} lyrics={lyrics} initialLink={link} /></section>;
 }
 const errorText = (error: unknown) => error instanceof Error ? error.message : String(error);
-interface ReaderProps { publication: Publication; labels: Labels; personal: Personal; store: PersonalStore; toggle: (id: string) => void }
+interface ReaderProps { publication: Publication; labels: Labels; personal: Personal; store: PersonalStore; toggle: (reference: PersonalReference) => void }
 
 function Reader({ publication, labels, personal, store, toggle }: ReaderProps) {
   const { id } = useParams();
@@ -63,26 +68,28 @@ function Reader({ publication, labels, personal, store, toggle }: ReaderProps) {
     {item && item.videoId === id && <>
       <header className={styles.readerHeader}>
         <div><p className={styles.eyebrow}>{labels.canonical}</p><h1 lang="kn">{item.title}</h1></div>
-        <button className={styles.secondary} aria-pressed={personal.favorites.includes(item.videoId)}
-          onClick={() => toggle(item.videoId)}>
-          {personal.favorites.includes(item.videoId) ? labels.removeFavorite : labels.addFavorite}
+        <button className={styles.secondary} aria-pressed={hasFavorite(personal, { kind: "legacyVideo", videoId: item.videoId })}
+          onClick={() => toggle({ kind: "legacyVideo", videoId: item.videoId })}>
+          {hasFavorite(personal, { kind: "legacyVideo", videoId: item.videoId }) ? labels.removeFavorite : labels.addFavorite}
         </button>
       </header>
       <div lang="kn" className={styles.lyrics}>
         {item.lines.map(line => <p id={line.id} key={line.id} data-selected={line.id === lineId}>{line.text || "\u00a0"}</p>)}
       </div>
       <p className={styles.muted}>{item.description}</p>
-      <AddToList key={item.videoId} labels={labels} personal={store} videoId={item.videoId} />
+      <AddToList key={item.videoId} labels={labels} personal={store} reference={{ kind: "legacyVideo", videoId: item.videoId }} />
     </>}
   </section>;
 }
 
-function ListsSession({ labels, personal, publication }: { labels: Labels; personal: PersonalStore; publication?: Publication }) {
+function ListsSession({ labels, personal, publication, lyrics }: {
+  labels: Labels; personal: PersonalStore; publication?: Publication; lyrics?: PreparedLyrics;
+}) {
   const location = useLocation();
   const state: unknown = location.state;
   const fromLists = state && typeof state === "object" && "browseFrom" in state && state.browseFrom === "/lists";
-  if (location.pathname !== "/lists" && !(location.pathname.startsWith("/item/") && fromLists)) return null;
-  return <div hidden={location.pathname !== "/lists"}><Lists labels={labels} personal={personal} publication={publication} /></div>;
+  if (location.pathname !== "/lists" && !(/^\/(?:item|lyrics)\//u.test(location.pathname) && fromLists)) return null;
+  return <div hidden={location.pathname !== "/lists"}><Lists labels={labels} personal={personal} publication={publication} lyrics={lyrics} /></div>;
 }
 function BrowsingSession(props: {
   publication: Publication; labels: Labels; personal: Personal; favoritesOnly: boolean;
@@ -142,12 +149,14 @@ function Library({ publication, labels, personal, favoritesOnly }: {
   let entries = searching
     ? hits.map(hit => publication.summary(hit.itemId)).filter(value => value !== undefined)
     : publication.manifest.catalog;
-  if (favoritesOnly) entries = entries.filter(item => personal.favorites.includes(item.videoId));
+  if (favoritesOnly) entries = entries.filter(item => hasFavorite(personal, { kind: "legacyVideo", videoId: item.videoId }));
   const shown = entries.slice(0, (prepared?.policy.pageSize ?? publication.manifest.catalog.length) * pages);
   return <>
     <section className={styles.hero}>
       <p className={styles.eyebrow}>{labels.ready}</p>
-      <h1>{favoritesOnly ? labels.favorites : labels.library}<span className={styles.count}>{entries.length}</span></h1>
+      <h1 id={favoritesOnly ? "favorites-title" : undefined} tabIndex={favoritesOnly ? -1 : undefined}>
+        {favoritesOnly ? labels.favorites : labels.library}<span className={styles.count}>
+          {favoritesOnly && !searching ? personal.favorites.length : entries.length}</span></h1>
       <p className={styles.muted}>{labels.tagline}</p>
       {!prepared ? <div className={styles.consent}>
         <p>{labels.searchConsent}</p>
@@ -166,7 +175,7 @@ function Library({ publication, labels, personal, favoritesOnly }: {
         const line = matching.get(item.videoId)?.lineIds[0];
         return <article className={styles.card} key={item.videoId}>
           <div className={styles.cardTop}><span className={styles.number}>{String(position + 1).padStart(2, "0")}</span>
-            <span className={styles.muted}>{personal.favorites.includes(item.videoId) ? "★" : "✦"}</span></div>
+            <span className={styles.muted}>{hasFavorite(personal, { kind: "legacyVideo", videoId: item.videoId }) ? "★" : "✦"}</span></div>
           <h2 lang="kn">{item.title}</h2>
           <p className={styles.muted}>{item.description}</p>
           <div className={styles.tags}>{item.tags.map(tag => <span key={tag}>{tag}</span>)}</div>
@@ -178,7 +187,8 @@ function Library({ publication, labels, personal, favoritesOnly }: {
           </Link>
         </article>;
       })}
-      {!shown.length && !busy && !error && <p role="status">{favoritesOnly && !searching ? labels.emptyFavorites : labels.noResults}</p>}
+      {!shown.length && !busy && !error && (!favoritesOnly || searching || !personal.favorites.length) &&
+        <p role="status">{favoritesOnly && !searching ? labels.emptyFavorites : labels.noResults}</p>}
     </section>
     {prepared && entries.length > prepared.policy.pageSize && <div>
       {!busy && <p role="status">{labels.resultCount.replace("{shown}", String(shown.length)).replace("{total}", String(entries.length))}</p>}
@@ -191,6 +201,7 @@ function Library({ publication, labels, personal, favoritesOnly }: {
 
 export default function App() {
   const [publication, setPublication] = useState<Publication>();
+  const [lyrics, setLyrics] = useState<PreparedLyrics>();
   const [personalReady, setPersonalReady] = useState(false);
   const [store, setStore] = useState<PersonalStore>();
   const [personal, setPersonal] = useState<Personal>(browserDefaultPersonal);
@@ -242,8 +253,7 @@ export default function App() {
     try { setPersonal(await updatePersonal(mutator)); }
     catch (reason) { setError(errorText(reason)); }
   }
-  const toggle = (id: string) => { void change(state => ({ ...state, favorites: state.favorites.includes(id)
-    ? state.favorites.filter(value => value !== id) : [...state.favorites, id] })); };
+  const toggle = (reference: PersonalReference) => { void change(state => toggleFavorite(state, reference)); };
   return <HashRouter>
     <NavigationContinuity />
     <a className={styles.skip} href="#content" onClick={event => {
@@ -267,12 +277,13 @@ export default function App() {
           <button onClick={() => setAttempt(value => value + 1)}>{labels.retry}</button></section>}
         {(!publication || !personalReady) && !error && !fixtureError && <p role="status">{labels.loading}</p>}
       </FixtureOnly>
-      <Lyrics labels={labels} />
+      <Lyrics labels={labels} publication={lyrics} onPrepared={setLyrics} personal={store} toggle={toggle} />
       {publication && personalReady && <>
         <BrowsingSession key={`all-${attempt}`} publication={publication} labels={labels} personal={personal} favoritesOnly={false} />
         <BrowsingSession key={`favorites-${attempt}`} publication={publication} labels={labels} personal={personal} favoritesOnly />
       </>}
-      {store && <ListsSession key={attempt} labels={labels} personal={store} publication={publication} />}
+      {store && <ReferenceFavorites labels={labels} personal={store} publication={lyrics} legacyPublication={publication} toggle={toggle} />}
+      {store && <ListsSession key={attempt} labels={labels} personal={store} publication={publication} lyrics={lyrics} />}
         <Routes>
         <Route path="/" element={null} />
         <Route path="/favorites" element={null} />
@@ -293,9 +304,9 @@ export default function App() {
               {theme === "device" ? labels.followDevice : labels[theme]}</button>)}
           </fieldset>
           </>}
-          <ListPreview labels={labels} personal={store} publication={publication} />
+          <ListPreview labels={labels} personal={store} publication={publication} lyrics={lyrics} />
         </section>} />
-        <Route path="/list/:payload" element={<ListRoute labels={labels} personal={store} publication={publication} />} />
+        <Route path="/list/:payload" element={<ListRoute labels={labels} personal={store} publication={publication} lyrics={lyrics} />} />
         <Route path="*" element={<p role="alert">{labels.unknownRoute} <Link to="/">{labels.back}</Link></p>} />
       </Routes>
       <FixtureOnly><footer className={styles.footer}>{labels.unavailableFeatures}</footer></FixtureOnly>

@@ -69,7 +69,7 @@ Initial values and exact field bounds belong only in the linked owning files.
 | Owner/source and keys | Current application and validation | Compatibility/open work |
 | --- | --- | --- |
 | [Web settings/schema](../settings/web.schema.json): `base`, `descriptorUrl`, `canonicalBaseUrl`, `listLinkPath`, `listFileName` | Strict build-time settings; fixture artifact entry and minimal-list URL/file projection | Public route/origin changes require old-link/hosting review; distinct real-publication settings below never reinterpret fixture formats |
-| [Web settings/schema](../settings/web.schema.json): `lyricPreview.descriptorUrl`, `pageSize`, `maxItems`, `maxEncodedBytes`, `maxDecodedBytes`, `concurrentRequests` | Credential-free absolute HTTPS endpoint, full preparation plan/count/aggregate bounds before item requests, bounded workers and explicit complete paging | Separate `lyric-preview-v1`, consented memory-only lifecycle; no production on-demand, persistent offline or typed personal migration claim |
+| [Web settings/schema](../settings/web.schema.json): `lyricPreview.descriptorUrl`, `pageSize`, `maxItems`, `maxEncodedBytes`, `maxDecodedBytes`, `concurrentRequests` | Credential-free absolute HTTPS endpoint, full preparation plan/count/aggregate bounds before item requests, bounded workers and explicit complete paging | Separate `lyric-preview-v1`, consented memory-only content lifecycle; no production on-demand or persistent offline claim; personal references follow the independent v4 protocol below |
 | [Web settings](../settings/web.yml): `transferChunkBytes`, `listCompressionLevel` | Byte allocation/compression controls passed to the dedicated codec worker; schema and actual-ceiling codec tests | Encoding choices do not narrow accepted valid input or change decoded/text limits |
 | [Web settings](../settings/web.yml): `databaseName` | Build-time Dexie/native IndexedDB identity | Changing it is not a migration; it would strand the prior database and requires explicit compatibility handling |
 | [Web settings](../settings/web.yml): `fontFamily`, `readerFontSize`, `space`, `contentWidth`, `readerWidth`, `themes` | Typed CSS tokens, system fonts, three palettes and measured contrast checks | Personal font/density/helper/script settings and physical-device/font conformance remain incomplete |
@@ -170,32 +170,37 @@ Personal values never enter repository settings; payloads cannot override limits
 - Root /open/ hash links, narrow signed Android association and browser fallback;
   no forced routing or claim that installation guarantees handoff.
 
-## Web fixture personal storage v3
+## Web typed personal storage v4
 
-This is the executable fixture-client protocol for favorites/preferences and
+This is the executable Website protocol for typed favorites/preferences and
 logical lists, not the full production personal/backup contract. The
-[Shared list record](https://github.com/DaasaVaani/shared/blob/main/docs/list-transfer.md#local-list-record-v1)
+[Shared typed-reference/local-record v2 contract](https://github.com/DaasaVaani/shared/blob/main/docs/list-transfer.md#typed-reference-and-list-v2)
 owns list/occurrence fields. All three tables share the configured personal DB:
 
 | Table | Exact logical rows |
 | --- | --- |
-| `personal` | Zero or one `{id:"personal", favorites, language, theme}`; absent row means first supported browser language plus validated configured defaults |
+| `personal` | Zero or one `{id:"personal", favorites, language, theme}`; favorites are exact typed lyric/legacy references, unique by kind plus case-sensitive ID; absent row means first supported browser language plus validated configured defaults |
 | `lists` | Independently identified Shared list records; entry array order is authoritative |
-| `control` | Exactly one `{id:"state", formatVersion:3, epoch, revision}`; fresh local UUIDv4 epoch and nonnegative safe-integer revision |
+| `control` | Exactly one `{id:"state", formatVersion:4, epoch, revision}`; fresh local UUIDv4 epoch and nonnegative safe-integer revision |
 
 ### Opening and migration
 
-Native IndexedDB version30 is the fixture v3 schema. Supported migration inputs
-are native version10 (personal-only v1) and version20 (three-table v2).
+Native IndexedDB version40 is the typed v4 schema. Supported migration inputs
+are native version10 (personal-only v1), version20 (three-table v2) and version30
+(three-table v3).
 Open at the exact native version **before** opening Dexie,
 which can otherwise retry a newer version and patch missing schema parts.
 Native upgrade creates only the specified stores/header, validates legacy
-preferences/favorites and aggregate capacity before success, and retains the
-legacy personal row unchanged. Version20 migration validates the exact stores,
-indexes, complete rows and old Light/Dark-only preference domain before replacing
-only the control row with a fresh v3 epoch/revision0; lists, occurrence identities
-and personal values stay unchanged. New theme tokens in an older-labeled schema
-are invalid, not silently accepted. Any failure aborts the entire schema transaction.
+preferences/favorites/lists and both old and prospective byte/collection bounds
+before success. Versions10/20 accept only old Light/Dark preferences; version30
+also accepts Warm/Follow device. Validate the exact old stores/indexes/rows and
+old opaque-string favorites/v1 entries before structural adaptation. Convert
+favorites only to typed legacy references and `item` only to `legacyVideo`,
+retaining every raw ID, list/occurrence UUID, name, fallback, repetition and order.
+UUID-looking old IDs are never lyric aliases. Write converted rows and a fresh
+v4 epoch/revision0 together. The longer typed representation can exceed capacity:
+abort rather than truncate/relax limits. New-mode or typed values mislabeled as
+older schemas are invalid. Any failure aborts the entire schema transaction.
 New initialization creates metadata only, not a personal preference or list row.
 For an absent preference row, inspect `navigator.languages` in preference order
 (or `navigator.language` if empty), matching each case-insensitive primary
@@ -207,7 +212,7 @@ over browser preferences. UI selection never changes canonical Kannada, lyric
 script or theme. The pure model accepts preference tags explicitly; only the
 browser adapter reads navigator values.
 
-V3 preferences accept `light`, `dark`, `warm` and `device`; `device` follows the
+V4 preferences accept `light`, `dark`, `warm` and `device`; `device` follows the
 current browser light/dark media preference. Explicit modes ignore system changes;
 stored mode selection survives reload and remains independent of UI locale and
 canonical lyrics. Media changes update colors only, never a personal row/revision.
@@ -247,11 +252,12 @@ locale, trim, lowercase or moving package table participates. Strict build check
 bind the pinned Shared settings/manifest/table/vector/license bytes; complete
 Unicode License V3 is included in the distribution.
 
-The v3 database stores raw names only, not derived keys or profile caches.
+The v4 database stores raw names only, not derived keys or profile caches.
 Compute this explicit profile on demand without rewriting any name, ID, occurrence,
 reference, order, preference or header. Existing names that now compare equal
 remain independent and opening a database does not ask for destructive repair.
-No database migration/version bump is invented for absent caches; any future
+The structural reference upgrade is not a Unicode-key migration. No version bump
+is invented for absent caches; any future
 persisted-key cache must version the profile and provide preserving migration.
 Confirmed reuse still creates independent lists.
 The confirmation captures epoch/revision; another tab's mutation forces renewed
@@ -289,13 +295,19 @@ data; the platform, not an in-page Cancel button, owns its sharing dialog.
 Controlled browser adapters verify these paths, not real OS/app interoperability.
 Catalog resolution uses a per-Publication map of the validated catalog's existing
 summary references: O(catalog size) construction, O(1) exact-ID lookup per list
-occurrence, no network/lyric reads. No publication means details are not yet
+occurrence, no network/lyric reads. Typed lyric references use only the separate
+complete verified real map; legacy references use only the fixture/legacy map.
+No inferred aliases exist between the maps. No publication means details are not yet
 resolved, not definitely absent; an unknown reference in the available catalog
 keeps its ID and user label with generic unavailable wording. Intentional
 placeholders remain distinct even when their text equals a known identifier.
 Known titles render separately from user fallback text and never enter personal
-records/minimal exports. A saved known reference offers explicit on-demand Read;
-previewing/saving/exporting never fetches lyrics or establishes offline readiness.
+records/minimal exports. A saved real reference offers Read even before preparation,
+reaching the explicit full-download gate without a request; prepared lookup is
+exact. Known legacy references retain fixture on-demand Read.
+Previewing/saving/exporting never fetches lyrics or establishes offline readiness.
+Real and unresolved legacy favorites remain visible/removable without preparation;
+kind plus ID keeps a lyric and UUID-looking legacy reference independent.
 
 Reader-to-list addition requires an explicit list choice and submit. The choice
 captures the list and revision/epoch; append allocates a fresh occurrence UUID
@@ -310,10 +322,11 @@ same-document navigation from a saved list must decode the newly selected link,
 not depend on a reload or unrelated personal-state render.
 
 The exact logical accounting envelope, serialized as compact UTF8 JSON without
-BOM, is `{format:"fixture-personal-storage",formatVersion:3,control,personal,lists}`.
+BOM, is `{format:"daasavaani-personal-storage",formatVersion:4,control,personal,lists}`.
 Key order is the order shown; header keys follow the table above. `personal` is
 an empty array or one row with keys `id,favorites,language,theme`. `lists` is sorted
-by ASCII UUID; row keys are `id,name,entries`. Each entry uses `id,kind,videoId`
+by ASCII UUID; row keys are `id,name,entries`. Favorite keys are `kind,lyricId`
+or `kind,videoId`. Each entry uses `id,kind,lyricId` or `id,kind,videoId`
 then optional `fallback`, or `id,kind,text`. No text/array normalization occurs.
 Every header, UUID, JSON escape, comma/bracket and revision digit is included.
 No timestamps exist in this version; adding them requires a versioned protocol
@@ -324,6 +337,10 @@ each list's actual minimal-export JSON decoded-byte bound before commit. Count
 serialized Unicode scalars exactly without allocating an output-sized byte
 buffer. Physical IndexedDB/index/quota usage differs from logical bytes.
 This envelope contains local control data and is **never a full-backup export**.
+Old v2/v3 accounting uses its exact `fixture-personal-storage` format/header and
+v1 entry projection before conversion. Transport decoding never selects a database
+version. Unmodified v1 previews re-export v1; confirmed v1 imports structurally
+adapt to local v2 records with fresh IDs, while all saved-list exports use v2.
 Full-backup headers, complete personal collections, replacement/crash/locale
 recovery and exportability require their own exact contracts/tests.
 

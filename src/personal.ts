@@ -1,6 +1,6 @@
 import Dexie, { liveQuery, type Transaction } from "dexie";
 import {
-  defaultPersonal, exportListSnapshot, migratePersonalV1, migrateStoreV2, nextRevision, parseStore, PersonalError, saveRecord, validatePersonal, validateStore,
+  defaultPersonal, exportListSnapshot, migratePersonalV1, migrateStoreV2, migrateStoreV3, nextRevision, parseStore, PersonalError, saveRecord, validatePersonal, validateStore,
   type ListRecord, type Personal, type PersonalStore, type Revision,
 } from "./personal-model";
 export type { Personal, PersonalStore } from "./personal-model";
@@ -10,7 +10,8 @@ const db = new Dexie(__WEB_CONFIG__.databaseName);
 db.version(1).stores({ personal: "id" });
 db.version(2).stores({ personal: "id", lists: "id", control: "id" });
 db.version(3).stores({ personal: "id", lists: "id", control: "id" });
-const nativeVersion = 30;
+db.version(4).stores({ personal: "id", lists: "id", control: "id" });
+const nativeVersion = 40;
 const newerSchema = () => new Error("A newer personal database schema is present. Use a compatible app; existing data was not changed.");
 function inspectNative(): Promise<IDBDatabase> {
   return new Promise((resolve, reject) => {
@@ -27,7 +28,7 @@ function inspectNative(): Promise<IDBDatabase> {
       if (!transaction) { reject(new PersonalError("invalid")); return; }
       const abort = (reason: unknown) => { upgradeFailure = reason; transaction.abort(); };
       if (stopped) { transaction.abort(); return; }
-      if (event.oldVersion === 20) {
+      if (event.oldVersion === 20 || event.oldVersion === 30) {
         const expected = ["control", "lists", "personal"], names = [...database.objectStoreNames];
         if (names.length !== expected.length || expected.some(name => !names.includes(name)) || names.some(name => {
           const store = transaction.objectStore(name);
@@ -41,7 +42,10 @@ function inspectNative(): Promise<IDBDatabase> {
           request.onsuccess = () => {
             if (--pending !== 0) return;
             try {
-              const state = migrateStoreV2(rows.control.result, rows.personal.result, rows.lists.result);
+              const migrate = event.oldVersion === 20 ? migrateStoreV2 : migrateStoreV3;
+              const state = migrate(rows.control.result, rows.personal.result, rows.lists.result);
+              if (state.personal) transaction.objectStore("personal").put(state.personal);
+              for (const list of state.lists) transaction.objectStore("lists").put(list);
               transaction.objectStore("control").put(state.control);
             } catch (reason) { abort(reason); }
           };
@@ -49,14 +53,15 @@ function inspectNative(): Promise<IDBDatabase> {
         return;
       }
       if (event.oldVersion !== 0 && event.oldVersion !== 10) { abort(new PersonalError("invalid")); return; }
-      function initialize(legacy: unknown[]) {
+      const initialize = (legacy: unknown[]) => {
         try {
           const state = migratePersonalV1(legacy);
           if (event.oldVersion === 0) database.createObjectStore("personal", { keyPath: "id" });
+          if (state.personal) transaction.objectStore("personal").put(state.personal);
           database.createObjectStore("lists", { keyPath: "id" });
           database.createObjectStore("control", { keyPath: "id" }).put(state.control);
         } catch (reason) { abort(reason); }
-      }
+      };
       if (event.oldVersion === 0) initialize([]);
       else {
         const names = [...database.objectStoreNames];

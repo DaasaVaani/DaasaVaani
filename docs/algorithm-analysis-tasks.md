@@ -92,8 +92,8 @@ silent truncation, false success or weaker validation.
   uses transactional new-list-only persistence with repeated independent IDs,
   duplicate-name confirmation and revision/epoch checks. Native codec
   interoperability and signed-link sharing remain incomplete.
-- ALG-15: fixture web-list writes have deterministic complete-envelope UTF8
-  accounting, atomic collection/identity checks, non-destructive v1/v2 migration and
+- ALG-15: typed web-list writes have deterministic complete-envelope UTF8
+  accounting, atomic collection/identity checks, non-destructive v1/v2/v3-to-v4 migration and
   stale revision/epoch refusal. Actual configured byte/collection boundaries have
   executable coverage. Full recoverable backup/replacement is not implemented.
 - ALG-07/08: the separate canonical publication reader preplans descriptor,
@@ -105,7 +105,7 @@ silent truncation, false success or weaker validation.
 - Official Unicode16 personal-name normalization/folding resources and independent
   conformance fixtures drive the actual web/native adapters. Website checks the
   official normalization equations/full scalar folding and derives versioned
-  keys on demand; raw-name v3 records have no cached key to migrate. Stable
+  keys on demand; raw-name v4 records have no cached key to migrate. Stable
   insertion ordering is O(d squared) worst case/O(d) storage for decomposed name
   length d, bounded by personal-name policy. This is not linguistic search
   normalization, a performance benchmark or permission to merge/rename lists.
@@ -429,7 +429,7 @@ source migration, live ingestion or automatic updates to reviewed items.
 
 ### ALG-14: Bounded list encoding and decoding
 
-Web saved-list export uses the [fixture personal protocol](architecture.md#web-fixture-personal-storage-v3):
+Web saved-list export uses the [typed personal protocol](architecture.md#web-typed-personal-storage-v4):
 one validated read transaction, minimal allowlist projection, bounded worker
 encoding, then epoch/revision recheck before exposing the independent snapshot.
 This supplies partial stable-read/no-write/cancellation evidence, not native
@@ -438,7 +438,10 @@ round trips, platform share interoperability or full-backup exportability.
 - **Requirements:** LIB-08-11, XFER-01-08, QUAL-05/06.
 - **Already fixed:** versioned JSON, raw deflate and base64url in a hash fragment;
   distinct gzip UTF-8 JSON files ending `.dvlist.json.gz`. The list format marker
-  is `daasavaani-list`, with independent initial version 1. Complete URL ceiling
+  is `daasavaani-list`, with frozen legacy v1 and typed lyric/legacy v2 families.
+  Website re-exports v1 previews unchanged, adapts confirmed v1 imports only by
+  discriminant and exports saved typed records as v2. No guessed mapping or
+  silent downgrade. Complete URL ceiling
   is 2,048 ASCII characters; encoded/decoded file ceilings are 9/8 MiB.
   Oversized links offer lossless file fallback.
   Require one gzip member, valid checksum/length and no trailing bytes; absolute
@@ -458,7 +461,7 @@ round trips, platform share interoperability or full-backup exportability.
 
 ### ALG-15: Recoverable backup replacement and capacity accounting
 
-The [web fixture storage protocol](architecture.md#web-fixture-personal-storage-v3)
+The [web typed storage protocol](architecture.md#web-typed-personal-storage-v4)
 supplies partial executable accounting/migration/fencing evidence only. It is not
 the full-backup format and does not establish backup exportability or replacement.
 

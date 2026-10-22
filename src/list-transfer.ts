@@ -5,8 +5,11 @@ import {
   zlibDeflateInit2, zlibDeflateSetHeader, zlibDeflate, zlibDeflateEnd,
 } from "pako";
 import schema from "../shared/schemas/list-transfer.schema.json";
+import schemaV2 from "../shared/schemas/list-transfer-v2.schema.json";
 import { TransferError, type ListSnapshot, type TransferConfig } from "./list-transfer-types";
-const validate = new Ajv2020({ strict: true }).compile<ListSnapshot>(schema);
+const ajv = new Ajv2020({ strict: true });
+const validV1 = ajv.compile<ListSnapshot>(schema), validV2 = ajv.compile<ListSnapshot>(schemaV2);
+const validate = (value: unknown): value is ListSnapshot => validV1(value) || validV2(value);
 const encoder = new TextEncoder();
 function base64url(bytes: Uint8Array) {
   let binary = "";

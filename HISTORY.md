@@ -1,5 +1,56 @@
 # Documentation history
 
+## 2026-10-22: typed lyric favorites, personal v4 and minimal-list v2
+
+- Archived the preceding current Website limitations: real canonical reading
+  offered no favorite/list controls, personal native30/control3 retained string
+  favorites and v1 item entries, minimal transfers accepted only v1 and old
+  native10/20 upgrades retained rows while replacing only the v3 control fence.
+  The old logical envelope was fixture-personal-storage/version3; its current
+  successor has an explicitly independent typed version4. Unicode name matching
+  itself still requires no absent-key cache migration.
+- Adopted published Shared7ad993c8362231aec95bb1b980ebd3b386059488, after its
+  exact preflight39706619174 and main39706731354 passed. Shared adds separate
+  reference/transfer-v2/record-v2 schemas/types/fixtures/UI labels; frozen v1
+  schema files were independently byte-compared against the old Git versions.
+- Website now stores exact lyric versus legacyVideo favorites/occurrences,
+  preserving UUID-looking legacy values, raw names/user text/order/repetitions
+  and every old list/occurrence ID. Native10/20/30-to40 validates each actual old
+  schema and old/prospective accounting, then atomically writes typed rows and a
+  fresh epoch/revision0. Invalid, blocked, future50 and capacity failures preserve
+  the prior database. No title/video/media mapping or source migration occurs.
+- Explicit real-reader favorites and Add to list persist locally; unresolved
+  real/legacy favorites remain visible/removable without fetching content.
+  Lyric-ID forms and placeholder replacement preserve independent occurrence
+  IDs/fallbacks. Real and fixture lookups stay separate. List/Favorites origins
+  retain available focus/scroll and unsaved list editor state through reading.
+  Preparation remains explicit, complete and memory-only; reload still needs
+  consent. Reading itself causes no personal write or extra lyric request.
+- Worker codecs accept strict v1/v2 independently. V1 previews re-export their
+  original shape; confirmed v1 imports adapt only item-to-legacyVideo, allocate
+  fresh local IDs and export saved records as v2. All privacy/size/stream/UTF8/
+  duplicate-key/cancellation/revision rules remain; no lyric copies/local IDs/
+  catalog titles or silent v2 downgrade. No dependencies/toolchain were added.
+- Requirements covered partially: DATA-01/04, LIB-01/02/03/04/05/08/09/10/11,
+  XFER-01/02/03/04/05/06/08 and UX-13. Native parity, full personal collections/
+  backups, persistent offline lifecycle, language/media/publication and release
+  acceptance remain distinct work; original owner inputs are untouched.
+- `runTests` found no VS Code test adapter; the documented npm runner was used.
+  Focused `npm test -- personal-model list-transfer` passed27 tests. The first
+  `node node_modules\@playwright\test\cli.js test lists lyrics` passed129 and
+  failed6 assertions: saved snapshots correctly became v2, and a test helper
+  mistakenly counted lyric UUIDs as local occurrence IDs. Corrected only those
+  expectations/helper; a focused rerun of both affected journeys passed all6
+  viewport cases. Additional strict/current-capacity cases were added afterward.
+- Final `npm run check` passed all82 units and195 browser cases across desktop,
+  Pixel7 and320px, with strict TypeScript and a fresh production build from the
+  clean pinned Library fixture publisher. Zero failed/skipped/cancelled cases.
+  Vite reported its advisory500kB chunk-size warning; no timing/memory/release
+  performance pass is inferred. The Node documentation/bootstrap check passed20
+  Markdown files and153 stable requirement IDs; strict YAML passed4 tracked
+  Website files. Actionlint1.7.12/ShellCheck0.11.0 and Git whitespace checks
+  passed. No configured app lint suite exists beyond these documented checks.
+
 ## 2026-10-22: official Unicode16 consumer adoption without stored-key rewrites
 
 - Archived the preceding current architecture: list matching used host NFC and

@@ -9,8 +9,10 @@ defines permanent lyric UUIDs and text-only publication without YouTube/images.
 Library publishes owner-approved canonical lyrics without videos or images.
 The [real lyric preview](docs/lyric-preview.md) downloads and validates the
 complete publication only after explicit consent, then supports UUID-based
-reading in memory. It has no personal-data writes or persistent offline state.
-Existing fixture identifiers/formats are unchanged. Typed personal references,
+reading in memory. Reading itself writes no personal data; explicit controls save
+typed lyric favorites and independent list occurrences locally. List v2 transfers
+preserve lyric/legacy identities and user text; v1 imports remain supported.
+Existing identifiers are never guessed or remapped. Persistent offline state,
 production metadata adapters and the complete production lifecycle remain open.
 
 The responsive React Website reads hash-verified artifacts from the Library fixture

@@ -1,17 +1,20 @@
 import Ajv2020 from "ajv/dist/2020";
-import recordSchema from "../shared/schemas/list-record.schema.json";
+import legacyRecordSchema from "../shared/schemas/list-record.schema.json";
+import recordSchema from "../shared/schemas/list-record-v2.schema.json";
 import transferSchema from "../shared/schemas/list-transfer.schema.json";
-import type { ListSnapshot } from "./list-transfer-types";
+import transferSchemaV2 from "../shared/schemas/list-transfer-v2.schema.json";
+import referenceSchema from "../shared/schemas/personal-reference.schema.json";
+import { typedEntry, type ListSnapshot, type ListSnapshotV1, type ListEntryV2, type ListTransferV2, type PersonalReference } from "./list-transfer-types";
 import { unicodeNameKey as listNameKey } from "./unicode-names";
 export { unicodeNameKey as listNameKey, unicodeNameProfile } from "./unicode-names";
 
 export interface Personal {
-  id: "personal"; favorites: string[]; language: "en" | "kn"; theme: WebConfig["defaultTheme"];
+  id: "personal"; favorites: PersonalReference[]; language: "en" | "kn"; theme: WebConfig["defaultTheme"];
 }
-export type ListEntry = ListSnapshot["entries"][number] & { id: string };
+export type ListEntry = ListEntryV2 & { id: string };
 export interface ListRecord { id: string; name: string; entries: ListEntry[] }
 export interface Revision { epoch: string; revision: number }
-export interface Control extends Revision { id: "state"; formatVersion: 3 }
+export interface Control extends Revision { id: "state"; formatVersion: 4 }
 export interface PersonalStore { control: Control; personal?: Personal; lists: ListRecord[] }
 export type PersonalErrorCode = "invalid" | "listInvalid" | "capacity" | "stale" | "duplicate";
 export class PersonalError extends Error {
@@ -25,11 +28,28 @@ export class PersonalError extends Error {
 }
 const ajv = new Ajv2020({ strict: true });
 const validList = ajv.compile<ListRecord>(recordSchema);
-const validSnapshot = ajv.compile<ListSnapshot>(transferSchema);
+type LegacyPersonal = Omit<Personal, "favorites"> & { favorites: string[] };
+type LegacyList = Omit<ListRecord, "entries"> & { entries: (ListSnapshotV1["entries"][number] & { id: string })[] };
+const validLegacyList = ajv.compile<LegacyList>(legacyRecordSchema);
+const validReference = ajv.compile<PersonalReference>(referenceSchema);
+const validSnapshotV1 = ajv.compile<ListSnapshotV1>(transferSchema), validSnapshotV2 = ajv.compile<ListTransferV2>(transferSchemaV2);
+const validSnapshot = (value: unknown): value is ListSnapshot => validSnapshotV1(value) || validSnapshotV2(value);
 const uuid = new RegExp(recordSchema.properties.id.pattern, "u");
 const object = (value: unknown): value is Record<string, unknown> => Boolean(value) && typeof value === "object" && !Array.isArray(value);
 const keys = (value: Record<string, unknown>, expected: string[]) =>
   Object.keys(value).length === expected.length && expected.every(key => Object.hasOwn(value, key));
+export function referenceKey(reference: PersonalReference): string {
+  return reference.kind === "lyric" ? `lyric:${reference.lyricId}` : `legacyVideo:${reference.videoId}`;
+}
+export function hasFavorite(personal: Personal, reference: PersonalReference): boolean {
+  const key = referenceKey(reference);
+  return personal.favorites.some(value => referenceKey(value) === key);
+}
+export function toggleFavorite(personal: Personal, reference: PersonalReference): Personal {
+  const key = referenceKey(reference);
+  return { ...personal, favorites: hasFavorite(personal, reference)
+    ? personal.favorites.filter(value => referenceKey(value) !== key) : [...personal.favorites, reference] };
+}
 
 export function defaultPersonal(preferredLanguages: readonly string[] = []): Personal {
   for (const tag of preferredLanguages) {
@@ -41,8 +61,8 @@ export function defaultPersonal(preferredLanguages: readonly string[] = []): Per
 export function validatePersonal(value: unknown, limits = __PERSONAL_LIMITS__): asserts value is Personal {
   if (!object(value) || !keys(value, ["id", "favorites", "language", "theme"]) || value.id !== "personal" ||
       !Array.isArray(value.favorites) || Object.keys(value.favorites).length !== value.favorites.length ||
-      Array.from(value.favorites).some(id => typeof id !== "string" || !/^[A-Za-z0-9_-]{1,128}$/.test(id)) ||
-      new Set(value.favorites).size !== value.favorites.length ||
+      !Array.from(value.favorites).every(value => validReference(value)) ||
+      new Set(value.favorites.map(referenceKey)).size !== value.favorites.length ||
       (value.language !== "en" && value.language !== "kn") ||
       (value.theme !== "light" && value.theme !== "dark" && value.theme !== "warm" && value.theme !== "device")) {
     throw new PersonalError("invalid");
@@ -50,15 +70,20 @@ export function validatePersonal(value: unknown, limits = __PERSONAL_LIMITS__): 
   if (value.favorites.length > limits.maxFavorites) throw new PersonalError("capacity");
 }
 export function newControl(): Control {
-  return { id: "state", formatVersion: 3, epoch: crypto.randomUUID(), revision: 0 };
+  return { id: "state", formatVersion: 4, epoch: crypto.randomUUID(), revision: 0 };
 }
-export function parseStore(controls: unknown[], personal: unknown[], lists: unknown[]): PersonalStore {
+function controlRevision(controls: unknown[], version: number): Revision {
   const control = controls[0];
   if (controls.length !== 1 || !object(control) || !keys(control, ["id", "formatVersion", "epoch", "revision"]) ||
-      control.id !== "state" || control.formatVersion !== 3 || typeof control.epoch !== "string" || !uuid.test(control.epoch) ||
-      typeof control.revision !== "number" || !Number.isSafeInteger(control.revision) || control.revision < 0 ||
-      personal.length > 1) throw new PersonalError("invalid");
+      control.id !== "state" || control.formatVersion !== version || typeof control.epoch !== "string" || !uuid.test(control.epoch) ||
+      typeof control.revision !== "number" || !Number.isSafeInteger(control.revision) || control.revision < 0) throw new PersonalError("invalid");
+  return { epoch: control.epoch, revision: control.revision };
+}
+export function parseStore(controls: unknown[], personal: unknown[], lists: unknown[]): PersonalStore {
+  const control = controlRevision(controls, 4);
+  if (personal.length > 1) throw new PersonalError("invalid");
   const preferences = personal[0];
+  if (preferences === undefined && personal.length !== 0) throw new PersonalError("invalid");
   if (preferences !== undefined) validatePersonal(preferences);
   const records: ListRecord[] = [];
   for (const list of lists) {
@@ -66,37 +91,71 @@ export function parseStore(controls: unknown[], personal: unknown[], lists: unkn
     records.push(list);
   }
   const state: PersonalStore = {
-    control: { id: "state", formatVersion: 3, epoch: control.epoch, revision: control.revision },
+    control: { id: "state", formatVersion: 4, ...control },
     personal: preferences, lists: records,
   };
   validateStore(state);
   return state;
 }
-function legacyPreferences(personal: unknown[]) {
-  for (const value of personal) {
-    if (!object(value) || (value.theme !== "light" && value.theme !== "dark")) throw new PersonalError("invalid");
+function legacyPreferences(personal: unknown[], version: 1 | 2 | 3, limits: typeof __PERSONAL_LIMITS__): LegacyPersonal | undefined {
+  if (personal.length > 1) throw new PersonalError("invalid");
+  if (personal.length === 0) return undefined;
+  const value = personal[0];
+  if (!object(value) || !keys(value, ["id", "favorites", "language", "theme"]) || value.id !== "personal" ||
+      !Array.isArray(value.favorites) || Object.keys(value.favorites).length !== value.favorites.length ||
+      (value.language !== "en" && value.language !== "kn") ||
+      (value.theme !== "light" && value.theme !== "dark" && !(version === 3 && (value.theme === "warm" || value.theme === "device")))) {
+    throw new PersonalError("invalid");
   }
+  const favorites: string[] = [];
+  for (const id of value.favorites) {
+    if (typeof id !== "string" || !/^[A-Za-z0-9_-]{1,128}$/.test(id)) throw new PersonalError("invalid");
+    favorites.push(id);
+  }
+  if (new Set(favorites).size !== favorites.length) throw new PersonalError("invalid");
+  if (favorites.length > limits.maxFavorites) throw new PersonalError("capacity");
+  return { id: "personal", favorites, language: value.language, theme: value.theme };
 }
 export function migratePersonalV1(personal: unknown[]): PersonalStore {
-  legacyPreferences(personal);
-  return parseStore([newControl()], personal, []);
+  return migrateLegacy([], personal, [], 1);
 }
 export function migrateStoreV2(controls: unknown[], personal: unknown[], lists: unknown[]): PersonalStore {
-  const control = controls[0];
-  if (controls.length !== 1 || !object(control) || control.formatVersion !== 2) throw new PersonalError("invalid");
-  legacyPreferences(personal);
-  const validated = parseStore([{ ...control, formatVersion: 3 }], personal, lists);
-  return { ...validated, control: newControl() };
+  return migrateLegacy(controls, personal, lists, 2);
 }
-export function listSnapshot(record: ListRecord): ListSnapshot {
-  return { format: "daasavaani-list", formatVersion: 1, name: record.name,
-    entries: record.entries.map(entry => entry.kind === "item"
-      ? { kind: "item", videoId: entry.videoId, ...(entry.fallback === undefined ? {} : { fallback: entry.fallback }) }
-      : { kind: "placeholder", text: entry.text }) };
+export function migrateStoreV3(controls: unknown[], personal: unknown[], lists: unknown[], limits = __PERSONAL_LIMITS__): PersonalStore {
+  return migrateLegacy(controls, personal, lists, 3, limits);
+}
+function migrateLegacy(controls: unknown[], personal: unknown[], lists: unknown[], version: 1 | 2 | 3,
+  limits = __PERSONAL_LIMITS__): PersonalStore {
+  const control = version === 1 ? newControl() : controlRevision(controls, version);
+  const preferences = legacyPreferences(personal, version, limits), records: LegacyList[] = [];
+  for (const list of lists) {
+    if (!validLegacyList(list)) throw new PersonalError("invalid");
+    jsonBytes({ format: "daasavaani-list", formatVersion: 1, name: list.name, entries: list.entries.map(wireEntry) },
+      limits.maxListDecodedBytes);
+    records.push(list);
+  }
+  if (version !== 1) storedBytes({ control, personal: preferences, lists: records }, version, limits.maxPersonalStoredBytes);
+  const state: PersonalStore = { control: newControl(), personal: preferences && { ...preferences,
+    favorites: preferences.favorites.map(videoId => ({ kind: "legacyVideo", videoId })) },
+    lists: records.map(list => ({ ...list, entries: list.entries.map(entry => ({ ...typedEntry(entry), id: entry.id })) })) };
+  validateStore(state, limits);
+  return state;
+}
+function wireEntry(entry: ListSnapshot["entries"][number]): ListSnapshot["entries"][number] {
+  if (entry.kind === "placeholder") return { kind: "placeholder", text: entry.text };
+  const fallback = entry.fallback === undefined ? {} : { fallback: entry.fallback };
+  return entry.kind === "lyric" ? { kind: "lyric", lyricId: entry.lyricId, ...fallback }
+    : entry.kind === "item" ? { kind: "item", videoId: entry.videoId, ...fallback }
+    : { kind: "legacyVideo", videoId: entry.videoId, ...fallback };
+}
+export function listSnapshot(record: ListRecord): ListTransferV2 {
+  return { format: "daasavaani-list", formatVersion: 2, name: record.name,
+    entries: record.entries.map(entry => typedEntry(wireEntry(entry))) };
 }
 export function newList(snapshot: ListSnapshot, name = snapshot.name): ListRecord {
   if (!validSnapshot(snapshot)) throw new PersonalError("listInvalid");
-  const record = { id: crypto.randomUUID(), name, entries: snapshot.entries.map(entry => ({ ...entry, id: crypto.randomUUID() })) };
+  const record = { id: crypto.randomUUID(), name, entries: snapshot.entries.map(entry => ({ ...typedEntry(entry), id: crypto.randomUUID() })) };
   if (!validList(record)) throw new PersonalError("listInvalid");
   return record;
 }
@@ -105,7 +164,7 @@ function entryIndex(record: ListRecord, id: string): number {
   if (index < 0) throw new PersonalError("stale");
   return index;
 }
-export function editEntry(record: ListRecord, id: string | undefined, value: ListSnapshot["entries"][number]): ListRecord {
+export function editEntry(record: ListRecord, id: string | undefined, value: ListEntryV2): ListRecord {
   const index = id === undefined ? record.entries.length : entryIndex(record, id);
   if (id === undefined && record.entries.length >= __PERSONAL_LIMITS__.maxEntriesPerList) throw new PersonalError("capacity");
   const entries = [...record.entries];
@@ -138,15 +197,19 @@ export function jsonBytes(value: unknown, limit = Number.MAX_SAFE_INTEGER): numb
   return bytes;
 }
 export function storageBytes(state: PersonalStore, limit = Number.MAX_SAFE_INTEGER): number {
+  return storedBytes(state, 4, limit);
+}
+function storedBytes(state: { control: Revision; personal?: Personal | LegacyPersonal; lists: (ListRecord | LegacyList)[] },
+  version: number, limit: number): number {
   const personal = state.personal;
   return jsonBytes({
-    format: "fixture-personal-storage", formatVersion: 3,
-    control: { id: "state", formatVersion: 3, epoch: state.control.epoch, revision: state.control.revision },
-    personal: personal ? [{ id: "personal", favorites: personal.favorites, language: personal.language, theme: personal.theme }] : [],
+    format: version === 4 ? "daasavaani-personal-storage" : "fixture-personal-storage", formatVersion: version,
+    control: { id: "state", formatVersion: version, epoch: state.control.epoch, revision: state.control.revision },
+    personal: personal ? [{ id: "personal", favorites: personal.favorites.map(reference => typeof reference === "string" ? reference
+      : reference.kind === "lyric" ? { kind: "lyric", lyricId: reference.lyricId } : { kind: "legacyVideo", videoId: reference.videoId }),
+      language: personal.language, theme: personal.theme }] : [],
     lists: [...state.lists].sort((a, b) => a.id < b.id ? -1 : a.id > b.id ? 1 : 0).map(list => ({
-      id: list.id, name: list.name, entries: list.entries.map(entry => entry.kind === "item"
-        ? { id: entry.id, kind: "item", videoId: entry.videoId, ...(entry.fallback === undefined ? {} : { fallback: entry.fallback }) }
-        : { id: entry.id, kind: "placeholder", text: entry.text }),
+      id: list.id, name: list.name, entries: list.entries.map(entry => ({ id: entry.id, ...wireEntry(entry) })),
     })),
   }, limit);
 }

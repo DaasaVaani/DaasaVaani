@@ -10,8 +10,9 @@ gates must close before their owning slices; no phase is globally complete.
 The approved [lyric identity and optional media contract](https://github.com/DaasaVaani/shared/blob/main/docs/lyric-identity.md)
 is the target for P1/P4/P5a/P7: text-only lyric publication, permanent UUID lookup,
 typed references and versioned legacy-preserving transfers. Source/publication
-schemas and separate real readers implement the initial slice; typed personal/
-transfer adapters and full production publication remain open. Follow its
+schemas and separate real readers implement the initial slice. Website typed
+favorites/lists, v1/v2 transfer adapters and preserving personal v4 upgrades are
+implemented; full personal collections/backups and production publication remain open. Follow its
 Shared-first rollout without inferred legacy mapping or identity changes.
 
 Publication requires exact main checks, successful deployment and live HTTPS
@@ -28,7 +29,7 @@ does not waive any validation gate.
 | P2 | Two-locale UI generation with committed web/Android resources | Reviewed five-Latin/nine-non-Latin tables, transliteration, technical grammar, plurals/escaping conformance |
 | P4 | Real canonical text-only hash-addressed publication; separate fixture index producer and sampled OSA/candidate parity | Public populated-metadata/Latin/media adapters, durable ledger/receipts, semantic dates, ZIP/planner and complete language/profile index evidence |
 | P5 | Separate consented real full-library in-memory preview/UUID reading, literal title filter, complete paging and reader continuity; existing fixture search/preferences/themes | Production individual on-demand reading, full filters/discovery/script/helper/video/accessibility/platform journeys |
-| P5a | Transactional web favorites/preferences/lists, bounded worker preview/saved-list file/link export, optional browser share/copy adapters with manual fallbacks, confirmed import/basic management/independent occurrence editing, catalog-only reference details/explicit reading, reader-to-list addition and fixture v1/v2 migration | Recents/bookmarks/learning/recitation, real sharing-surface interoperability, native durable lists/occurrences, full backups and production migrations |
+| P5a | Transactional typed lyric/legacy web favorites/lists/preferences, preserving v1/v2/v3-to-v4 upgrade, worker v1/v2 preview and saved-v2 export, optional share/copy/fallbacks, independent occurrence editing/import/management, exact prepared catalog lookup and reader-to-list addition | Recents/bookmarks/learning/recitation, real sharing-surface interoperability, native durable lists/occurrences, full backups and remaining production migrations |
 | P6 | No persistent offline snapshot implementation | Journals/atomic activation/resume/repair/reader-safe GC and service worker lifecycle |
 | P7 | Separate native real canonical full preparation/reading in memory; fixture search, Room favorites/preferences, locale/theme and bounded transfer preview/re-export, core and connected tests | Native durable lists/occurrences/backups, signed App Links/receiving-app matrix, durable preparation/recovery, typed personal references and full parity/device matrix |
 | P3/P8/P9 | Dependency-ordered Shared/fixture-publisher pins; full web fixture CI/Pages and native build/core/lint CI | Live-provider clarification, production ingestion/publication/signing, device CI and release readiness |
@@ -59,7 +60,7 @@ Settings/preview/list management remain available when the Library endpoint fail
 Saving requires an explicit action after preview and creates a new independent
 list only. Duplicate names require confirmation; revision/epoch changes require
 renewed review. No lyric is fetched by transfer or saving, and no offline readiness
-or signed native App Links is claimed. The [current storage protocol](architecture.md#web-fixture-personal-storage-v3)
+or signed native App Links is claimed. The [current storage protocol](architecture.md#web-typed-personal-storage-v4)
 does not establish full-backup exportability, complete list/recitation journeys,
 production migration coverage or native parity.
 Saved-list export rechecks its read revision after encoding and refuses concurrent
@@ -78,14 +79,18 @@ destination; the warning preserves this distinction from unchanged personal data
 Official Unicode16 name matching is implemented in both consumers using Shared's
 pinned tables and conformance fixtures, without platform lowercase/ICU.
 Website derives keys on demand from raw names; no persisted-key cache exists
-in v3. Native has no durable list-name keys yet. Existing names/identities remain
+in v4. Native has no durable list-name keys yet. Existing names/identities remain
 unchanged; future persisted caches require explicit profile-aware preserving
 migration, never automatic renaming/merging. This prerequisite does not complete
-native durable lists, typed transfers or full personal-state parity.
+native durable lists or full personal-state parity.
 
 The [real lyric preview](lyric-preview.md) provides partial DATA-01/02/04/05,
 UX-07/13, OFF-02 and SET-01/02 evidence. It preserves canonical line/layout
-identity without optional media and never writes fixture personal references.
+identity without optional media. Website explicit favorite/list actions write
+typed lyric references, never real UUIDs in fixture `videoId` fields; reading
+itself performs no personal write or new request. Legacy discriminants are
+structurally upgraded without source/identity remapping. V1 previews re-export
+unchanged; confirmed imports create fresh local IDs and saved exports use v2.
 It is not production profile search, persistent offline preparation or the final
 PWA individual-reading path. Populated source metadata remains a publisher gate
 until its matching public adapters are implemented; empty authoring fields are
@@ -99,13 +104,15 @@ offers the user's placeholder text as an editable fallback, never a guessed
 catalog title. List previews and saved lists resolve titles only from the currently
 available verified catalog, distinguishing unresolved-before-catalog references
 from generic unavailable references/placeholders without guessing matches.
-Only explicit Read requests a known lyric. Readers add fresh independent occurrences
+Explicit real-reference Read reaches the consent gate without a request if
+unprepared, then resumes exact UUID reading. Prepared real/legacy maps remain
+independent. Readers add fresh independent occurrences
 to an explicitly chosen list using the captured revision; no catalog title is
 stored as a fallback or exported. Recitation remains incomplete.
 
 UX-11 and SET-04 receive partial Website evidence for persisted Light/Dark/Warm/
 Follow device selection. System-color changes do not write personal data, and
-explicit choices/locale/canonical text stay independent. Strict v1/v2-to-v3
+explicit choices/locale/canonical text stay independent. Strict v1/v2/v3-to-v4
 migrations preserve favorites/lists/identities and create a fresh writer fence;
 future/invalid schemas remain non-destructive refusals. Palette contrast tests
 do not establish full physical-device/font/offline-shell accessibility evidence.

@@ -59,9 +59,11 @@ override/reload and independent theme/canonical Kannada behavior.
 Appearance journeys exercise actual media changes, persisted Warm/Follow device,
 configured palettes and independent Kannada UI/canonical text. Pure checks enforce
 at least4.5:1 normal text/accent contrast on configured reading surfaces and3:1
-interactive-boundary contrast. Native10/20-to30 database cases preserve all rows/
-identities, refresh the local fence and roll back invalid legacy data/schema;
-future40 refusal and stale already-open clients stay non-destructive. Media
+interactive-boundary contrast. Native10/20/30-to40 database cases structurally
+type legacy favorites/entries while preserving their raw values and every
+list/occurrence ID, refreshing the local fence and rolling back invalid or
+over-capacity legacy data/schema; future50 refusal and stale already-open
+clients stay non-destructive. Media
 changes compare every personal table/header/index without automatic writes.
 Session-continuity journeys verify query/results, restored keyboard focus
 and measured scroll position through Back/Forward and reader return, no repeated
@@ -76,7 +78,11 @@ The [real-preview suite](../tests/browser/lyrics.spec.ts) serves only synthetic,
 independently hashed public-family objects. It verifies explicit whole-download
 consent, complete title paging, exact canonical text/layout, locale independence,
 Back/Forward focus/scroll, corrupt-object failure/retry, cancellation, unknown IDs,
-reload reconsent and byte-equivalent personal database snapshots. Loader units
+reload reconsent and byte-equivalent personal database snapshots for reading.
+Additional typed-personal journeys cover explicit real favorites/repeated
+reader-to-list saves, unresolved favorites after reload with no implicit download,
+mixed v2 preview/re-export/new-list save, UUID-looking legacy separation and
+real list-origin return/focus/unsaved context. Loader units
 cover compatible optional fields versus unsupported capabilities/versions,
 identity/control/layout/hash/size failures and aggregate/count exact/+1 bounds,
 including the actual configured decoded-byte ceiling. Incremental commands:
@@ -94,7 +100,7 @@ comparisons and invalid UTF16 units, official normalization equations and full
 scalar folding against official C/F records, with host normalization disabled in
 an additional guard case. Build guards reject changed settings/table/vector/license
 bytes. Browser journeys check byte-identical packaged licensing, an old-package
-collision that now splits, existing newly equal names without any v3 database/
+collision that now splits, existing newly equal names without any current database/
 row rewrite, and future explicit independent reuse/rename cancellation.
 `npm test -- unicode-names` is the focused unit command. These are Unicode-data/
 algorithm checks, not transliteration, linguistic review or complete native lists.
@@ -111,7 +117,7 @@ contracts; check generated resources remain unchanged. Library: `npm ci` then
 `npm run check` runs TypeScript and all publisher tests; `npm run publish:demo`
 generates only explicitly synthetic fixtures. No real source-PR variants.
 
-Web transfer unit tests compare the pinned streaming codec with independent Node
+Web transfer unit tests compare both frozen v1 and typed v2 families with independent Node
 zlib, including exact/limit+1 encoded/decoded/link ceilings, BOM accounting, malformed
 UTF8/JSON/schema/duplicate keys, every truncated fixture, CRC/length damage,
 concatenated members and trailing bytes. Browser journeys exercise the actual
@@ -122,7 +128,10 @@ compression-speed benchmark. Confirmed web import and list creation/rename/
 duplication/deletion exercise the real personal database, including cross-tab
 duplicate-name confirmation invalidation, migration rollback, future-schema refusal
 without changing unfamiliar stores, blocked-upgrade recovery and preservation of
-favorites/preferences. Occurrence journeys verify independent add/edit/move/remove/
+favorites/preferences. Model checks also account for old and longer typed target
+envelopes, exact target capacity and capacity-minus-one refusal, actual favorite
+and stored-byte ceilings, strict old-schema discrimination and no input mutation.
+Occurrence journeys verify independent add/edit/move/remove/
 manual replacement, stable UUID/order, focus after movement, literal user text,
 configured code-point boundaries, optional fallbacks, stale writes and cancellation.
 Unchanged duplicate names do not reprompt on entry edits; actual renames do.
@@ -220,11 +229,11 @@ IDs or a release acceptance declaration.
 
 | Requirements | Current evidence | Boundary |
 | --- | --- | --- |
-| DATA-01/02/04/05/07/08 | Real canonical source/import/publication contracts, optional empty authoring fields, LF/CRLF/UUID preservation, verse/alignment validation, held-input isolation and separate media-independent readers; synthetic failure fixtures | Populated public metadata/Latin/media adapters, full rights/registry closure, typed personal migration and production lifecycle remain incomplete |
+| DATA-01/02/04/05/07/08 | Real canonical source/import/publication contracts, optional empty authoring fields, LF/CRLF/UUID preservation, verse/alignment validation, held-input isolation and separate media-independent readers; typed web lyric references and preserving structural legacy adapters | Populated public metadata/Latin/media adapters, full rights/registry closure, remaining personal collections/backup and production lifecycle remain incomplete |
 | SEARCH-12/13 | Sampled independent substring/full-matrix oracle, counted-gram candidates, native core checks and real browser search | Ordinary fixture text only; reviewed profiles/aliases/markers, exhaustive proof and complete native parity pending |
 | PLAT-01/05 | Real React and Compose apps; built-site browser journeys at desktop/mobile/320px and one native API36 reading journey | PWA installation, complete routes/layout/interaction modes and supported-platform/device matrix pending |
 | I18N-01/02/03, SET-04 | Matching two-locale resources; web first-use ordered browser-language selection, configured fallback, persisted four-mode appearance with contrast/media checks; native durable locale/theme preferences; canonical text remains independent | Complete script/personal preferences, device/font matrix and full localization conformance pending |
-| LIB-01/02/03/04/08/09/10/11 | Web favorites/lists, independent occurrences/plain text, duplicate-name confirmation, management/manual replacement, catalog-only details/explicit reading, reader-to-list addition and non-destructive fixture v1/v2 migration; native Room favorites/preferences | Recitation/offline/production migrations and native durable lists/occurrences remain incomplete |
+| LIB-01/02/03/04/05/08/09/10/11 | Typed web lyric/legacy favorites/lists, independent occurrences/plain text, duplicate-name confirmation, management/manual replacement, exact catalog details/explicit reading, reader-to-list addition and non-destructive v1/v2/v3-to-v4 upgrade; native Room favorites/preferences | Recitation/offline/remaining personal migrations and native durable lists/occurrences remain incomplete |
 | UX-13 | In-session Library/Favorites context and list-origin selected editor state, Back/Forward/reader return with measured scroll/focus; removed-result/direct-reader/reload coverage | No persistent search history; filters/Explore, offline and Android continuity pending |
 | XFER-01/02/03/04/05/06/08 | Bounded web worker/native codecs with independent vectors, web preview/saved-list export and transactional save, native file/pasted-link preview/re-export, catalog-only details, browser share/copy adapters, cancellation/errors/no-write checks | Real sharing-surface delivery, native durable saves/occurrences, verified App Links and full backups incomplete |
 | SET-01/02 | Owned settings/schema guards, Shared policy binding and immutable clean fixture-tool pin | Complete production settings inventory, language/protocol/backup contracts and all compatibility fixtures pending |

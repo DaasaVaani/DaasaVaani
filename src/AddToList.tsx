@@ -4,9 +4,10 @@ import type messages from "../shared/generated/web/ui.json";
 import { editEntry, type ListRecord, type PersonalStore, type Revision } from "./personal-model";
 import { saveList } from "./personal";
 import { personalMessage } from "./ListSave";
+import type { PersonalReference } from "./list-transfer-types";
 
-export function AddToList({ labels, personal, videoId }: {
-  labels: typeof messages.en; personal: PersonalStore; videoId: string;
+export function AddToList({ labels, personal, reference }: {
+  labels: typeof messages.en; personal: PersonalStore; reference: PersonalReference;
 }) {
   const id = useId();
   const [selected, setSelected] = useState<{ record: ListRecord; expected: Revision }>();
@@ -21,7 +22,7 @@ export function AddToList({ labels, personal, videoId }: {
     if (!selected) return;
     setBusy(true); setError(""); setSaved(false);
     try {
-      await saveList(editEntry(selected.record, undefined, { kind: "item", videoId }), selected.expected, true);
+      await saveList(editEntry(selected.record, undefined, reference), selected.expected, true);
       setSelected(undefined); setSaved(true);
     } catch (reason) { setError(personalMessage(reason, labels)); setSelected(undefined); }
     finally { focus.current = true; setBusy(false); }

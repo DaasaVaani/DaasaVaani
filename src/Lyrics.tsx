@@ -2,35 +2,86 @@ import { useEffect, useId, useRef, useState } from "react";
 import { Link, Route, Routes, useLocation, useNavigate, useParams } from "react-router-dom";
 import messages from "../shared/generated/web/ui.json";
 import { prepareLyrics, type PreparedLyrics } from "./lyric-publication";
+import { hasFavorite, referenceKey, type PersonalStore } from "./personal-model";
+import type { Publication } from "./artifacts";
+import type { PersonalReference } from "./list-transfer-types";
+import { AddToList } from "./AddToList";
 import styles from "./App.module.css";
 
 type Labels = typeof messages.en;
-function LyricReader({ publication, labels }: { publication: PreparedLyrics; labels: Labels }) {
+function LyricReader({ publication, labels, personal, toggle }: {
+  publication: PreparedLyrics; labels: Labels; personal?: PersonalStore; toggle: (reference: PersonalReference) => void;
+}) {
   const { id } = useParams();
   const location = useLocation(), navigate = useNavigate();
   const state: unknown = location.state;
-  const fromCatalog = state !== null && typeof state === "object" && "browseFrom" in state && state.browseFrom === "/lyrics";
+  const origin = state !== null && typeof state === "object" && "browseFrom" in state ? state.browseFrom : undefined;
+  const fromBrowsing = origin === "/lyrics" || origin === "/lists" || origin === "/favorites";
   const item = id ? publication.item(id) : undefined;
+  const reference: PersonalReference | undefined = item && { kind: "lyric", lyricId: item.lyricId };
+  const favorite = reference && personal?.personal ? hasFavorite(personal.personal, reference) : false;
   return <section className={styles.reader}>
-    <Link to="/lyrics" className={styles.back} onClick={event => {
-      if (fromCatalog && event.button === 0 && !event.metaKey && !event.ctrlKey && !event.shiftKey && !event.altKey) {
+    <Link to={fromBrowsing ? origin : "/lyrics"} className={styles.back} onClick={event => {
+      if (fromBrowsing && event.button === 0 && !event.metaKey && !event.ctrlKey && !event.shiftKey && !event.altKey) {
         event.preventDefault(); navigate(-1);
       }
-    }}>← {labels.lyricBack}</Link>
+    }}>← {origin === "/lists" ? labels.backToList : origin === "/favorites" ? labels.favorites : labels.lyricBack}</Link>
     {!item ? <p role="alert">{labels.lyricsUnavailable}</p> : <>
-      <h1 lang="kn">{item.title}</h1>
+      <header className={styles.readerHeader}>
+        <h1 lang="kn">{item.title}</h1>
+        {personal && reference && <button className={styles.secondary} aria-pressed={favorite} onClick={() => toggle(reference)}>
+          {favorite ? labels.removeFavorite : labels.addFavorite}
+        </button>}
+      </header>
       <div lang="kn" className={styles.lyrics}>{item.lines.map((line, index) =>
         <p key={line.kind === "line" ? line.lineId : `layout-${index}`}
           {...(line.kind === "line" ? { id: line.lineId } : { "data-layout": true })}>{line.text || <br />}</p>)}</div>
       <p className={styles.muted}>{labels.lyricNoMedia}</p>
+      {personal && reference ? <AddToList key={item.lyricId} labels={labels} personal={personal} reference={reference} />
+        : <p role="status">{labels.personalUnavailable}</p>}
     </>}
   </section>;
 }
-export function Lyrics({ labels }: { labels: Labels }) {
+export function ReferenceFavorites({ labels, personal, publication, legacyPublication, toggle }: {
+  labels: Labels; personal: PersonalStore; publication?: PreparedLyrics; legacyPublication?: Publication;
+  toggle: (reference: PersonalReference) => void;
+}) {
+  const location = useLocation();
+  const restoreFocus = useRef(false), heading = useRef<HTMLHeadingElement>(null);
+  useEffect(() => {
+    if (restoreFocus.current) {
+      (heading.current ?? document.getElementById("favorites-title"))?.focus();
+      restoreFocus.current = false;
+    }
+  }, [personal.personal?.favorites]);
+  const favorites = personal.personal?.favorites ?? [];
+  const groups = [
+    { kind: "lyric", label: labels.ownerLyrics, pending: !publication, entries: favorites.filter(reference => reference.kind === "lyric") },
+    { kind: "legacyVideo", label: labels.legacyReference, pending: !legacyPublication,
+      entries: favorites.filter(reference => reference.kind === "legacyVideo" && !legacyPublication?.summary(reference.videoId)) },
+  ].filter(group => group.entries.length);
+  return <div hidden={location.pathname !== "/favorites"}>{groups.map((group, index) => <section key={group.kind} aria-label={group.label}>
+    <h2 tabIndex={-1} ref={index === 0 ? heading : undefined}>{group.label}</h2>
+    {group.kind === "lyric" && <p>{publication ? labels.lyricPersonalLimits : labels.lyricCatalogPending}</p>}
+    <div className={styles.grid}>{group.entries.map(reference => {
+      const item = reference.kind === "lyric" ? publication?.item(reference.lyricId) : undefined;
+      return <article className={styles.card} key={referenceKey(reference)}>
+        {item ? <h3 lang="kn">{item.title}</h3> : <p>{group.pending ? labels.referencePending : labels.lyricsUnavailable}</p>}
+        <code>{reference.kind === "lyric" ? reference.lyricId : reference.videoId}</code>
+        {reference.kind === "lyric" && <Link className={styles.readLink} to={`/lyrics/${reference.lyricId}`} state={{ browseFrom: "/favorites" }}
+          onClick={event => event.currentTarget.focus({ preventScroll: true })}>{labels.open}</Link>}
+        <button className={styles.secondary} onClick={() => { restoreFocus.current = true; toggle(reference); }}>{labels.removeFavorite}</button>
+      </article>;
+    })}</div>
+  </section>)}</div>;
+}
+export function Lyrics({ labels, publication, onPrepared, personal, toggle }: {
+  labels: Labels; publication?: PreparedLyrics; onPrepared: (publication: PreparedLyrics) => void;
+  personal?: PersonalStore; toggle: (reference: PersonalReference) => void;
+}) {
   const location = useLocation();
   const active = /^\/lyrics(?:\/|$)/u.test(location.pathname);
   const catalogActive = /^\/lyrics\/?$/u.test(location.pathname);
-  const [publication, setPublication] = useState<PreparedLyrics>();
   const [busy, setBusy] = useState(false), [error, setError] = useState("");
   const [progress, setProgress] = useState<{ done: number; total: number }>();
   const [query, setQuery] = useState(""), [pages, setPages] = useState(1);
@@ -52,7 +103,7 @@ export function Lyrics({ labels }: { labels: Labels }) {
     void prepareLyrics(request.signal, (done, total) => {
       if (controller.current === request && !request.signal.aborted) setProgress({ done, total });
     }).then(value => {
-      if (controller.current === request && !request.signal.aborted) setPublication(value);
+      if (controller.current === request && !request.signal.aborted) onPrepared(value);
     }).catch(reason => {
       if (controller.current === request && !request.signal.aborted) setError(reason instanceof Error ? reason.message : String(reason));
     }).finally(() => {
@@ -62,7 +113,7 @@ export function Lyrics({ labels }: { labels: Labels }) {
   const entries = publication?.catalog.filter(entry => entry.title.includes(query)) ?? [];
   const shown = entries.slice(0, pages * __WEB_CONFIG__.lyricPreview.pageSize);
   return <section hidden={!active}>
-    <aside className={styles.notice}><p>{labels.lyricPreviewNotice}</p><p>{labels.lyricPreviewLimits}</p></aside>
+    <aside className={styles.notice}><p>{labels.lyricPreviewNotice}</p><p>{labels.lyricPersonalLimits}</p></aside>
     {!publication && <section className={styles.reader}>
       <h1>{labels.ownerLyrics}</h1>
       {error && <p className={styles.error} role="alert">{labels.error}: {error}</p>}
@@ -91,7 +142,7 @@ export function Lyrics({ labels }: { labels: Labels }) {
       </div>
       <Routes>
         <Route path="/lyrics" element={null} />
-        <Route path="/lyrics/:id" element={<LyricReader publication={publication} labels={labels} />} />
+        <Route path="/lyrics/:id" element={<LyricReader publication={publication} labels={labels} personal={personal} toggle={toggle} />} />
         <Route path="/lyrics/*" element={<p role="alert">{labels.unknownRoute}</p>} />
         <Route path="*" element={null} />
       </Routes>

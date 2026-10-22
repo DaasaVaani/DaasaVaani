@@ -1,5 +1,7 @@
 import { test, expect, type Page } from "@playwright/test";
 import { readFileSync } from "node:fs";
+import { gzipSync, gunzipSync } from "node:zlib";
+import type { ListTransferV2 } from "../../src/list-transfer-types";
 import Ajv2020 from "ajv/dist/2020.js";
 import { strictYaml } from "../../shared/tools/generate-catalog.mjs";
 import webSchema from "../../settings/web.schema.json" with { type: "json" };
@@ -43,6 +45,115 @@ async function personalSnapshot(page: Page) {
     } finally { database.close(); }
   }, config.databaseName);
 }
+test("explicit real favorites and repeated reader-to-list saves persist without implicit preparation or identity remapping", async ({ page }) => {
+  const requests = await serve(page);
+  await page.goto("/#/lists");
+  const create = page.getByRole("form", { name: labels.createList, exact: true });
+  await create.getByLabel(labels.listName, { exact: true }).fill("Synthetic real reader");
+  await create.getByRole("button", { name: labels.createList, exact: true }).click();
+  await expect(page.getByRole("list", { name: labels.lists, exact: true }).getByRole("button", { name: "Synthetic real reader", exact: true })).toBeVisible();
+  await page.getByRole("link", { name: labels.ownerLyrics, exact: true }).click();
+  expect(requests).toHaveLength(0);
+  await page.getByRole("button", { name: labels.prepareLibrary }).click();
+  await page.getByRole("article").first().getByRole("link", { name: labels.open, exact: true }).click();
+  await page.getByRole("button", { name: labels.addFavorite, exact: true }).click();
+  await expect(page.getByRole("button", { name: labels.removeFavorite, exact: true })).toHaveAttribute("aria-pressed", "true");
+  const add = page.getByRole("form", { name: labels.addToList, exact: true }), choice = add.getByLabel(labels.chooseList, { exact: true });
+  const listId = await choice.getByRole("option", { name: /^Synthetic real reader · / }).getAttribute("value");
+  if (!listId) throw new Error("Missing real-reader target list");
+  for (let occurrence = 0; occurrence < 2; occurrence++) {
+    await choice.selectOption(listId);
+    await add.getByRole("button", { name: labels.addOccurrence, exact: true }).click();
+    await expect(page.getByRole("status")).toHaveText(labels.occurrenceAdded);
+  }
+  const saved = await personalSnapshot(page);
+  expect(saved.tables.personal).toMatchObject([{ favorites: [{ kind: "lyric", lyricId: lyricId(1) }] }]);
+  expect(saved.tables.lists).toMatchObject([{ id: listId, entries: [
+    { kind: "lyric", lyricId: lyricId(1) }, { kind: "lyric", lyricId: lyricId(1) },
+  ] }]);
+  const ids = [...JSON.stringify(saved.tables.lists).matchAll(/"id":"([0-9a-f-]+)"/g)].map(match => match[1]);
+  expect(ids).toHaveLength(3); expect(new Set(ids).size).toBe(3);
+  expect(JSON.stringify(saved.tables.lists)).not.toContain("fallback");
+  const prepared = [...requests];
+  await page.getByRole("link", { name: labels.favorites, exact: true }).click();
+  const favorites = page.getByRole("region", { name: labels.ownerLyrics, exact: true });
+  await expect(favorites.getByRole("article")).toHaveCount(1);
+  await expect(page.getByText(labels.emptyFavorites, { exact: true })).toHaveCount(0);
+  const read = favorites.getByRole("link", { name: labels.open, exact: true });
+  await read.focus(); await read.press("Enter");
+  await page.getByRole("link", { name: labels.favorites, exact: false }).filter({ hasText: "←" }).click();
+  await expect(read).toBeFocused();
+  expect(requests).toEqual(prepared);
+  await page.reload();
+  await expect(favorites.getByText(labels.lyricCatalogPending, { exact: true })).toBeVisible();
+  expect(requests).toEqual(prepared); expect(await personalSnapshot(page)).toEqual(saved);
+  await read.click();
+  await expect(page.getByRole("button", { name: labels.prepareLibrary })).toBeVisible();
+  expect(requests).toEqual(prepared);
+  await page.getByRole("button", { name: labels.prepareLibrary }).click();
+  await expect(page.getByRole("button", { name: labels.removeFavorite, exact: true })).toBeVisible();
+  expect(requests).toHaveLength(prepared.length * 2);
+  expect(await personalSnapshot(page)).toEqual(saved);
+  await page.getByRole("button", { name: labels.removeFavorite, exact: true }).click();
+  await expect(page.getByRole("button", { name: labels.addFavorite, exact: true })).toBeVisible();
+  const removed = await personalSnapshot(page);
+  expect(removed.tables.lists).toEqual(saved.tables.lists);
+  expect(removed.tables.personal).toMatchObject([{ favorites: [] }]);
+  expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(true);
+});
+test("mixed typed transfers resolve only explicit lyric references and list-origin reading retains exact context", async ({ page }) => {
+  const requests = await serve(page);
+  const value: ListTransferV2 = { format: "daasavaani-list", formatVersion: 2, name: "Synthetic mixed references", entries: [
+    { kind: "lyric", lyricId: lyricId(1), fallback: "  User text, not a title  " },
+    { kind: "legacyVideo", videoId: lyricId(1) },
+    { kind: "placeholder", text: "<b>Only literal</b>" },
+    { kind: "lyric", lyricId: lyricId(1) },
+    { kind: "lyric", lyricId: lyricId(99) },
+  ] };
+  await page.goto("/#/settings");
+  await expect(page.getByRole("button", { name: labels.light, exact: true })).toBeVisible();
+  const before = await personalSnapshot(page);
+  await page.getByLabel(labels.transferFile, { exact: true }).setInputFiles({
+    name: "synthetic-v2.gz", mimeType: "application/gzip", buffer: gzipSync(JSON.stringify(value)),
+  });
+  await expect(page.getByRole("heading", { name: value.name, exact: true })).toBeVisible();
+  expect(requests).toHaveLength(0); expect(await personalSnapshot(page)).toEqual(before);
+  await page.getByRole("button", { name: labels.transferDownload, exact: true }).click();
+  const [download] = await Promise.all([page.waitForEvent("download"), page.getByRole("link", { name: labels.transferDownload, exact: true }).click()]);
+  const path = await download.path();
+  if (!path) throw new Error("Missing typed snapshot download");
+  expect(JSON.parse(gunzipSync(readFileSync(path)).toString("utf8"))).toEqual(value);
+  expect(await personalSnapshot(page)).toEqual(before);
+  await page.getByRole("button", { name: labels.saveList, exact: true }).click();
+  await page.getByRole("link", { name: labels.viewLists, exact: true }).click();
+  await page.getByRole("list", { name: labels.lists, exact: true }).getByRole("button", { name: value.name, exact: true }).click();
+  const rows = page.locator("main ol > li"), read = rows.first().getByRole("link", { name: labels.open, exact: true });
+  await expect(rows).toHaveCount(value.entries.length);
+  await expect(rows.nth(1).getByRole("link")).toHaveCount(0);
+  const saved = await personalSnapshot(page);
+  expect(saved.tables.lists).toMatchObject([{ entries: value.entries }]);
+  const ids = [...JSON.stringify(saved.tables.lists).matchAll(/"id":"([0-9a-f-]+)"/g)].map(match => match[1]);
+  expect(ids).toHaveLength(6); expect(new Set(ids).size).toBe(6);
+  const rename = page.getByRole("form", { name: labels.renameList, exact: true }).getByLabel(labels.listName, { exact: true });
+  await rename.fill("Unsaved real list name");
+  await read.focus(); await read.press("Enter");
+  await expect(page.getByRole("button", { name: labels.prepareLibrary })).toBeVisible();
+  expect(requests).toHaveLength(0);
+  await page.getByRole("button", { name: labels.prepareLibrary }).click();
+  await expect(page.locator("div[lang=kn] > p")).toHaveCount(4);
+  await page.getByRole("link", { name: labels.backToList, exact: false }).click();
+  await expect(rename).toHaveValue("Unsaved real list name"); await expect(read).toBeFocused();
+  await expect(rows.first().getByText(labels.referenceKnown, { exact: true })).toBeVisible();
+  await expect(rows.nth(1).getByText(labels.lyricsUnavailable, { exact: true })).toBeVisible();
+  await expect(rows.nth(1).getByText(labels.referenceKnown, { exact: true })).toHaveCount(0);
+  await expect(page.locator("main b")).toHaveCount(0);
+  const prepared = [...requests];
+  await rows.last().getByRole("link", { name: labels.open, exact: true }).click();
+  await expect(page.getByRole("alert")).toHaveText(labels.lyricsUnavailable);
+  await page.goBack(); await expect(rename).toHaveValue("Unsaved real list name");
+  expect(requests).toEqual(prepared); expect(await personalSnapshot(page)).toEqual(saved);
+  expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(true);
+});
 test("real lyric preparation needs consent, preserves personal data and exact layout, and resets on reload", async ({ page }) => {
   const requests = await serve(page);
   await page.goto("/#/lyrics");
@@ -61,7 +172,7 @@ test("real lyric preparation needs consent, preserves personal data and exact la
   await expect(page.locator("div[lang=kn] > p")).toHaveText(["ಕನ್ನಡ 😀  ", " \t ", "", "ಅಕ್ಷರ"], { useInnerText: false });
   expect(await page.locator("div[lang=kn] > p").evaluateAll(nodes => nodes.map(node => node.textContent)))
     .toEqual(["ಕನ್ನಡ 😀  ", " \t ", "", "ಅಕ್ಷರ"]);
-  await expect(page.getByRole("button", { name: labels.addFavorite })).toHaveCount(0);
+  await expect(page.getByRole("button", { name: labels.addFavorite })).toBeVisible();
   await expect(page.getByText(labels.canonical, { exact: true })).toHaveCount(0);
   await expect(page.getByText(labels.lyricNoMedia, { exact: true })).toBeVisible();
   expect(requests).toEqual(preparedRequests);
