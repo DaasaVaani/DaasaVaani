@@ -113,8 +113,18 @@ reading fully no-write. Reload discards this discovery context.
 
 This is not reviewed Explore groups, first-publication-date discovery, Practice,
 personalized recommendations or complete persistent offline-version support.
-The native application independently requires complete preparation before reading;
-its feature/validation boundary belongs to its owning guide.
+The native application independently exposes the same action only from its
+completely prepared canonical catalog and valid reader. Its pure selector uses
+a validated ordinary bounded random index over eligible summaries, not the
+Website fraction interface. It never initiates preparation, fetches an item or
+writes personal state. The prepared reader retains normal successful-exposure
+history and typed controls. Consecutive choices replace reader state while
+preserving Catalog/Favorites/Lists/Recently opened/unsaved-preview origin and
+Settings/Android Back continuity; an unsaved preview is not saved by discovery.
+Current native preparation and the last-opened reference are process-local,
+not durable offline snapshots. Its owning
+[guide](https://github.com/DaasaVaani/AndroidApp/blob/main/README.md)
+defines native setup and validation.
 
 ## Personal reading and references
 

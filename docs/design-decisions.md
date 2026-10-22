@@ -43,11 +43,13 @@ fixture/v1 formats remain legacy-only. Full personal collections/backup and
 production adapters remain open. The [preview guide](lyric-preview.md) defines the current narrower lifecycle,
 not a change to approved production PWA on-demand reading/offline behavior.
 
-The Website's explicit [Show another lyric](lyric-preview.md#show-another-lyric)
+The clients' explicit [Show another lyric](lyric-preview.md#show-another-lyric)
 uses the entire same verified canonical catalog independently of title filtering,
 excludes the current/session-last-opened UUID, and preserves normal reader/history
 and return behavior. It adds no persisted choice history, inferred classifications
-or personalized recommendation. Reviewed Explore groups, publication dates,
+or personalized recommendation. Native requires a completely prepared catalog;
+Website retains on-demand selected-object reading. Both current content lifecycles
+remain process-local, not durable offline snapshots. Reviewed Explore groups, publication dates,
 Practice and complete active-snapshot offline discovery remain open.
 
 Recently opened recording is initially enabled, device-only and bounded to the

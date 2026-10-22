@@ -67,8 +67,13 @@ text-only preparation/reading and fixture features with typed Room favorites,
 durable lists/independent occurrences, recent history, preferences and locale/theme controls.
 Strict v1/v2 file/pasted-link previews can be explicitly saved as independent
 lists; readers and list entries use exact typed identities without guessing.
-Native preview and list management work before preparation;
-explicit complete-link exports can open Android's standard Sharesheet while
+Native preview and list management work before preparation.
+After complete canonical preparation, its catalog and readers offer the same
+whole-catalog Show another lyric action without fetching or preparing content.
+Successive choices retain the original catalog, collection or unsaved-preview
+return context through Settings and Android Back. This remains session-memory
+preparation, not durable offline readiness.
+Explicit complete-link exports can open Android's standard Sharesheet while
 retaining selectable/copyable links and complete-file export. Handoff is not
 delivery confirmation; verified App Links and real receiving-app delivery remain open.
 Production contracts, reviewed transliteration, persistent

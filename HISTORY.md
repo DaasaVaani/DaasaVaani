@@ -1,5 +1,56 @@
 # Documentation history
 
+## 2026-10-22: cross-client discovery validation and publication evidence
+
+- Website discovery committedef05ac36f27996f24a83a4835dc7871630f9a374
+  with independently adopted published Sharedf4f8aec. Local and Linux full
+  checks passed101 units/294 browser cases. Exact preflight39766079581,
+  main/Pages39767405046 and CodeQL39767403341 passed every actual required
+  job/step. Live policy/admin/no-bypass guard/clean-tree/pin/baseline/ancestry
+  gates preceded unchanged normal main push. Only expected preflight
+  upload/deploy skips were permitted.
+- The successful29-entry Pages artifact was inspected with explicit path,
+  entry-type/count/size bounds and extracted only into owned session scratch.
+  Fresh isolated hosted Chromium matched all17 public resource bodies and12
+  actual cache bodies byte-for-byte with that artifact. Cached bodies plus worker
+  totaled992595/8388608 bytes; no Library/demo/compressed/media objects entered
+  the interface cache. Actual871-catalog selection reached beyond title filtering,
+  excluded the current item and used only four successful browser Library
+  requests for metadata plus two chosen items. Literal Kannada/layout/line IDs
+  were compared by hashes without logging source payloads. Typed favorite/list
+  controls, every personal row, original return focus and memory-only offline
+  reuse were preserved; offline reload honestly lost content readiness.
+- The first hosted helper incorrectly expected the Warm background as browser
+  theme-color. Existing product tests specify the resolved accent; corrected
+  only that helper assertion and reran the complete fresh proof successfully.
+  No product behavior/assertion/suite/retry/timeout was weakened. Owned helper,
+  artifact extraction and no-PR validation ref contained by main were cleaned;
+  successful and diagnostic logs were retained.
+- Native discovery committed1699f41709f6cba736cbb20fd430c258b5d5c8f2
+  independently adopting the same published Sharedf4 from preceding44.
+  Final generated configuration and full clean-core/all-variant build/both-lint/
+  connected command passed44 core/72 device cases, zero failures/errors/skips.
+  Both lints reported58 warnings/zero errors; app JVM remains NO-SOURCE.
+  Hygiene88, strict YAML5, actionlint/ShellCheck and whitespace passed.
+  Its owning HISTORY records the exact commands, corrected test discovery/
+  transition synchronization failures and Compose-collected Favorites rejection
+  state fix, without dropping assertions or narrowing final suites.
+- Native released the frozen Website/dist/device/HTTP slot after validation,
+  cleaned owned helpers and preserved user5173/emulator5556. Current guides now
+  describe both clients' bounded discovery and truthful origin continuity;
+  durable snapshots, reviewed groups/dates, Practice and release gates remain open.
+- Exact native preflight39771896064 passed every actual configuration/build/core/
+  lint/hygiene step. Parent independently checked the unchanged commit/tree,
+  independently pinned Sharedf4, baseline ancestry and live admin/no-bypass guard
+  before a normal fast-forward main push. CI device coverage is not claimed;
+  the72 connected cases are actual local API36 emulator evidence.
+- Cross-client Root documentation finalization reran complete `npm run check`:
+  101 units, strict TypeScript/production build and294 browser cases passed.
+  Hygiene72, strict workflow/settings YAML4, actionlint/ShellCheck, whitespace
+  and all20 UTF8/newline-clean Markdown files/213 local links/153 unique
+  normative IDs passed. No runtime, dependency, settings or consumer pin changes
+  accompany this documentation batch.
+
 ## 2026-10-22: canonical Show another lyric
 
 - Archived P5's preceding discovery status: full discovery remained incomplete
