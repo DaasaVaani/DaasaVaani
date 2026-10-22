@@ -84,6 +84,16 @@
   remains on PR/check rules only; force/delete protection has no bypass.
   Publication still requires successful exact-SHA lint/full-app preflight and
   unchanged-SHA main validation/deployment; normal policy remains a release gate.
+- Exact preflight39725029407 for7112a5d passed lint/90 units but failed four
+  browser cases (227 passed); no main push occurred. The Favorites paging case
+  could count the old unresolved Favorite cards before the catalog view rendered,
+  and a reloaded favorite's Remove control was visible before its reader loaded.
+  Those tests now await the loaded title filter and actual canonical paragraphs,
+  respectively, before asserting the unchanged exact request budgets. No retry,
+  timeout extension, weaker budget or additional product change was introduced.
+- After those two readiness corrections, full `npm run check` again passed90
+  units, fresh build/typecheck and all231 browser cases, with zero retries,
+  failures or skips. The Shared pin and application implementation were unchanged.
 
 ## 2026-10-22: Website successful-open history and personal v5
 

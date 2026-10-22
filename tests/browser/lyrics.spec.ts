@@ -67,6 +67,7 @@ test("real Favorites have independent complete title paging and preserve context
   const before = await personalSnapshot(page);
   expect(requests).toHaveLength(0);
   await page.getByRole("link", { name: labels.ownerLyrics, exact: true }).click();
+  await expect(page.getByRole("searchbox", { name: labels.lyricTitleFilter, exact: true })).toBeVisible();
   await expect(page.getByRole("article")).toHaveCount(config.lyricPreview.pageSize);
   expect(requests).toHaveLength(2);
   await page.getByRole("link", { name: labels.favorites, exact: true }).click();
@@ -139,6 +140,7 @@ test("explicit real favorites and repeated reader-to-list saves persist without 
   await expect(favorites.getByText(labels.lyricOnlineCatalogPending, { exact: true })).toBeVisible();
   expect(requests).toEqual(prepared); expect(await personalSnapshot(page)).toEqual(saved);
   await read.click();
+  await expect(page.locator("div[lang=kn] > p")).toHaveCount(4);
   await expect(page.getByRole("button", { name: labels.removeFavorite, exact: true })).toBeVisible();
   expect(requests).toHaveLength(prepared.length * 2);
   expect(await personalSnapshot(page)).toEqual(saved);
