@@ -13,6 +13,7 @@ import { Lyrics, ReferenceFavorites } from "./Lyrics";
 import { HistoryControls, RecentHistory } from "./RecentHistory";
 import { Learning, LearningControl } from "./Learning";
 import { Recite } from "./Recite";
+import { LyricText } from "./LyricText";
 import { ReadingPreferences, type ReadingPreferencesProps } from "./ReadingPreferences";
 import { useAppShell } from "./app-shell";
 import type { LyricLibrary } from "./lyric-publication";
@@ -99,21 +100,21 @@ function Reader({ publication, labels, personal, store, toggle, opened, change }
       </>}
       secondary={<><p className={styles.muted}>{item.description}</p>
         <AddToList key={item.videoId} labels={labels} personal={store} reference={{ kind: "legacyVideo", videoId: item.videoId }} /></>}>
-      <div lang="kn" className={styles.lyrics}>
-        {item.lines.map(line => <p id={line.id} key={line.id} data-selected={line.id === lineId}>{line.text || "\u00a0"}</p>)}
-      </div>
+      <LyricText item={item} selectedLine={lineId} />
     </Recite>}
   </section>;
 }
 
-function ListsSession({ labels, personal, publication, lyrics }: {
+function ListsSession({ labels, personal, publication, lyrics, onLyrics, opened, change }: {
   labels: Labels; personal: PersonalStore; publication?: Publication; lyrics?: LyricLibrary;
+  onLyrics: (library: LyricLibrary) => void; opened: ReaderProps["opened"]; change: ReaderProps["change"];
 }) {
   const location = useLocation();
   const state: unknown = location.state;
   const fromLists = state && typeof state === "object" && "browseFrom" in state && state.browseFrom === "/lists";
   if (location.pathname !== "/lists" && !(/^\/(?:item|lyrics)\//u.test(location.pathname) && fromLists)) return null;
-  return <div hidden={location.pathname !== "/lists"}><Lists labels={labels} personal={personal} publication={publication} lyrics={lyrics} /></div>;
+  return <div hidden={location.pathname !== "/lists"}><Lists labels={labels} personal={personal} publication={publication}
+    lyrics={lyrics} onLyrics={onLyrics} opened={opened} change={change} /></div>;
 }
 function BrowsingSession(props: {
   publication: Publication; labels: Labels; personal: Personal; favoritesOnly: boolean;
@@ -326,7 +327,8 @@ export default function App() {
       {store && <ReferenceFavorites labels={labels} personal={store} publication={lyrics} legacyPublication={publication} toggle={toggle} />}
       {store && <RecentHistory labels={labels} personal={store} publication={publication} lyrics={lyrics} />}
       {store && <Learning labels={labels} personal={store} publication={publication} lyrics={lyrics} />}
-      {store && <ListsSession key={attempt} labels={labels} personal={store} publication={publication} lyrics={lyrics} />}
+      {store && <ListsSession key={attempt} labels={labels} personal={store} publication={publication} lyrics={lyrics}
+        onLyrics={setLyrics} opened={opened} change={change} />}
         <Routes>
         <Route path="/" element={null} />
         <Route path="/favorites" element={null} />

@@ -50,3 +50,6 @@
 :global(body[data-recite="focused"]) .notice,
 :global(body[data-recite="focused"]) .footer,
 :global(body[data-recite="focused"]) .back { display: none; }
+
+.recitationNavigation > div { display: flex; flex-wrap: wrap; gap: var(--space); }
+.recitationNavigation button { min-height: 48px; padding: calc(var(--space) * 2); }

@@ -2,6 +2,7 @@ import { test, expect, type Page } from "@playwright/test";
 import messages from "../../shared/generated/web/ui.json" with { type: "json" };
 import { config, personalSnapshot, serveLyrics } from "../lyric-browser";
 import { lyricId } from "../lyric-fixture";
+import { installScreenAwakeAdapter as adapter } from "../screen-awake";
 
 const labels = messages.en;
 const recite = (page: Page) => page.getByRole("button", { name: labels.recite, exact: true });
@@ -10,40 +11,6 @@ const awake = (page: Page) => page.getByRole("button", { name: labels.keepScreen
 const navigation = (page: Page) => page.getByRole("navigation", { name: labels.appName, exact: true });
 const layout = (page: Page) => page.locator("div[lang=kn] > p").evaluateAll(elements =>
   elements.map(element => [element.id, element.textContent, element.hasAttribute("data-layout"), element.innerHTML]));
-declare global {
-  interface Window {
-    reciteWakeTest: {
-      mode: "normal" | "deny" | "release-fail" | "unconfirmed" | "pending";
-      requests: number; releases: number; active: boolean; hidden: boolean;
-      settle: () => void; end: () => void;
-    };
-  }
-}
-async function adapter(page: Page) {
-  await page.addInitScript(() => {
-    const state: Window["reciteWakeTest"] = { mode: "normal", requests: 0, releases: 0, active: false, hidden: false,
-      settle: () => { throw new Error("No pending synthetic request"); }, end: () => { throw new Error("No synthetic sentinel"); } };
-    window.reciteWakeTest = state;
-    Object.defineProperty(document, "visibilityState", { configurable: true, get: () => state.hidden ? "hidden" : "visible" });
-    class Sentinel extends EventTarget {
-      released = false;
-      async release() {
-        state.releases++;
-        if (state.mode === "release-fail") throw new DOMException("Synthetic release denial", "NotAllowedError");
-        if (state.mode === "unconfirmed") return;
-        this.end();
-      }
-      end() { this.released = true; state.active = false; this.dispatchEvent(new Event("release")); }
-    }
-    Object.defineProperty(navigator, "wakeLock", { configurable: true, value: { request: async (type: string) => {
-      if (type !== "screen") throw new Error("Unexpected wake request type");
-      state.requests++;
-      if (state.mode === "deny") throw new DOMException("Synthetic request denial", "NotAllowedError");
-      if (state.mode === "pending") await new Promise<void>(resolve => { state.settle = resolve; });
-      const sentinel = new Sentinel(); state.active = true; state.end = () => sentinel.end(); return sentinel;
-    } } });
-  });
-}
 async function prepare(page: Page, fixture = false) {
   const requests = await serveLyrics(page);
   await page.goto("/#/settings");

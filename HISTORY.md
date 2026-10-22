@@ -1,5 +1,59 @@
 # Documentation history
 
+## 2026-10-22: saved-list Recite and final individual-mode publication evidence
+
+- Archived the superseded Website-only individual Recite limitation: saved-list
+  traversal/boundaries were unimplemented, and list reading preferences remained
+  uncovered. REC-03 now has session-only ordered stored occurrences, literal
+  placeholders/repetitions, exact typed resolution, explicit empty/start/end/
+  unavailable/cancellation/retry states, one optional awake owner and original
+  mounted draft/Back-focus restoration. Active-list changes end mode explicitly.
+  No REC-04 position, schema/default, backup, verse identity or durable offline
+  readiness is introduced. Native adoption/validation remains independent.
+- Archived final individual-mode Website78da1db4b20e2f8cba6d13c604baf3b8182301fe:
+  preflight39813680606 stalled after successful steps; a full fresh exact-ref
+  dispatch39815715890 passed every actual required job/step (the original later
+  completed too). Fresh admin/main/guard/exact tree/pin/68b baseline/ancestry
+  gates preceded normal main push. Main/Pages39817016489 and CodeQL39817016517
+  passed all actual required jobs/steps; both owned contained refs were cleaned.
+- Isolated hosted Chromium compared24 exact deployed artifact bodies from the
+ 29-entry Pages artifact, actual871 catalog/3 Library requests, exact canonical
+  text/layout digest, fonts and full native70 five-table/schema preservation.
+  Explicit entry/controls/Escape/exit, offline session Recite and actual offline
+  shell Settings restart passed.12 cache bodies plus worker were1010002/
+ 8388608 bytes. Real headless wake acquisition was denied and explicitly reported,
+  not counted as an active lease; controlled lifecycle/native flags remain
+  separate evidence. The first external probe incorrectly expected immediate
+  control after worker readiness; a normal explicit online reload established
+  actual control without changing app activation policy. Final proof passed twice,
+  including full database schema metadata. Owned browser/helper/extracted artifact
+  scratch were cleaned; user pages/servers/emulator were preserved, logs retained.
+- Website independently adopted published Shared397988's seven additive bilingual
+  captions. Extracted the unchanged literal lyric renderer and controlled wake
+  test adapter for both reader modes. Initial strict TypeScript found two extra
+  JSX closing parentheses; corrected them and strict TypeScript passed.
+  `npm test -- list-recite screen-awake` passed13 units. First focused browser
+  command passed48/54: a real history-boundary bug passed occurrence IDs/fallbacks
+  into strict typed history, and a new fixture expectation assumed three rather
+  than its actual two lines. Projected only typed kind/ID at successful opens;
+  strengthened coverage for both canonical/legacy fallbacks and exact history.
+  Corrected the fixture expectation and asserted different literal content.
+  `node node_modules\@playwright\test\cli.js test recite` then passed54/54
+  across desktop/Pixel7/320px, zero failures/skips. No retry/time-limit or integrity/
+  stale-state/history assertion was weakened.
+- Final `npm run check` passed121 units, strict TypeScript/production build and
+  all384 browser cases, zero failures/skips. `python shared\tools\check_repository.py`
+  passed75 tracked Shared files; actionlint1.7.12 with ShellCheck0.11.0 passed.
+  Existing strict Node YAML parsed all4 GitHub/settings files. Python PyYAML
+  was unavailable, so no Python YAML pass is claimed and no dependency was
+  installed. The inline documentation checker initially omitted I18N IDs;
+  corrected its alphanumeric-prefix grammar and checked all17 UTF8/newline/
+  whitespace/fence-clean guides/archive,237 local links/anchors and153 unique
+  requirement IDs. Both whitespace checks passed. Fresh dist was frozen and
+  exclusive native device/HTTP ownership granted only after full Website success.
+  Native reported51 clean core tests/all builds/both lints/compiled95 connected
+  cases before this grant; connected results remain unclaimed until execution.
+
 ## 2026-10-22: Recite publication and committed-history test synchronization
 
 - Archived the prior Website-only REC-01/02 capability/Native-adoption-open

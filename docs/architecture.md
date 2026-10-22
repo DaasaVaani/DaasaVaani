@@ -329,8 +329,8 @@ Mutations use the latest complete transaction state. Bound/same-density actions
 are no-ops without a row/revision write; default rendering stores no preferences.
 Changes propagate to peer tabs and survive reload without additional successful
 reader-open/history events or implicit content requests.
-This covers later reading/settings controls and the individual focused Recite
-surface below. Onboarding, helper/scripts, list recitation/Practice, persistent offline use and full device/font accessibility remain
+This covers later reading/settings controls and individual/saved-list focused Recite
+surfaces below. Onboarding, helper/scripts, Practice, persistent offline use and full device/font accessibility remain
 separate requirements, not inferred from canonical/fixture browser tests.
 
 ### Focused individual Recite and screen awake
@@ -362,9 +362,47 @@ Failures are shown explicitly and logged, including cleanup failures after the
 reader has departed. Unsupported/failed screen awake never blocks Recite.
 
 This slice does not force full-screen/orientation, load video/audio or promise
-to override OS restrictions. List traversal/boundaries (REC-03), durable latest
+to override OS restrictions. Durable latest
 occurrence/Continue recitation (REC-04), selected-script generation and persistent
 offline content remain separate open work.
+
+### Saved-list Recite occurrences
+
+REC-03 adds an explicit Recite list action for a selected stored list, including
+an empty list. It reads stored contents, never unsaved editor fields. Every
+independent occurrence retains its exact position/identity, including consecutive
+equal references and literal placeholders. Previous/Next never wrap or skip an
+unavailable reference. Empty/start/end feedback is explicit; an empty list has no
+invented position. Typed legacy/lyric identities never imply a mapping.
+
+One session-only owner holds the captured list, position and optional awake
+request through movement. Escape/Exit/Back end mode and restore the original
+mounted list/editor drafts and start control. A same-path history token creates
+the explicit Back boundary, but cannot recreate mode through Forward/reload.
+Settings/navigation departure also ends it. There is no new personal schema,
+stored position, automatic entry or Continue action.
+
+The selected occurrence alone loads content. Canonical entries reuse the
+verified catalog/selected-object cache, lazily loading metadata when necessary;
+fixture entries retain a separate verified session cache. Pending metadata,
+unknown references, download failure/cancellation and explicit retry remain
+distinct. Changing occurrence immediately removes prior text and aborts its
+request; late results cannot expose content or record history. Successful explicit
+opens project only the exact typed reference into normal recent history, excluding
+local occurrence IDs/fallbacks. Empty/placeholder/unavailable/failed/cancelled
+selections write nothing. Font/density changes do not reload or replay history.
+The shared literal renderer preserves canonical line/layout identities and
+fixture paragraph/highlight behavior in both ordinary and list readers.
+
+Compare the captured list against its live stored identity, name, ordered
+occurrence IDs, kinds, raw references, fallbacks and placeholder text. Any change
+or deletion ends Recite with the existing explicit stale-state error rather than
+jumping or continuing stale order; unrelated history/preferences/labels do not.
+The original editor DOM remains mounted hidden during mode, preserving focus
+targets and drafts. Position focus moves only on explicit entry/movement, not
+asynchronous results. Already verified process-local text may work offline;
+this neither prepares a complete snapshot nor provides persistent offline readiness.
+Native owns its independent adoption, complete-preparation gate and validation.
 
 ### Personal schema refusal
 

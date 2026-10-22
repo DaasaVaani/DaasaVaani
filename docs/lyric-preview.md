@@ -181,7 +181,21 @@ background/navigation/disposal without foreground reacquisition. Consult the
 for its platform lifecycle and separate validation boundaries.
 Already verified session text remains usable without a network connection, but
 this is not durable offline readiness: reload retains the existing online/
-preparation gate. List traversal and Continue recitation remain unimplemented.
+preparation gate.
+
+Website saved lists offer an explicit Recite list action over the exact stored
+order. Repetitions and raw placeholders remain independent occurrences;
+Previous/Next do not wrap or skip missing entries. Empty/start/end states and
+unavailable/failed/cancelled downloads are explicit, with retry only on request.
+Only the selected lyric loads; successful opens use normal typed recent history,
+never storing local occurrence IDs/fallbacks there. List movement retains one
+focused/optional-awake owner and the same independent reading preferences.
+Exit/Escape/Back restore the original mounted list drafts and start focus;
+Forward/reload never reenter. An active stored-list change/deletion ends mode
+with a stale-state error rather than silently changing order. See the
+[occurrence lifecycle](architecture.md#saved-list-recite-occurrences).
+Continue recitation, persistent position and complete offline readiness remain
+unimplemented; management/preview is not native preparation.
 
 ## Local learning labels
 
@@ -236,7 +250,7 @@ never record. Clear/disable preserve favorites/lists/preferences; unknown
 references remain visible. See the [history lifecycle](architecture.md#recently-opened-lifecycle).
 
 Still open: complete production-profile reading, bookmarks/verse Practice/
-recitation for real UUIDs, full personal backups, full linguistic search/
+latest-occurrence recitation resume for real UUIDs, full personal backups, full linguistic search/
 profiles/helpers, populated classification/context/verse/media/eligible-Latin
 public adapters, rights/registry closure, persistent offline activation/repair,
 publication ledger/date/ZIP protocols and release/platform acceptance.

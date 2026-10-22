@@ -627,6 +627,12 @@ validation must be settled before implementation.
   items/placeholders, moving/removing one occurrence, duplicate/import order and
   cancelled duplicate-name confirmation. Confirmed equal names remain separate
   lists. Cross-platform transfer decoding remains ALG-14.
+- **Current Website REC-03:** array position preserves every independent
+  occurrence; movement is O(1), with no deduplication/skip/wrap. Captured/live list
+  comparison is O(entries), checking exact ordered occurrence IDs/kinds/raw values
+  and name; any change ends the session rather than reanchoring. Typed catalog/
+  cache lookups remain exact. This supplies session navigation, not MED-07
+  persisted-position recovery or durable offline/readiness evidence.
 
 ### MED-06: Bounded recently-opened history
 

@@ -24,8 +24,12 @@ The Website's [focused individual Recite](lyric-preview.md#focused-recite) adds
 bounded REC-01/02 entry/exit/restorable controls and optional scoped screen-awake
 requests to loaded canonical/fixture readers. No schema/preference/history or
 content-lifecycle change accompanies it. Native independently implements the
-same bounded focused-reading/scoped-awake surface. REC-03/04 list
-traversal/Continue recitation, reviewed verse Practice and persistent offline
+same bounded focused-reading/scoped-awake surface. Website additionally implements
+session-only REC-03 saved-list order, repetitions/placeholders, explicit boundaries/
+unavailability, cancellation/retry and conservative active-list invalidation,
+preserving drafts/Back focus and one awake owner. Selected successful reads use
+normal history without storing occurrence metadata. Native adoption/validation
+remains independent. REC-04 Continue recitation, reviewed verse Practice and persistent offline
 content remain open; this is not complete recitation.
 
 ## Current implementation coverage

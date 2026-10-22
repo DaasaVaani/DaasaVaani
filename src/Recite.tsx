@@ -40,10 +40,13 @@ function ScreenAwakeControl({ labels }: { labels: Labels }) {
     </p>
   </div>;
 }
-export function Recite({ labels, heading, controls, children, secondary }: {
+export function Recite({ labels, heading, controls, children, secondary, list }: {
   labels: Labels; heading: ReactNode; controls: ReactNode; children: ReactNode; secondary: ReactNode;
+  list?: { onExit: () => void; navigation: ReactNode };
 }) {
-  const [active, setActive] = useState(false), [showControls, setShowControls] = useState(false);
+  const [individual, setIndividual] = useState(false), [showControls, setShowControls] = useState(false);
+  const active = list !== undefined || individual;
+  const leave = () => { if (list) list.onExit(); else setIndividual(false); };
   const button = useRef<HTMLButtonElement>(null);
   const focused = active && !showControls;
   useEffect(() => {
@@ -56,21 +59,26 @@ export function Recite({ labels, heading, controls, children, secondary }: {
     };
   }, [active, focused]);
   return <div onKeyDown={event => {
-    if (focused && event.key === "Escape") { event.preventDefault(); setActive(false); button.current?.focus({ preventScroll: true }); }
+    if (focused && event.key === "Escape") {
+      event.preventDefault(); leave(); if (!list) button.current?.focus({ preventScroll: true });
+    }
   }}>
     {heading}
     <div>
-      <button ref={button} aria-pressed={active} onClick={() => { setShowControls(false); setActive(value => !value); }}>
+      <button ref={button} aria-pressed={active} onClick={() => {
+        setShowControls(false); if (list) leave(); else setIndividual(value => !value);
+      }}>
         {active ? labels.exitRecite : labels.recite}
       </button>
       {active && <>
         <button className={styles.secondary} aria-expanded={showControls} onClick={() => setShowControls(value => !value)}>
           {showControls ? labels.hideReadingControls : labels.showReadingControls}
         </button>
-        <p className={styles.muted}>{labels.reciteNotice}</p>
+        <p className={styles.muted}>{list ? labels.listReciteNotice : labels.reciteNotice}</p>
         <ScreenAwakeControl labels={labels} />
       </>}
     </div>
+    {list?.navigation}
     <div hidden={focused}>{controls}</div>
     {children}
     <div hidden={focused}>{secondary}</div>

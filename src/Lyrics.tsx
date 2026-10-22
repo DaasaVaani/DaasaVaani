@@ -10,6 +10,7 @@ import { AddToList } from "./AddToList";
 import { ReadingPreferences, type ReadingPreferencesProps } from "./ReadingPreferences";
 import { LearningControl } from "./Learning";
 import { Recite } from "./Recite";
+import { LyricText } from "./LyricText";
 import { LyricPagination, useLyricPaging } from "./LyricPaging";
 import styles from "./App.module.css";
 
@@ -97,9 +98,7 @@ function LyricReader({ publication, labels, personal, preferences, change, toggl
       secondary={<><p className={styles.muted}>{labels.lyricNoMedia}</p>
         {personal && reference ? <AddToList key={item.lyricId} labels={labels} personal={personal} reference={reference} />
           : <p role="status">{labels.personalUnavailable}</p>}</>}>
-      <div lang="kn" className={styles.lyrics}>{item.lines.map((line, index) =>
-        <p key={line.kind === "line" ? line.lineId : `layout-${index}`}
-          {...(line.kind === "line" ? { id: line.lineId } : { "data-layout": true })}>{line.text || <br />}</p>)}</div>
+      <LyricText item={item} />
     </Recite>}
   </section>;
 }

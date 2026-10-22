@@ -86,7 +86,7 @@ See [the storage/name protocol](architecture.md#transactions-names-and-exact-acc
   authoritative; no full offline-shell/device/font coverage is inferred.
   Independent lyric font/density controls in Settings and both readers affect
   body text only and preserve canonical layout/history; onboarding/helper/
-  list recitation/resume/Practice/offline preference coverage remains incomplete.
+  resume/Practice/offline preference coverage remains incomplete.
 - Learning labels follow the [Shared contract](https://github.com/DaasaVaani/shared/blob/main/docs/learning-labels.md):
   exact typed identity, stable assignment order, explicit linear duplicate check,
   fenced/no-op writes and complete personal accounting. Learning management
@@ -99,6 +99,13 @@ See [the storage/name protocol](architecture.md#transactions-names-and-exact-acc
   Requests are explicit, scoped, truthfully reported and released on departure/
   background; late acquisition must not reactivate a departed reader. Do not
   silently reacquire, force full screen or promise OS power-policy control.
+- Website saved-list REC-03 traverses exact independent stored occurrences,
+  including repetitions/placeholders/unavailable references, without wrap/skip.
+  Preserve original mounted drafts/return focus, abort stale selected reads and
+  project only typed references into successful-open history. Active-list changes
+  end mode explicitly; unrelated personal changes do not. Session state is not
+  REC-04 persistence/Continue or durable offline readiness. Native retains its
+  independent complete-preparation gate and validation.
 - Shared owns portable contracts/settings/fixtures and UI catalogs/generator/
   committed resources. Library owns source/assets/registries/ingestion/publisher.
   Consumers query published artifacts and pin Shared independently.

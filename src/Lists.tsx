@@ -1,4 +1,5 @@
-import { useId, useLayoutEffect, useMemo, useRef, useState } from "react";
+import { useEffect, useId, useLayoutEffect, useMemo, useRef, useState } from "react";
+import { useLocation, useNavigate } from "react-router-dom";
 import type messages from "../shared/generated/web/ui.json";
 import { deleteList, saveList } from "./personal";
 import { editEntry, listSnapshot, moveEntry, newList, removeEntry, type ListEntry, type ListRecord, type PersonalStore, type Revision } from "./personal-model";
@@ -8,13 +9,24 @@ import { ListExport, type ExportSource } from "./ListExport";
 import type { Publication } from "./artifacts";
 import { ListEntryView } from "./ListEntryView";
 import type { LyricLibrary } from "./lyric-publication";
+import { ListRecite } from "./ListRecite";
+import { sameRecitationList } from "./list-recite";
+import type { PersonalReference } from "./list-transfer-types";
+import type { ReadingPreferencesProps } from "./ReadingPreferences";
 
 interface EntryDraft { id?: string; kind: ListEntry["kind"]; identifier: string; text: string; fallback: string }
 
-export function Lists({ labels, personal, publication, lyrics }: {
+export function Lists({ labels, personal, publication, lyrics, onLyrics, opened, change }: {
   labels: typeof messages.en; personal: PersonalStore; publication?: Publication; lyrics?: LyricLibrary;
+  onLyrics: (library: LyricLibrary) => void; opened: (reference: PersonalReference) => void; change: ReadingPreferencesProps["change"];
 }) {
   const id = useId();
+  const location = useLocation(), navigate = useNavigate();
+  const state: unknown = location.state;
+  const routeSession = state !== null && typeof state === "object" && "listRecite" in state &&
+    typeof state.listRecite === "string" ? state.listRecite : undefined;
+  const [reciting, setReciting] = useState<{ token: string; record: ListRecord }>();
+  const reciteButton = useRef<HTMLButtonElement>(null), restoreRecite = useRef(false);
   const [name, setName] = useState("");
   const [newName, setNewName] = useState("");
   const [selected, setSelected] = useState<{ record: ListRecord; expected: Revision }>();
@@ -31,12 +43,29 @@ export function Lists({ labels, personal, publication, lyrics }: {
   const working = busy || save.busy || exportBusy;
   const source = useMemo<ExportSource | undefined>(() => selected
     ? { kind: "stored", id: selected.record.id, expected: selected.expected } : undefined, [selected]);
+  useEffect(() => {
+    setReciting(current => {
+      if (!current || routeSession === current.token) return current;
+      restoreRecite.current = location.pathname === "/lists";
+      return undefined;
+    });
+  }, [location.key, location.pathname, routeSession]);
+  useEffect(() => {
+    if (!reciting || sameRecitationList(reciting.record, personal.lists.find(record => record.id === reciting.record.id))) return;
+    restoreRecite.current = true; setReciting(undefined); setError(labels.personalStale);
+    if (routeSession === reciting.token) navigate(-1);
+  }, [reciting, personal.lists, labels.personalStale, routeSession, navigate]);
   useLayoutEffect(() => {
+    if (restoreRecite.current && !reciting && location.pathname === "/lists") {
+      (reciteButton.current && !reciteButton.current.disabled ? reciteButton.current : heading.current)
+        ?.focus({ preventScroll: true });
+      restoreRecite.current = false;
+    }
     if (focus.current !== undefined) {
       (focus.current === null ? heading.current : entryGroups.current.get(focus.current) ?? heading.current)?.focus();
       focus.current = undefined;
     }
-  }, [selected, editor]);
+  }, [selected, editor, reciting, location.key, location.pathname]);
   function choose(record: ListRecord) {
     save.reset(); setError(""); setDeleting(false);
     setEditor(undefined); setEntrySaved(false);
@@ -66,7 +95,9 @@ export function Lists({ labels, personal, publication, lyrics }: {
     catch (reason) { setError(personalMessage(reason, labels)); setDeleting(false); }
     finally { setBusy(false); }
   }
-  return <section className={styles.reader}><h1 ref={heading} tabIndex={-1}>{labels.lists}</h1>
+  const active = reciting !== undefined && routeSession === reciting.token && location.pathname === "/lists" &&
+    sameRecitationList(reciting.record, personal.lists.find(record => record.id === reciting.record.id));
+  return <section className={styles.reader}><div hidden={active}><h1 ref={heading} tabIndex={-1}>{labels.lists}</h1>
     {!personal.lists.length && <p>{labels.emptyLists}</p>}
     <form aria-label={labels.createList} onSubmit={event => {
       event.preventDefault();
@@ -83,6 +114,13 @@ export function Lists({ labels, personal, publication, lyrics }: {
     </li>)}</ul>
     {selected && <section aria-label={selected.record.name}>
       <h2>{selected.record.name}</h2>
+      <button ref={reciteButton} disabled={working || !sameRecitationList(selected.record,
+        personal.lists.find(record => record.id === selected.record.id))} onClick={event => {
+        event.currentTarget.focus({ preventScroll: true });
+        const token = crypto.randomUUID();
+        setError(""); setReciting({ token, record: selected.record });
+        navigate("/lists", { state: { listRecite: token } });
+      }}>{labels.reciteList}</button>
       <form aria-label={labels.renameList} onSubmit={event => {
         event.preventDefault();
         void save.run(() => ({ ...selected.record, name }), selected.expected, true);
@@ -151,5 +189,10 @@ export function Lists({ labels, personal, publication, lyrics }: {
     {save.feedback}
     {entrySaved && <p role="status">{labels.listUpdated}</p>}
     {error && <p role="alert">{error}</p>}
+    </div>
+    {active && reciting && <ListRecite record={reciting.record} labels={labels} personal={personal} publication={publication}
+      lyrics={lyrics} onLyrics={onLyrics} opened={opened} change={change} exit={() => {
+        restoreRecite.current = true; setReciting(undefined); navigate(-1);
+      }} />}
   </section>;
 }
