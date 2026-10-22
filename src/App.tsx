@@ -11,11 +11,12 @@ import { Lists } from "./Lists";
 import { AddToList } from "./AddToList";
 import { Lyrics, ReferenceFavorites } from "./Lyrics";
 import { HistoryControls, RecentHistory } from "./RecentHistory";
+import { Learning, LearningControl } from "./Learning";
 import { ReadingPreferences, type ReadingPreferencesProps } from "./ReadingPreferences";
 import { useAppShell } from "./app-shell";
 import type { LyricLibrary } from "./lyric-publication";
 import type { PersonalReference } from "./list-transfer-types";
-import { hasFavorite, toggleFavorite } from "./personal-model";
+import { hasFavorite, learningLabelFor, toggleFavorite } from "./personal-model";
 import styles from "./App.module.css";
 
 type Labels = typeof messages.en;
@@ -28,7 +29,7 @@ function ShellNotices({ labels, shell }: { labels: Labels; shell: ReturnType<typ
   </>;
 }
 function FixtureOnly({ children }: { children: ReactNode }) {
-  return /^\/lyrics(?:\/|$)/u.test(useLocation().pathname) ? null : children;
+  return /^\/(?:lyrics(?:\/|$)|learning$)/u.test(useLocation().pathname) ? null : children;
 }
 function ListRoute({ labels, personal, publication, lyrics }: {
   labels: Labels; personal?: PersonalStore; publication?: Publication; lyrics?: LyricLibrary;
@@ -51,7 +52,7 @@ function Reader({ publication, labels, personal, store, toggle, opened, change }
   const navigate = useNavigate();
   const state: unknown = location.state;
   const origin = state && typeof state === "object" && "browseFrom" in state ? state.browseFrom : undefined;
-  const fromBrowsing = origin === "/" || origin === "/favorites" || origin === "/lists" || origin === "/recent";
+  const fromBrowsing = origin === "/" || origin === "/favorites" || origin === "/lists" || origin === "/recent" || origin === "/learning";
   const [params] = useSearchParams();
   const [item, setItem] = useState<FixtureItem>();
   const [error, setError] = useState("");
@@ -81,7 +82,7 @@ function Reader({ publication, labels, personal, store, toggle, opened, change }
           navigate(-1);
         }
       }}>← {origin === "/lists" ? labels.backToList : origin === "/favorites" ? labels.favorites
-        : origin === "/recent" ? labels.recentHistory : labels.back}</Link>
+        : origin === "/recent" ? labels.recentHistory : origin === "/learning" ? labels.learning : labels.back}</Link>
     {error && <p role="alert" className={styles.error}>{error}</p>}
     {!item && !error && <p role="status">{labels.loading}</p>}
     {item && item.videoId === id && <>
@@ -93,6 +94,8 @@ function Reader({ publication, labels, personal, store, toggle, opened, change }
         </button>
       </header>
       <ReadingPreferences labels={labels} personal={personal} change={change} />
+      <LearningControl key={item.videoId} labels={labels} reference={{ kind: "legacyVideo", videoId: item.videoId }}
+        label={learningLabelFor(store.learning, { kind: "legacyVideo", videoId: item.videoId })} revision={store.control} />
       <div lang="kn" className={styles.lyrics}>
         {item.lines.map(line => <p id={line.id} key={line.id} data-selected={line.id === lineId}>{line.text || "\u00a0"}</p>)}
       </div>
@@ -300,6 +303,7 @@ export default function App() {
       <NavLink to="/lyrics">{labels.ownerLyrics}</NavLink>
       <NavLink to="/favorites">{labels.favorites}</NavLink>
       <NavLink to="/recent">{labels.recentHistory}</NavLink>
+      <NavLink to="/learning">{labels.learning}</NavLink>
       <NavLink to="/lists">{labels.lists}</NavLink>
       <NavLink to="/settings">{labels.settings}</NavLink>
     </nav></header>
@@ -320,11 +324,13 @@ export default function App() {
       </>}
       {store && <ReferenceFavorites labels={labels} personal={store} publication={lyrics} legacyPublication={publication} toggle={toggle} />}
       {store && <RecentHistory labels={labels} personal={store} publication={publication} lyrics={lyrics} />}
+      {store && <Learning labels={labels} personal={store} publication={publication} lyrics={lyrics} />}
       {store && <ListsSession key={attempt} labels={labels} personal={store} publication={publication} lyrics={lyrics} />}
         <Routes>
         <Route path="/" element={null} />
         <Route path="/favorites" element={null} />
         <Route path="/recent" element={null} />
+        <Route path="/learning" element={null} />
         <Route path="/lists" element={null} />
         <Route path="/lyrics/*" element={null} />
         <Route path="/item/:id" element={publication && personalReady && store

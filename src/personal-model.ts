@@ -5,7 +5,9 @@ import transferSchema from "../shared/schemas/list-transfer.schema.json";
 import transferSchemaV2 from "../shared/schemas/list-transfer-v2.schema.json";
 import referenceSchema from "../shared/schemas/personal-reference.schema.json";
 import historySchema from "../shared/schemas/recent-history.schema.json";
-import type { ReadingDensity, RecentHistoryV1 } from "../shared/types/personal";
+import learningSchema from "../shared/schemas/learning-labels.schema.json";
+import type { LearningLabel, LearningLabelsV1, ReadingDensity, RecentHistoryV1 } from "../shared/types/personal";
+export type { LearningLabel, LearningLabelsV1 } from "../shared/types/personal";
 export type { RecentHistoryV1 } from "../shared/types/personal";
 import { typedEntry, type ListSnapshot, type ListSnapshotV1, type ListEntryV2, type ListTransferV2, type PersonalReference } from "./list-transfer-types";
 import { unicodeNameKey as listNameKey } from "./unicode-names";
@@ -18,8 +20,8 @@ export interface Personal {
 export type ListEntry = ListEntryV2 & { id: string };
 export interface ListRecord { id: string; name: string; entries: ListEntry[] }
 export interface Revision { epoch: string; revision: number }
-export interface Control extends Revision { id: "state"; formatVersion: 6 }
-export interface PersonalStore { control: Control; personal?: Personal; lists: ListRecord[]; history: RecentHistoryV1 }
+export interface Control extends Revision { id: "state"; formatVersion: 7 }
+export interface PersonalStore { control: Control; personal?: Personal; lists: ListRecord[]; history: RecentHistoryV1; learning: LearningLabelsV1 }
 export type PersonalErrorCode = "invalid" | "listInvalid" | "capacity" | "stale" | "duplicate";
 export class PersonalError extends Error {
   constructor(readonly code: PersonalErrorCode) {
@@ -38,6 +40,7 @@ type LegacyList = Omit<ListRecord, "entries"> & { entries: (ListSnapshotV1["entr
 const validLegacyList = ajv.compile<LegacyList>(legacyRecordSchema);
 const validReference = ajv.compile<PersonalReference>(referenceSchema);
 const validHistory = ajv.compile<RecentHistoryV1>(historySchema);
+const validLearning = ajv.compile<LearningLabelsV1>(learningSchema);
 const validSnapshotV1 = ajv.compile<ListSnapshotV1>(transferSchema), validSnapshotV2 = ajv.compile<ListTransferV2>(transferSchemaV2);
 const validSnapshot = (value: unknown): value is ListSnapshot => validSnapshotV1(value) || validSnapshotV2(value);
 const uuid = new RegExp(recordSchema.properties.id.pattern, "u");
@@ -58,6 +61,36 @@ export function toggleFavorite(personal: Personal, reference: PersonalReference)
 }
 export function defaultHistory(): RecentHistoryV1 {
   return { enabled: __WEB_CONFIG__.defaultRecentHistoryEnabled, entries: [] };
+}
+export const learningChoices = ["wantToLearn", "practising", "comfortableReciting"] as const;
+export function validateLearning(value: unknown, limits = __PERSONAL_LIMITS__): asserts value is LearningLabelsV1 {
+  if (!object(value) || !Array.isArray(value.entries)) throw new PersonalError("invalid");
+  if (value.entries.length > limits.maxLearningLabels) throw new PersonalError("capacity");
+  if (Object.keys(value.entries).length !== value.entries.length || !validLearning(value) ||
+      new Set(value.entries.map(referenceKey)).size !== value.entries.length) throw new PersonalError("invalid");
+}
+export function learningLabelFor(learning: LearningLabelsV1, reference: PersonalReference): LearningLabel | undefined {
+  const key = referenceKey(reference);
+  return learning.entries.find(entry => referenceKey(entry) === key)?.label;
+}
+export function saveLearningLabel(state: PersonalStore, reference: PersonalReference, label: LearningLabel | undefined,
+  expected: Revision, limits = __PERSONAL_LIMITS__): PersonalStore {
+  assertRevision(state.control, expected);
+  validateLearning(state.learning, limits);
+  if (!validReference(reference) || (label !== undefined && !learningChoices.some(value => value === label))) throw new PersonalError("invalid");
+  if (learningLabelFor(state.learning, reference) === label) return state;
+  const key = referenceKey(reference);
+  const index = state.learning.entries.findIndex(entry => referenceKey(entry) === key);
+  const entries = [...state.learning.entries];
+  if (label === undefined) entries.splice(index, 1);
+  else {
+    const entry = reference.kind === "lyric" ? { kind: reference.kind, lyricId: reference.lyricId, label }
+      : { kind: reference.kind, videoId: reference.videoId, label };
+    if (index < 0) entries.push(entry); else entries[index] = entry;
+  }
+  const next = { ...nextRevision(state, expected), learning: { entries } };
+  validateStore(next, limits);
+  return next;
 }
 export function validateHistory(value: unknown, limits = __PERSONAL_LIMITS__): asserts value is RecentHistoryV1 {
   if (!object(value) || !Array.isArray(value.entries)) throw new PersonalError("invalid");
@@ -110,7 +143,7 @@ export function setReadingDensity(personal: Personal, value: unknown): Personal 
   return personal.density === density ? personal : { ...personal, density };
 }
 export function newControl(): Control {
-  return { id: "state", formatVersion: 6, epoch: crypto.randomUUID(), revision: 0 };
+  return { id: "state", formatVersion: 7, epoch: crypto.randomUUID(), revision: 0 };
 }
 function controlRevision(controls: unknown[], version: number): Revision {
   const control = controls[0];
@@ -147,12 +180,31 @@ function historyRow(histories: unknown[]): RecentHistoryV1 {
   validateHistory(history);
   return history;
 }
-export function parseStore(controls: unknown[], personal: unknown[], lists: unknown[], histories: unknown[]): PersonalStore {
-  const control = controlRevision(controls, 6), preferences = preferenceRow(personal);
+function learningRow(rows: unknown[]): LearningLabelsV1 {
+  const row = rows[0];
+  if (rows.length !== 1 || !object(row) || !keys(row, ["id", "entries"]) || row.id !== "learning") throw new PersonalError("invalid");
+  const learning = { entries: row.entries };
+  validateLearning(learning);
+  return learning;
+}
+export function parseStore(controls: unknown[], personal: unknown[], lists: unknown[], histories: unknown[], learning: unknown[]): PersonalStore {
+  const control = controlRevision(controls, 7), preferences = preferenceRow(personal);
   if (preferences !== undefined) validatePersonal(preferences);
-  const state: PersonalStore = { control: { id: "state", formatVersion: 6, ...control },
-    personal: preferences, lists: typedRecords(lists), history: historyRow(histories) };
+  const state: PersonalStore = { control: { id: "state", formatVersion: 7, ...control },
+    personal: preferences, lists: typedRecords(lists), history: historyRow(histories), learning: learningRow(learning) };
   validateStore(state);
+  return state;
+}
+export function migrateStoreV6(controls: unknown[], personal: unknown[], lists: unknown[], histories: unknown[],
+  limits = __PERSONAL_LIMITS__): PersonalStore {
+  const control = controlRevision(controls, 6), preferences = preferenceRow(personal);
+  if (preferences !== undefined) validatePersonal(preferences, limits);
+  const old = { control, personal: preferences, lists: typedRecords(lists) }, history = historyRow(histories);
+  validateCollections(old, limits);
+  validateHistory(history, limits);
+  storedBytes(old, 6, limits.maxPersonalStoredBytes, history);
+  const state = { ...old, control: newControl(), history, learning: { entries: [] } };
+  validateStore(state, limits);
   return state;
 }
 export function migrateStoreV4(controls: unknown[], personal: unknown[], lists: unknown[], limits = __PERSONAL_LIMITS__): PersonalStore {
@@ -160,7 +212,7 @@ export function migrateStoreV4(controls: unknown[], personal: unknown[], lists: 
   validateCollections(old, limits);
   storedBytes(old, 4, limits.maxPersonalStoredBytes);
   const state: PersonalStore = { ...old, personal: old.personal && { ...old.personal, ...readingDefaults() },
-    control: newControl(), history: defaultHistory() };
+    control: newControl(), history: defaultHistory(), learning: { entries: [] } };
   validateStore(state, limits);
   return state;
 }
@@ -171,7 +223,7 @@ export function migrateStoreV5(controls: unknown[], personal: unknown[], lists: 
   validateHistory(history, limits);
   storedBytes(old, 5, limits.maxPersonalStoredBytes, history);
   const state: PersonalStore = { ...old, personal: old.personal && { ...old.personal, ...readingDefaults() },
-    control: newControl(), history };
+    control: newControl(), history, learning: { entries: [] } };
   validateStore(state, limits);
   return state;
 }
@@ -214,7 +266,7 @@ function migrateLegacy(controls: unknown[], personal: unknown[], lists: unknown[
     records.push(list);
   }
   if (version !== 1) storedBytes({ control, personal: preferences, lists: records }, version, limits.maxPersonalStoredBytes);
-  const state: PersonalStore = { control: newControl(), history: defaultHistory(), personal: preferences && { ...preferences,
+  const state: PersonalStore = { control: newControl(), history: defaultHistory(), learning: { entries: [] }, personal: preferences && { ...preferences,
     favorites: preferences.favorites.map(videoId => ({ kind: "legacyVideo", videoId })), ...readingDefaults() },
     lists: records.map(list => ({ ...list, entries: list.entries.map(entry => ({ ...typedEntry(entry), id: entry.id })) })) };
   validateStore(state, limits);
@@ -275,10 +327,10 @@ export function jsonBytes(value: unknown, limit = Number.MAX_SAFE_INTEGER): numb
   return bytes;
 }
 export function storageBytes(state: PersonalStore, limit = Number.MAX_SAFE_INTEGER): number {
-  return storedBytes(state, 6, limit, state.history);
+  return storedBytes(state, 7, limit, state.history, state.learning);
 }
 function storedBytes(state: { control: Revision; personal?: PreviousPersonal | LegacyPersonal; lists: (ListRecord | LegacyList)[] },
-  version: number, limit: number, history?: RecentHistoryV1): number {
+  version: number, limit: number, history?: RecentHistoryV1, learning?: LearningLabelsV1): number {
   const personal = state.personal;
   return jsonBytes({
     format: version >= 4 ? "daasavaani-personal-storage" : "fixture-personal-storage", formatVersion: version,
@@ -292,6 +344,9 @@ function storedBytes(state: { control: Revision; personal?: PreviousPersonal | L
     })),
     ...(history ? { recentHistory: [{ id: "history", enabled: history.enabled, entries: history.entries.map(reference =>
       reference.kind === "lyric" ? { kind: "lyric", lyricId: reference.lyricId } : { kind: "legacyVideo", videoId: reference.videoId }) }] } : {}),
+    ...(learning ? { learningLabels: [{ id: "learning", entries: learning.entries.map(entry => entry.kind === "lyric"
+      ? { kind: "lyric", lyricId: entry.lyricId, label: entry.label }
+      : { kind: "legacyVideo", videoId: entry.videoId, label: entry.label }) }] } : {}),
   }, limit);
 }
 function validateCollections(state: { personal?: PreviousPersonal; lists: ListRecord[] }, limits: PersonalLimits): void {
@@ -314,6 +369,7 @@ export function validateStore(state: PersonalStore, limits = __PERSONAL_LIMITS__
   if (state.personal) validatePersonal(state.personal, limits);
   validateCollections(state, limits);
   validateHistory(state.history, limits);
+  validateLearning(state.learning, limits);
   storageBytes(state, limits.maxPersonalStoredBytes);
 }
 export function nextRevision(state: PersonalStore, expected: Revision): PersonalStore {

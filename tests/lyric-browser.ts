@@ -21,9 +21,10 @@ if (!validateDefaults(defaults)) throw new Error("Invalid portable reading defau
 export const readingDefaults = { fontSize: config.readerFontSize, density: defaults.readingDensity };
 export const defaultUiLanguage = defaults.uiLanguage;
 const limits = strictYaml(readFileSync(new URL("../shared/settings/personal-transfer.yml", import.meta.url), "utf8"));
-const validateLimits = new Ajv2020({ strict: true }).compile<Pick<PersonalLimits, "maxRecents">>(personalSchema);
+const validateLimits = new Ajv2020({ strict: true }).compile<Pick<PersonalLimits, "maxRecents" | "maxLearningLabels" | "maxFavorites">>(personalSchema);
 if (!validateLimits(limits)) throw new Error("Invalid configured personal history limits");
 export const maxRecents = limits.maxRecents;
+export const maxLearningLabels = limits.maxLearningLabels, maxFavorites = limits.maxFavorites;
 const base = new URL(".", config.lyricPreview.descriptorUrl);
 export async function serveLyrics(page: Page, fixture = lyricFixture(), corrupt: () => boolean = () => false) {
   const requests: string[] = [];

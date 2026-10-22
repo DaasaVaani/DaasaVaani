@@ -98,12 +98,13 @@ override/reload and independent theme/canonical Kannada behavior.
 Appearance journeys exercise actual media changes, persisted Warm/Follow device,
 configured palettes and independent Kannada UI/canonical text. Pure checks enforce
 at least4.5:1 normal text/accent contrast on configured reading surfaces and3:1
-interactive-boundary contrast. Native10/20/30/40/50-to60 database cases structurally
+interactive-boundary contrast. Native10/20/30/40/50/60-to70 database cases structurally
 type legacy favorites/entries while preserving their raw values and every
 list/occurrence ID, refreshing the local fence and rolling back invalid or
 over-capacity legacy data/schema, add configured reading defaults only to existing
 preference rows and preserve exact v5 history (earlier inputs gain empty history);
-future70 refusal and stale already-open
+preserve v6 font/density and initialize only empty labels;
+future80 refusal and stale already-open
 clients stay non-destructive. Media
 changes compare every personal table/header/index without automatic writes.
 The [reading-preference suite](../tests/browser/reading-preferences.spec.ts)
@@ -117,6 +118,22 @@ freeze old accounting and test prospective migration at the actual64MiB boundary
 `node node_modules\@playwright\test\cli.js test reading-preferences` is incremental
 only. These cases do not establish onboarding/helper/Recite/Practice/offline or
 complete physical-device/font coverage.
+The [Learning suite](../tests/browser/learning.spec.ts) covers canonical/fixture
+assignment, all three states, clearing/no-ops, peer propagation, unresolved and
+UUID-looking legacy identities, configured label capacity, exact personal
+snapshot isolation and no mounted-reader history replay. It checks All/state
+filters, complete configured paging/new-page focus, Learning-origin
+Back/Forward/consecutive discovery, explicit unavailable Practice, actual quota/
+stale-fence rollback, native60 preserving/invalid/schema/over-capacity upgrade
+and actual controlled offline-shell restart management without content readiness.
+The [pure learning suite](../src/learning.test.ts) consumes Shared accepted/
+structural/semantic vectors, tests typed uniqueness and stable order, required
+current rows, exact full-envelope accounting and actual configured aggregate
+ceiling/+1 admission, frozen v6 migration, no-op revision and minimal-export
+exclusion. `npm test -- personal-model unicode-names learning` and
+`node node_modules\@playwright\test\cli.js test learning reading-preferences recent-history lists`
+are incremental only. LEARN-04 is partial: reviewed verse Practice and its
+shortcut remain unimplemented; local labels are not assessed progress.
 Session-continuity journeys verify query/results, restored keyboard focus
 and measured scroll position through Back/Forward and reader return, no repeated
 index download, separate Library/Favorites searches, removed favorites, direct
@@ -265,6 +282,14 @@ or incoming signed App Links. File export still uses Create Document, not direct
 file sharing. No unreliable activity-result code is treated as a delivery or
 cancellation receipt; see the [native guide](https://github.com/DaasaVaani/AndroidApp/blob/main/README.md).
 
+Native learning checks cover Shared structural/semantic vectors, stable typed
+order and no-op/limit/accounting semantics, preserving Room6 migration and local
+filter/paging/restart management before preparation. Connected journeys exercise
+canonical/fixture label controls, exact text/history preservation and true
+Learning origin through preparation, readers, repeated discovery, Settings and
+Android Back. Minimal exports exclude labels; reviewed verse Practice remains
+unavailable. These do not prove durable canonical preparation or full device parity.
+
 Android requires Node, JDK21, the configured SDK36/build tools and an API36 emulator
 for current connected evidence. Set JAVA_HOME/ANDROID_HOME and select the intended
 device with ANDROID_SERIAL; do not target another user's device. From Android:
@@ -278,7 +303,7 @@ npm run config
 App-level JVM tests currently have no sources; the pure core has executable JVM
 tests. The connected test launches the actual Compose app, requires preparation,
 downloads/verifies the served fixtures and opens canonical text. The native
-suite also covers Room5 typed favorites, durable list/occurrence management and
+suite also covers Room6 typed favorites, durable list/occurrence management and
 device-only recent history, preserving migrations, v1/v2 import/export,
 reader/list navigation and independent font/density/locale/theme controls.
 Reading cases preserve the existing Normal baseline, literal text/spacing,
@@ -342,9 +367,10 @@ IDs or a release acceptance declaration.
 | SEARCH-12/13 | Sampled independent substring/full-matrix oracle, counted-gram candidates, native core checks and real browser search | Ordinary fixture text only; reviewed profiles/aliases/markers, exhaustive proof and complete native parity pending |
 | PLAT-01/05/06 | Real React and Compose apps; built-site desktop/mobile/320px journeys; stable PWA manifest/root and direct-entry links, decoded original icons, Chromium installability diagnostics and independent chrome/theme checks; one native API36 reading journey | Actual OS installation/launcher behavior, complete routes/layout/interaction modes and supported-platform/device matrix pending |
 | I18N-01/02/03, SET-04 | Matching two-locale resources; web first-use ordered browser-language selection, configured fallback, persisted four-mode appearance with contrast/media checks; native durable locale/theme preferences; canonical text remains independent | Complete script/personal preferences, device/font matrix and full localization conformance pending |
-| LIB-01/02/03/04/05/08/09/10/11 | Typed web/native lyric/legacy favorites/lists, independent occurrences/plain text, duplicate-name confirmation, management/manual replacement, exact catalog details/explicit reading, reader-to-list addition and preserving web v6/native Room5 upgrades | Recitation/offline/full personal collections and remaining production migrations remain incomplete |
-| LIB-06, SET-04, QUAL-05 | Web v6/native Room5 default-on device-only typed50-distinct successful-open history, explicit disable/re-enable/clear, retained unresolved refs, exact accounting, migration/failure/no-network and restart checks | Selected-script/offline parity and full personal backup remain incomplete |
-| UX-02/03/14, SET-04 | Website/native canonical/fixture and later Settings lyric-only bounded font/all densities, exact layout preservation, persisted independent native-unit choices, no-op/history and preserving web v6/native Room5 checks; Website peer propagation | Onboarding/helper/Recite/Practice/offline and complete font/device evidence remain open |
+| LIB-01/02/03/04/05/08/09/10/11 | Typed web/native lyric/legacy favorites/lists, independent occurrences/plain text, duplicate-name confirmation, management/manual replacement, exact catalog details/explicit reading, reader-to-list addition and preserving web v7/native Room6 upgrades | Recitation/offline/full personal collections and remaining production migrations remain incomplete |
+| LIB-06, SET-04, QUAL-05 | Web v7/native Room6 default-on device-only typed50-distinct successful-open history, explicit disable/re-enable/clear, retained unresolved refs, exact accounting, migration/failure/no-network and restart checks | Selected-script/offline parity and full personal backup remain incomplete |
+| LEARN-04, QUAL-05, XFER-01 | Website v7/native Room6 self-assigned typed labels/local filtered paged Learning view, no-network/offline management, preserving upgrade, exact limits/fences/no-ops and exclusion from minimal transfers | Reviewed verse Practice shortcut and full backups remain incomplete |
+| UX-02/03/14, SET-04 | Website/native canonical/fixture and later Settings lyric-only bounded font/all densities, exact layout preservation, persisted independent native-unit choices, no-op/history and preserving web v7/native Room6 checks; Website peer propagation | Onboarding/helper/Recite/Practice/offline and complete font/device evidence remain open |
 | UX-13 | Web in-session Library/Favorites context and list-origin selected editor state, Back/Forward/reader return with measured scroll/focus; removed-result/direct-reader/reload coverage; native prepared real Library and independent Favorites literal query/pages/viewport and reader/Android Back context, plus Library Settings return | No persistent search history; full production filters/search/Explore and offline continuity remain incomplete |
 | EXP-02/04 | Web/native explicit entire-verified-catalog canonical selection, current/session-last-opened exclusion, honest sole/current/error states and ordinary typed favorite/list/history controls; web on-demand selected-object requests, native prepared-only/no-request selection and truthful original collection/unsaved-preview/Settings/Back continuity | Reviewed Explore groups/first-publication dates, Practice and complete persistent active-snapshot offline discovery remain incomplete; consumers adopt Shared and validate independently |
 | XFER-01/02/03/04/05/06/08 | Bounded web worker/native v1/v2 codecs with independent vectors, explicit previews/transactional new-list saves and saved-v2 exports, actual cross-client v2 codec round trips, catalog-only details, browser share/copy adapters and native complete-link chooser/payload/Back/fallback/no-write checks | Real receiving-app/provider/device interoperability, direct native file sharing, verified App Links and full backups incomplete |

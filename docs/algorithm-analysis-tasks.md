@@ -105,7 +105,7 @@ silent truncation, false success or weaker validation.
   v2 client-generated codec interoperability has actual round-trip evidence;
   OS delivery and signed-link sharing remain incomplete.
 - ALG-15: typed web-list writes have deterministic complete-envelope UTF8
-  accounting, atomic collection/identity checks, non-destructive v1/v2/v3/v4/v5-to-v6 migration and
+  accounting, atomic collection/identity checks, non-destructive v1/v2/v3/v4/v5/v6-to-v7 migration and
   stale revision/epoch refusal. Actual configured byte/collection boundaries have
   executable coverage. Full recoverable backup/replacement is not implemented.
 - ALG-07/08: the separate canonical publication reader preplans descriptor,
@@ -117,7 +117,7 @@ silent truncation, false success or weaker validation.
 - Official Unicode16 personal-name normalization/folding resources and independent
   conformance fixtures drive the actual web/native adapters. Website checks the
   official normalization equations/full scalar folding and derives versioned
-  keys on demand; raw-name v6 records have no cached key to migrate. Stable
+  keys on demand; raw-name v7 records have no cached key to migrate. Stable
   insertion ordering is O(d squared) worst case/O(d) storage for decomposed name
   length d, bounded by personal-name policy. This is not linguistic search
   normalization, a performance benchmark or permission to merge/rename lists.
@@ -127,6 +127,14 @@ silent truncation, false success or weaker validation.
   Disabled/already-first opens produce no write/revision. Complete prospective
   personal-state validation/accounting remains transactional; rolling-window
   eviction does not authorize migration truncation or truncating other collections.
+- Learning assignments use an explicit Set for O(l) typed uniqueness validation,
+  not schema `uniqueItems` whole-object comparisons, which cannot reject
+  conflicting labels and can be quadratic at configured10000 assignments.
+  Lookup, change/clear copying, filter and paging scan the bounded ordered array
+  in O(l) time with O(l) temporary references; complete personal accounting is
+  still required in each transaction. Same-label/absent-clear actions are no-op.
+  View rendering resolves summaries only from existing exact-ID maps and issues
+  no content requests. This is not assessed progress, verse Practice or full backup.
 - ALG-05/06/08-13: complete algorithms are not implemented. Basic verified online
   reading and process-local Android preparation are not aligned transliteration,
   a ZIP planner, persistent activation/GC, ingestion or recoverable personal backup.
@@ -447,7 +455,7 @@ source migration, live ingestion or automatic updates to reviewed items.
 
 ### ALG-14: Bounded list encoding and decoding
 
-Web saved-list export uses the [typed personal protocol](architecture.md#web-typed-personal-storage-v6):
+Web saved-list export uses the [typed personal protocol](architecture.md#web-typed-personal-storage-v7):
 one validated read transaction, minimal allowlist projection, bounded worker
 encoding, then epoch/revision recheck before exposing the independent snapshot.
 This supplies partial stable-read/no-write/cancellation evidence, not native
@@ -479,7 +487,7 @@ round trips, platform share interoperability or full-backup exportability.
 
 ### ALG-15: Recoverable backup replacement and capacity accounting
 
-The [web typed storage protocol](architecture.md#web-typed-personal-storage-v6)
+The [web typed storage protocol](architecture.md#web-typed-personal-storage-v7)
 supplies partial executable accounting/migration/fencing evidence only. It is not
 the full-backup format and does not establish backup exportability or replacement.
 

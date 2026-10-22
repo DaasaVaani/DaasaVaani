@@ -42,17 +42,17 @@ demonstrations do not close remaining production contracts or prove full readine
 
 | Surface | Current capability |
 | --- | --- |
-| Website | Verified real text-only online catalog/on-demand UUID reading and explicit entire-catalog canonical discovery with bounded in-memory content, typed favorites/lists and device-only recent history; separate fixture reader/search, browsing/list-reader continuity, independent persisted lyric font/density, preserving personal v6 upgrade, worker v1/v2 transfer/export, production-only interface cache/normal code-update notice and declarative installation metadata/original icons (not offline lyrics or complete OS installation evidence) |
+| Website | Verified real text-only online catalog/on-demand UUID reading and explicit entire-catalog canonical discovery with bounded in-memory content, typed favorites/lists, device-only recent history and optional learning labels/local filtered view; separate fixture reader/search, browsing/list-reader continuity, independent persisted lyric font/density, preserving personal v7 upgrade, worker v1/v2 transfer/export, production-only interface cache/normal code-update notice and declarative installation metadata/original icons (not offline lyrics or complete OS installation evidence) |
 | Shared | Lyric/source/publication and fixture/minimal-list/logical-list contracts, official Unicode16 name-matching resources, portable settings and generated web/Android UI catalogs |
 | Library | Reviewed owner-text import with stable identities/held exceptions, complete empty authoring fields, canonical text-only post-merge publication; separate synthetic indexed fixture publisher |
-| Android | Separate real canonical preparation/reading and whole-prepared-catalog discovery, session-local Library and independent Favorites literal filtering/paging/reader/Back return context; original collection/unsaved-preview context through successive reader choices and Settings; typed Room5 favorites, durable lists/occurrences/recent history, preserving upgrades, independent font/density/locale/theme, bounded v1/v2 preview/new-list save/re-export, explicit complete-link Sharesheet handoff with copy/file fallbacks and reader/list navigation; production lifecycle/full personal parity remain incomplete |
+| Android | Separate real canonical preparation/reading and whole-prepared-catalog discovery, session-local Library and independent Favorites literal filtering/paging/reader/Back return context; original collection/unsaved-preview/Learning context through successive reader choices and Settings; typed Room6 favorites, durable lists/occurrences/recent history/learning labels with offline local filtered view, preserving upgrades, independent font/density/locale/theme, bounded v1/v2 preview/new-list save/re-export, explicit complete-link Sharesheet handoff with copy/file fallbacks and reader/list navigation; production lifecycle/full personal parity remain incomplete |
 | Website library/ | Absent; reviewed sources belong only to Library |
 | Website settings/ | Web schema/settings; portable defaults and bounds consumed from Shared |
 | Tooling | Exact npm lockfiles and Gradle wrapper/version catalog; use the current command registry |
 | Approval | Staged implementation authorized; production language/lifecycle/personal/publication gates and release evidence remain incomplete |
 
 Website/native personal-name matching uses the official Shared Unicode16 profile.
-Website v6 stores only raw names and computes explicit-profile keys on demand:
+Website v7 stores only raw names and computes explicit-profile keys on demand:
 there is no stored cache to rewrite or schema migration to invent. Keep existing
 names/IDs/contents unchanged and never auto-merge/rename newly equivalent lists.
 See [the storage/name protocol](architecture.md#transactions-names-and-exact-accounting).
@@ -68,10 +68,12 @@ See [the storage/name protocol](architecture.md#transactions-names-and-exact-acc
   structured credits as provenance rather than inventing registry/media facts.
   Real UUIDs must never enter fixture `videoId` fields. Follow the
   [preview boundary](lyric-preview.md) and preserving typed personal protocol.
-  Structural v1/v2/v3-to-v6 adaptation changes only legacy discriminants, never
+  Structural v1/v2/v3-to-v7 adaptation changes only legacy discriminants, never
   legacy-to-lyric identity mappings.
-  V4-to-v6 preserves typed values/identities, adds only default font/density and
-  empty initially-enabled history; v5-to-v6 additionally preserves all history.
+  V4-to-v7 preserves typed values/identities, adds only default font/density and
+  empty initially-enabled history; v5-to-v7 additionally preserves all history.
+  V6-to-v7 preserves font/density/history unchanged. Every upgrade initializes
+  only empty learning labels, never inferring assignments from other collections.
   No prior activity is reconstructed. Recent recording is device-only;
   disabling stops writes, Clear preserves all other personal state.
 - Kannada canonical; transliterate never translate. UI locale and lyric script
@@ -79,12 +81,18 @@ See [the storage/name protocol](architecture.md#transactions-names-and-exact-acc
   fallback, and explicit stored override wins. Uncertain lyrics held, corrections
   and identities preserved.
 - Website appearance uses persisted Light/Dark/Warm/Follow device, strict
-  non-destructive personal v1/v2/v3/v4/v5-to-v6 migration and color-only system
+  non-destructive personal v1/v2/v3/v4/v5/v6-to-v7 migration and color-only system
   updates. Portable defaults/allowed choices and owned palette settings remain
   authoritative; no full offline-shell/device/font coverage is inferred.
   Independent lyric font/density controls in Settings and both readers affect
   body text only and preserve canonical layout/history; onboarding/helper/
   Recite/Practice/offline preference coverage remains incomplete.
+- Learning labels follow the [Shared contract](https://github.com/DaasaVaani/shared/blob/main/docs/learning-labels.md):
+  exact typed identity, stable assignment order, explicit linear duplicate check,
+  fenced/no-op writes and complete personal accounting. Learning management
+  requires no content preparation/network and minimal exports exclude labels.
+  Reviewed verse Practice remains explicitly unavailable; do not infer verses,
+  progress, scores or offline lyric readiness from assignments.
 - Shared owns portable contracts/settings/fixtures and UI catalogs/generator/
   committed resources. Library owns source/assets/registries/ingestion/publisher.
   Consumers query published artifacts and pin Shared independently.

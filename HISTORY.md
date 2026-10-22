@@ -1,5 +1,73 @@
 # Documentation history
 
+## 2026-10-22: local learning-label prerequisite and preserving web storage evolution
+
+- Archived preceding current Website storage v6: native60, four stores
+  `personal/lists/control/recentHistory`, control format6 and current envelope6.
+  Inputs native10/20/30/40/50 migrated to60 with fresh fence, earlier preference
+  rows gained configured font/density and earlier history was initialized empty;
+  future70 was refused. Every mutation covered all four tables. Raw names had no
+  persisted Unicode-key cache. The preceding saved-export paragraph incorrectly
+  called the complete read a three-table transaction; the executable v6 reader
+  already included recent history. The new complete read includes all five.
+  These replaced descriptions are historical, not downgrade instructions.
+- Shared published166b7af343064f2190f2fe89aee98d42fef8e03a with the additive
+  label contract/schema/types/fixtures and12 bilingual captions. Full
+  `npm run check` passed35 tests; hygiene75, strict YAML11,
+  actionlint/ShellCheck and whitespace passed. All21 generated/schema resources
+  were byte-identical on repeat generation; all prior captions/settings/schemas/
+  fixtures stayed unchanged. Exact preflight39776808369/main39777169354 passed
+  every actual required step. Live policy/clean-tree/pin/baseline/ancestry gates
+  preceded unchanged normal main push; owned contained no-PR ref was cleaned.
+- Website independently adopts published Shared166. Its v7/native70 schema adds
+  only the learning store/empty row on migration, preserving v6 preferences,
+  disabled history, exact typed references and all list/occurrence identities.
+  All old accounting stays frozen; prospective v7 accounting includes labels.
+  Future80 is refused without repair/reset. The local label/filter slice does
+  not implement reviewed verse Practice, full backups or durable offline lyrics.
+- Incremental `npm test -- personal-model unicode-names learning` passed69
+  tests. The editor test-discovery tool previously returned no tests, not a pass;
+  the documented CLI provided the actual executed evidence.
+- The first four-suite browser run passed183/195 and failed12: nine old migration
+  expectations omitted the intentionally added learning store; three new helper
+  assertions waited for a Saved status inside a correctly filtered-away card.
+  Updated exact schema/empty-row assertions and checked the committed assignment,
+  removed card and restored heading focus instead. The first full run passed
+  108 units and327/330 browser cases; three synthetic stale-fence tests failed
+  because Dexie had captured the native transaction adapter before a late hook.
+  Moved the armed one-shot fault adapter before application loading, retaining
+  the actual transaction, strict stale-error/whole-snapshot rollback assertions
+  and explicit successful retry. No product behavior, assertion, suite or timeout
+  was relaxed. Documentation validation initially counted149 IDs with an
+  alphabetic-only prefix regex; included the existing alphanumeric A11Y prefix
+  and verified all153 unique IDs without changing requirements.
+- Final Website `npm run check` passed108 units, strict TypeScript/production
+  build and330 browser cases across desktop/Pixel7/320px, zero failures/skips.
+  This includes actual10000-label capacity and exact64MiB/+1 prospective label
+  admission, actual native60 preserving/invalid/schema/over-capacity rollback,
+  all previous migrations/future80 refusal and controlled offline-shell restart.
+  `python shared\tools\check_repository.py` passed75 tracked Shared files;
+  strict-YAML Node parser checked4 workflow/settings files, actionlint1.7.12 with
+  ShellCheck0.11.0 and both git whitespace checks passed. `python -` inline
+  documentation validation checked20 UTF8/newline-clean files, local links/
+  anchors/fences and all153 unique normative IDs. None establishes broad
+  browser/device, reviewed linguistic/verse Practice or release acceptance.
+- Native independently adopted published Shared166 and staged Room6/label/
+  Learning changes after config, clean-core/all builds/both lints/test-APK
+  compilation:48 core cases, debug57/release58 warnings and zero lint errors.
+  App JVM remains NO-SOURCE, not a passing suite. Full connected validation is
+  required independently before native publication. Website's passed output was
+  frozen and its local dist/device/HTTP slot explicitly granted to the native
+  owner; no parent rebuild is permitted during that slot.
+- Final preceding cross-client discovery documentation was published as
+  Rootbae12585503ac75133a4d14173049f06c4d55fbc: exact preflight39772885740,
+  main/Pages39773549183 and CodeQL39773549405 passed every actual required step.
+  Safely inspected29-entry final artifact and all17 public resource bodies were
+  byte-identical to the browser-verified ef05 runtime. Owned refs/artifact
+  scratch were cleaned; logs retained. Native1699f417 publication main39772764234
+  passed every actual config/build/core/lint/hygiene step after exact
+  preflight39771896064; its72 device cases remain local emulator evidence.
+
 ## 2026-10-22: cross-client discovery validation and publication evidence
 
 - Website discovery committedef05ac36f27996f24a83a4835dc7871630f9a374

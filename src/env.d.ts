@@ -25,7 +25,7 @@ interface WebConfig {
 declare const __WEB_CONFIG__: WebConfig;
 declare const __TRANSFER_LIMITS__: { maxListEncodedBytes: number; maxListDecodedBytes: number; maxSharedUrlAscii: number };
 interface PersonalLimits {
-  maxFavorites: number; maxLists: number; maxEntriesPerList: number; maxTotalEntries: number; maxRecents: number;
+  maxFavorites: number; maxLists: number; maxEntriesPerList: number; maxTotalEntries: number; maxRecents: number; maxLearningLabels: number;
   maxPersonalStoredBytes: number; maxListDecodedBytes: number;
   maxListNameCodePoints: number; maxEntryTextCodePoints: number;
 }

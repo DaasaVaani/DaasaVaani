@@ -24,7 +24,7 @@ refresh, replacement UI, resume or persistent content cache here.
   and its hash-pinned catalog manifest initially. Browsing requires no complete
   download. Reading requests only the selected catalog item's immutable object.
   This does not download an index or establish offline readiness.
-- Settings, Favorites, lists/list previews and Recently opened do not implicitly
+- Settings, Favorites, lists/list previews, Learning and Recently opened do not implicitly
   fetch owner content. An explicit Read link is an online-reading action and may
   load the catalog and selected item. Fixture metadata loads independently.
 - Strict build-time [web settings](../settings/web.yml) and their
@@ -104,7 +104,7 @@ not a silently chosen replacement. Literal text/layout/IDs and Favorite/Add to
 list controls remain the ordinary canonical reader.
 
 The first catalog choice pushes a reader; consecutive choices replace that reader,
-preserving its original Catalog/Favorites/Lists/Recently opened return context.
+preserving its original Catalog/Favorites/Lists/Recently opened/Learning return context.
 Back therefore does not traverse a generated chain of reader choices. Catalog
 filter/pages and available originating focus/scroll survive normal return.
 Only a successful exposed reader records the existing optional history, once;
@@ -119,7 +119,7 @@ a validated ordinary bounded random index over eligible summaries, not the
 Website fraction interface. It never initiates preparation, fetches an item or
 writes personal state. The prepared reader retains normal successful-exposure
 history and typed controls. Consecutive choices replace reader state while
-preserving Catalog/Favorites/Lists/Recently opened/unsaved-preview origin and
+preserving Catalog/Favorites/Lists/Recently opened/Learning/unsaved-preview origin and
 Settings/Android Back continuity; an unsaved preview is not saved by discovery.
 Current native preparation and the last-opened reference are process-local,
 not durable offline snapshots. Its owning
@@ -152,17 +152,52 @@ loads the requested UUID online, not a guessed substitute. Preview/save/export
 alone never downloads lyrics. List/Favorites origins restore
 available focus/scroll and the selected unsaved list editor in the same session.
 
-The [personal v6 protocol](architecture.md#web-typed-personal-storage-v6) validates
+The [personal v7 protocol](architecture.md#web-typed-personal-storage-v7) validates
 and structurally upgrades old local schemas atomically without changing existing
 list/occurrence IDs or raw legacy values. Transport families remain independent:
 v1 previews can re-export unchanged; confirmed v1 imports adapt to typed legacy
 records, and all saved-list exports use minimal v2 without local IDs/lyric copies.
 
+## Local learning labels
+
+Both clients' canonical and fixture readers offer optional Want to learn, Practising and
+Comfortable reciting labels, plus explicit clearing. These are self-assigned
+local intent, not scores, inferred progress or evidence of memorization.
+The [Shared learning-label contract](https://github.com/DaasaVaani/shared/blob/main/docs/learning-labels.md)
+owns exact tokens, typed identity, order, limits, no-op and migration semantics.
+Changing a label never changes lyric text/layout, favorites/lists/preferences or
+Recently opened, and never replays an already exposed reader's successful open.
+Minimal list links/files never include labels.
+
+`#/learning` manages persisted assignments before catalog preparation, with All
+and three label filters. Filtering/page expansion never writes or fetches
+content. It uses configured canonical page sizes, stable first-assignment order
+and first-new-result focus. A change retains position; clearing removes only the
+exact typed identity. Unresolved IDs and UUID-looking legacy references remain
+independent and editable; titles resolve only from already available catalogs.
+Canonical Read links explicitly load their exact UUID online. Unknown legacy
+references do not gain guessed links. Reader return/Back/Forward and consecutive
+Show another lyric retain the original Learning filter/pages and available focus.
+Reload resets browsing context, not assignments.
+
+The interface shell can reopen Learning offline and manage the local record after
+restart. This does not establish lyric readiness or durable offline snapshots.
+Practice remains explicitly unavailable until reviewed verse-based Practice is
+implemented. No verse divisions, Practice action, automatic assessment or reminder
+is fabricated; LEARN-04 remains partial until that separate entrypoint exists.
+Native Room6 independently preserves earlier collections/preferences/history,
+initializing only empty labels. Its offline Learning view is available before
+preparation and retains filters/pages/origin through readers, Settings, Back and
+consecutive discovery. Explicit canonical Read still requires complete
+preparation; pending destinations retain their Learning origin. Native local
+labels do not make the process-local prepared catalog durable.
+
 ## Coverage and open work
 
 This slice provides partial DATA-01/02/04/05, UX-07/13, EXP-02/04, OFF-02 and SET-01/02
 coverage, with partial LIB-01/02/03/04/05/06/08/09/10/11 and XFER-01/02/03/04/05/06/08
-for the Website typed personal slice. See [validation commands and obligations](testing-and-release.md) and
+for the Website typed personal slice, plus partial LEARN-04/QUAL-05 for local
+labels and filtering without Practice. See [validation commands and obligations](testing-and-release.md) and
 the [roadmap](implementation-roadmap.md). The native application independently
 implements full-preparation reading with the same media independence, typed
 favorites, durable lists/occurrences and device-only recent history. Native
@@ -175,7 +210,7 @@ Only a verified explicitly opened reader updates it; catalog loading and preview
 never record. Clear/disable preserve favorites/lists/preferences; unknown
 references remain visible. See the [history lifecycle](architecture.md#recently-opened-lifecycle).
 
-Still open: complete production-profile reading, bookmarks/learning/
+Still open: complete production-profile reading, bookmarks/verse Practice/
 recitation for real UUIDs, full personal backups, full linguistic search/
 profiles/helpers, populated classification/context/verse/media/eligible-Latin
 public adapters, rights/registry closure, persistent offline activation/repair,

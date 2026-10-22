@@ -36,6 +36,13 @@ or save separate choice history; opening the result uses normal reader controls
 and optional Recently opened recording.
 Recently opened retains the configured latest50 distinct typed references across
 restarts, never search queries or lyric copies, and never sends history to a service.
+Both clients' readers also support optional self-assigned Want to learn, Practising
+and Comfortable reciting labels. The [Learning view](docs/lyric-preview.md#local-learning-labels)
+filters and manages exact typed assignments locally, including unresolved
+references, without downloading lyrics. Assignments survive restart and work
+offline with the installed interface; they are excluded from minimal list
+exports. Reviewed verse-based Practice is explicitly unavailable, not inferred
+from these labels or the published flat lines.
 Loaded search results expose every ranked match through explicit configured-size
 pages; Show more focuses the first newly revealed result and retains the expanded
 context through in-session reading.
@@ -64,10 +71,12 @@ lyrics; explicit Read opens known entries, and readers can add independent
 occurrences to chosen lists. Recitation remains incomplete.
 Shared generates the English/Kannada UI resources; Android has separate real
 text-only preparation/reading and fixture features with typed Room favorites,
-durable lists/independent occurrences, recent history, preferences and locale/theme controls.
+durable lists/independent occurrences, recent history, learning labels, preferences and locale/theme controls.
 Strict v1/v2 file/pasted-link previews can be explicitly saved as independent
 lists; readers and list entries use exact typed identities without guessing.
 Native preview and list management work before preparation.
+Native Learning likewise filters and manages local assignments offline before
+preparation; explicit Read remains behind complete canonical preparation.
 After complete canonical preparation, its catalog and readers offer the same
 whole-catalog Show another lyric action without fetching or preparing content.
 Successive choices retain the original catalog, collection or unsaved-preview

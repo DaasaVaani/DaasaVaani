@@ -11,7 +11,7 @@ The approved [lyric identity and optional media contract](https://github.com/Daa
 is the target for P1/P4/P5a/P7: text-only lyric publication, permanent UUID lookup,
 typed references and versioned legacy-preserving transfers. Source/publication
 schemas and separate real readers implement the initial slice. Website typed
-favorites/lists/recent history/font/density, v1/v2 transfer adapters and preserving personal v6 upgrades are
+favorites/lists/recent history/learning labels/font/density, v1/v2 transfer adapters and preserving personal v7 upgrades are
 implemented; full personal collections/backups and production publication remain open. Follow its
 Shared-first rollout without inferred legacy mapping or identity changes.
 
@@ -29,9 +29,9 @@ does not waive any validation gate.
 | P2 | Two-locale UI generation with committed web/Android resources | Reviewed five-Latin/nine-non-Latin tables, transliteration, technical grammar, plurals/escaping conformance |
 | P4 | Real canonical text-only hash-addressed publication; separate fixture index producer and sampled OSA/candidate parity | Public populated-metadata/Latin/media adapters, durable ledger/receipts, semantic dates, ZIP/planner and complete language/profile index evidence |
 | P5 | Verified real online metadata/catalog and on-demand UUID reading with bounded in-memory cache, literal title filter, complete paging, explicit entire-catalog Show another lyric and reader continuity; existing fixture search/preferences/themes | Complete production-profile reading, full filters/reviewed Explore groups/first-publication discovery/script/helper/video/accessibility/platform journeys |
-| P5a | Transactional typed lyric/legacy web favorites/lists/preferences/recent history, independent lyric font/density, preserving v1/v2/v3/v4/v5-to-v6 upgrade, worker v1/v2 preview and saved-v2 export, optional share/copy/fallbacks, independent occurrence editing/import/management, exact verified catalog lookup and reader-to-list addition; native Room5 typed favorites/durable lists/occurrences/recent history/font/density | Bookmarks/learning/recitation, real sharing-surface interoperability, full backups and remaining production migrations |
+| P5a | Transactional typed lyric/legacy web favorites/lists/preferences/recent history/learning labels with filtered local view, independent lyric font/density, preserving v1/v2/v3/v4/v5/v6-to-v7 upgrade, worker v1/v2 preview and saved-v2 export, optional share/copy/fallbacks, independent occurrence editing/import/management, exact verified catalog lookup and reader-to-list addition; native Room6 typed favorites/durable lists/occurrences/recent history/learning labels/font/density | Bookmarks/verse Practice/recitation, real sharing-surface interoperability, full backups and remaining production migrations |
 | P6 | Production-only shell precache with offline lazy-worker/manifest coverage, narrow root/open fallback, explicit support/error/retry states, normal deferred code-update notice and stable declarative installation metadata/original maskable/touch icons | Actual OS installation/supported-platform matrix, persistent snapshots/journals/atomic activation/resume/repair/reader-safe GC, eviction/readiness and complete lifecycle compatibility |
-| P7 | Separate native real canonical full preparation/reading and whole-prepared-catalog discovery in memory; session-local Library and independent Favorites literal filtering/complete paging/reader/Back return context, original collection/unsaved-preview context through successive choices and Settings, fixture search, Room5 typed favorites/durable lists/occurrences/preferences/recent history, preserving upgrades, independent font/density/locale/theme, bounded v1/v2 preview/save/re-export, explicit complete-link Sharesheet handoff with copy/file fallbacks and reader/list navigation, core and connected tests | Full personal backups/bookmarks/learning/recitation, signed App Links/receiving-app matrix, direct file sharing, durable preparation/recovery and full parity/device matrix |
+| P7 | Separate native real canonical full preparation/reading and whole-prepared-catalog discovery in memory; session-local Library and independent Favorites literal filtering/complete paging/reader/Back return context, original collection/unsaved-preview/Learning context through successive choices and Settings, fixture search, Room6 typed favorites/durable lists/occurrences/preferences/recent history/learning labels and offline filtered Learning view before preparation, preserving upgrades, independent font/density/locale/theme, bounded v1/v2 preview/save/re-export, explicit complete-link Sharesheet handoff with copy/file fallbacks and reader/list navigation, core and connected tests | Full personal backups/bookmarks/verse Practice/recitation, signed App Links/receiving-app matrix, direct file sharing, durable preparation/recovery and full parity/device matrix |
 | P3/P8/P9 | Dependency-ordered Shared/fixture-publisher pins; full web fixture CI/Pages and native build/core/lint CI | Live-provider clarification, production ingestion/publication/signing, device CI and release readiness |
 
 The fixture capability is deliberately named `fixture-catalog-v1`; all UIs label
@@ -71,7 +71,7 @@ Settings/preview/list management remain available when the Library endpoint fail
 Saving requires an explicit action after preview and creates a new independent
 list only. Duplicate names require confirmation; revision/epoch changes require
 renewed review. No lyric is fetched by transfer or saving, and no offline readiness
-or signed native App Links is claimed. The [current storage protocol](architecture.md#web-typed-personal-storage-v6)
+or signed native App Links is claimed. The [current storage protocol](architecture.md#web-typed-personal-storage-v7)
 does not establish full-backup exportability, complete list/recitation journeys,
 production migration coverage or native parity.
 Saved-list export rechecks its read revision after encoding and refuses concurrent
@@ -85,7 +85,7 @@ the XFER-08 platform matrix and signed App Links remain open.
 Android's bounded native codec has independent Node/zlib vectors and strict
 actual-ceiling rejection, plus connected preview/new-list save/re-export evidence.
 It displays catalog known/pending/unavailable states without guessing matches.
-Typed favorites and independently identified list occurrences persist in Room5;
+Typed favorites and independently identified list occurrences persist in Room6;
 v1 imports structurally become legacy references and saved lists export v2.
 Actual client-generated v2 gzip/link round trips cover both codec directions,
 not OS delivery. Failed/cancelled provider writes can leave an incomplete selected
@@ -93,11 +93,23 @@ destination; the warning preserves this distinction from unchanged personal data
 Official Unicode16 name matching is implemented in both consumers using Shared's
 pinned tables and conformance fixtures, without platform lowercase/ICU.
 Website derives keys on demand from raw names; no persisted-key cache exists
-in v6. Native list-name behavior follows its
+in v7. Native list-name behavior follows its
 [owning storage/validation guide](https://github.com/DaasaVaani/AndroidApp/blob/main/README.md).
 Existing names/identities remain unchanged; future persisted caches require
 explicit profile-aware preserving migration, never automatic renaming/merging.
 Durable lists do not complete full personal-state parity.
+
+LEARN-04 receives partial Website/native evidence for self-assigned Want to
+learn, Practising and Comfortable reciting labels, exact typed change/clear and
+offline persisted local Learning filters/paging before content preparation.
+Website v7/native Room6 migrations initialize only empty labels while preserving
+all old values and identities; complete accounting, collection limits, no-op
+revisions and stale-write fences remain mandatory. Unresolved records are
+retained/editable and no catalog is implicitly fetched. Reader/discovery return
+retains Learning context; native explicit Read remains preparation-gated.
+Minimal list exports exclude labels. Reviewed verse Practice and its Learning
+shortcut remain explicitly unavailable, not fabricated from flat published lines.
+See the [bounded implementation](lyric-preview.md#local-learning-labels).
 
 The [real lyric preview](lyric-preview.md) provides partial DATA-01/02/04/05,
 UX-07/13, OFF-02 and SET-01/02 evidence. It preserves canonical line/layout
@@ -129,7 +141,7 @@ stored as a fallback or exported. Recitation remains incomplete.
 
 UX-11 and SET-04 receive partial Website evidence for persisted Light/Dark/Warm/
 Follow device selection. System-color changes do not write personal data, and
-explicit choices/locale/canonical text stay independent. Strict v1/v2/v3/v4/v5-to-v6
+explicit choices/locale/canonical text stay independent. Strict v1/v2/v3/v4/v5/v6-to-v7
 migrations preserve favorites/lists/identities and create a fresh writer fence;
 future/invalid schemas remain non-destructive refusals. Palette contrast tests
 do not establish full physical-device/font/offline-shell accessibility evidence.
@@ -140,7 +152,7 @@ readers and Settings. Default platform rendering (Website28px/native28sp,
 Normal density) and literal line/layout
 identities are preserved. Latest-state transactions, no-op choices, peer updates,
 restart, old-history preservation and actual byte-capacity checks belong to the
-v6/native Room5 slices, with independent native font units and spacing. Onboarding, helper/script coverage, Recite/Practice, persistent offline
+v7/native Room6 slices, with independent native font units and spacing. Onboarding, helper/script coverage, Recite/Practice, persistent offline
 use and the complete accessibility/font/device matrix remain unimplemented or
 unverified; this is not full UX-14 completion.
 

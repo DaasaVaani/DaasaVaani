@@ -70,7 +70,7 @@ Initial values and exact field bounds belong only in the linked owning files.
 | Owner/source and keys | Current application and validation | Compatibility/open work |
 | --- | --- | --- |
 | [Web settings/schema](../settings/web.schema.json): `base`, `descriptorUrl`, `canonicalBaseUrl`, `listLinkPath`, `listFileName` | Strict build-time settings; fixture artifact entry and minimal-list URL/file projection | Public route/origin changes require old-link/hosting review; distinct real-publication settings below never reinterpret fixture formats |
-| [Web settings/schema](../settings/web.schema.json): `lyricPreview.descriptorUrl`, `pageSize`, `maxItems`, `maxEncodedBytes`, `maxDecodedBytes`, `concurrentRequests` | Credential-free absolute HTTPS endpoint, verified metadata/catalog count, bounded requested-item cache/in-flight byte reservations and complete paging; complete-preparation helper retains whole-plan/concurrent-worker validation | Separate prelaunch `lyric-preview-v1`, on-demand online memory-only lifecycle; no persistent offline or complete production-profile claim; see the [reader lifecycle](lyric-preview.md#online-loading-and-failure-behavior) and independent personal v6 protocol below |
+| [Web settings/schema](../settings/web.schema.json): `lyricPreview.descriptorUrl`, `pageSize`, `maxItems`, `maxEncodedBytes`, `maxDecodedBytes`, `concurrentRequests` | Credential-free absolute HTTPS endpoint, verified metadata/catalog count, bounded requested-item cache/in-flight byte reservations and complete paging; complete-preparation helper retains whole-plan/concurrent-worker validation | Separate prelaunch `lyric-preview-v1`, on-demand online memory-only lifecycle; no persistent offline or complete production-profile claim; see the [reader lifecycle](lyric-preview.md#online-loading-and-failure-behavior) and independent personal v7 protocol below |
 | [Web settings](../settings/web.yml): `transferChunkBytes`, `listCompressionLevel` | Byte allocation/compression controls passed to the dedicated codec worker; schema and actual-ceiling codec tests | Encoding choices do not narrow accepted valid input or change decoded/text limits |
 | [Web settings](../settings/web.yml): `databaseName` | Build-time Dexie/native IndexedDB identity | Changing it is not a migration; it would strand the prior database and requires explicit compatibility handling |
 | [Web settings](../settings/web.yml): `fontFamily`, `readerFontSize`, `readerFontSizeMin`, `readerFontSizeMax`, `readerFontSizeStep`, `readerLineHeights`, `space`, `contentWidth`, `readerWidth`, `themes` | Typed CSS tokens, lyric-only bounded font/density preferences, system fonts, three palettes and measured contrast checks; portable density choices/default come from Shared | Onboarding/helper/script/Recite/Practice/offline integration and physical-device/font conformance remain incomplete |
@@ -250,25 +250,27 @@ snapshot readiness. Chromium manifest parsing/installability diagnostics and
 pixel/geometry tests do not prove OS installation, iOS/Safari/Firefox behavior,
 launcher/update rendering, signed Android association or the full platform matrix.
 
-## Web typed personal storage v6
+## Web typed personal storage v7
 
 This is the executable Website protocol for typed favorites/preferences and
-logical lists and recent history, not the full production personal/backup contract. The
+logical lists, recent history and learning labels, not the full production personal/backup contract. The
 [Shared typed-reference/local-record v2 contract](https://github.com/DaasaVaani/shared/blob/main/docs/list-transfer.md#typed-reference-and-list-v2)
-owns list/occurrence fields. All four tables share the configured personal DB:
+owns list/occurrence fields. All five tables share the configured personal DB:
 
 | Table | Exact logical rows |
 | --- | --- |
 | `personal` | Zero or one `{id:"personal", favorites, language, theme, fontSize, density}`; favorites are exact typed lyric/legacy references, unique by kind plus case-sensitive ID; absent row means first supported browser language plus validated configured defaults |
 | `lists` | Independently identified Shared list records; entry array order is authoritative |
-| `control` | Exactly one `{id:"state", formatVersion:6, epoch, revision}`; fresh local UUIDv4 epoch and nonnegative safe-integer revision |
+| `control` | Exactly one `{id:"state", formatVersion:7, epoch, revision}`; fresh local UUIDv4 epoch and nonnegative safe-integer revision |
 | `recentHistory` | Exactly one `{id:"history", enabled, entries}`; ordered unique typed references following the [Shared logical history record](https://github.com/DaasaVaani/shared/blob/main/docs/recent-history.md) |
+| `learningLabels` | Exactly one `{id:"learning", entries}`; ordered unique typed assignments following the [Shared learning-label contract](https://github.com/DaasaVaani/shared/blob/main/docs/learning-labels.md); absence from `entries` means unassigned |
 
 ### Opening and migration
 
-Native IndexedDB version60 is the typed v6 schema. Supported migration inputs
+Native IndexedDB version70 is the typed v7 schema. Supported migration inputs
 are native version10 (personal-only v1), version20 (three-table v2) and version30
-(three-table v3), version40 (typed three-table v4) and version50 (four-table v5).
+(three-table v3), version40 (typed three-table v4), version50 (four-table v5)
+and version60 (four-table v6).
 Open at the exact native version **before** opening Dexie,
 which can otherwise retry a newer version and patch missing schema parts.
 Native upgrade creates only the specified stores/header, validates legacy
@@ -279,16 +281,20 @@ old opaque-string favorites/v1 entries before structural adaptation. Convert
 favorites only to typed legacy references and `item` only to `legacyVideo`,
 retaining every raw ID, list/occurrence UUID, name, fallback, repetition and order.
 UUID-looking old IDs are never lyric aliases. Write converted rows and a fresh
-v6 epoch/revision0 together. Version40 validates its exact typed schema/old
+v7 epoch/revision0 together. Version40 validates its exact typed schema/old
 accounting; version50 additionally validates and preserves its exact history,
-including disabled state and unresolved typed references. Both preserve every
-existing typed value and identity. Existing preference rows gain only configured
+including disabled state and unresolved typed references. Version60 additionally
+preserves exact font/density values. All preserve every existing typed value and
+identity. Pre-v6 preference rows gain only configured
 font/density defaults; absent rows remain absent. Upgrades from versions10..40
 create empty initially-enabled history; no activity is inferred from collections.
-Future70 and unfamiliar native schemas are refused. The longer representation can exceed capacity:
+Every supported upgrade initializes only empty learning labels, never inferring
+assignments from favorites, history or lists. Future80 and unfamiliar native
+schemas are refused. The longer representation can exceed capacity:
 abort rather than truncate/relax limits. New-mode or typed values mislabeled as
 older schemas are invalid. Any failure aborts the entire schema transaction.
-New initialization creates control and empty history, not a personal preference or list row.
+New initialization creates control, empty history and empty labels, not a personal
+preference or list row.
 For an absent preference row, inspect `navigator.languages` in preference order
 (or `navigator.language` if empty), matching each case-insensitive primary
 language subtag against configured supported UI languages. Regional/script tags
@@ -299,7 +305,7 @@ over browser preferences. UI selection never changes canonical Kannada, lyric
 script or theme. The pure model accepts preference tags explicitly; only the
 browser adapter reads navigator values.
 
-V6 preferences accept `light`, `dark`, `warm` and `device`; `device` follows the
+Current preferences accept `light`, `dark`, `warm` and `device`; `device` follows the
 current browser light/dark media preference. Explicit modes ignore system changes;
 stored mode selection survives reload and remains independent of UI locale and
 canonical lyrics. Media changes update colors only, never a personal row/revision.
@@ -335,9 +341,27 @@ Blocked upgrades report closing other tabs/retrying, not data deletion. Invalid
 personal storage disables Save/personal reading controls but does not disable
 local transfer preview or re-export. There is no downgrade/reset migration.
 
+### Learning assignments and local view
+
+The [Shared learning contract](https://github.com/DaasaVaani/shared/blob/main/docs/learning-labels.md)
+owns the three label tokens, typed uniqueness, stable order and no-assignment
+semantics. Schema validation is structural; an explicit linear Set check rejects
+conflicting or identical duplicate typed identities. `maxLearningLabels` and the
+complete `maxPersonalStoredBytes` envelope are validated before every commit.
+Same-label/absent-clear operations return the unchanged store, without a row or
+revision write. New assignment appends, change retains position, clear removes
+only the exact typed entry. All use the captured epoch/revision fence.
+
+The [Learning view](lyric-preview.md#local-learning-labels) reads local assignments
+before preparation without requests. Filtering/pagination scan the bounded
+ordered collection; unresolved IDs remain editable. Only an explicit Read may
+load canonical content. Minimal exports exclude labels, as they exclude history.
+No label mutation replays an exposed reader's history. Full backups and reviewed
+verse Practice remain separate unimplemented requirements.
+
 ### Transactions, names and exact accounting
 
-Every personal mutation uses one read-write transaction spanning all four
+Every personal mutation uses one read-write transaction spanning all five
 tables. Read/validate the complete current state, check captured epoch/revision,
 validate the prospective state including the incremented revision, then write
 only the intended record and header. Failure rolls back all writes. Creation/
@@ -358,7 +382,7 @@ locale, trim, lowercase or moving package table participates. Strict build check
 bind the pinned Shared settings/manifest/table/vector/license bytes; complete
 Unicode License V3 is included in the distribution.
 
-The v6 database stores raw names only, not derived keys or profile caches.
+The v7 database stores raw names only, not derived keys or profile caches.
 Compute this explicit profile on demand without rewriting any name, ID, occurrence,
 reference, order, preference or header. Existing names that now compare equal
 remain independent and opening a database does not ask for destructive repair.
@@ -377,7 +401,7 @@ user-written text into the visible editable fallback field. It never infers an
 item match or fills a catalog title. Focus follows the affected occurrence after
 save/move/removal and returns to the list heading when no occurrence remains.
 
-Saved-list export reads/validates the three-table state in one read-only
+Saved-list export reads/validates the complete five-table state in one read-only
 transaction at the selected epoch/revision and projects only the minimal-list
 allowlist. After bounded worker encoding, recheck the same epoch/revision before
 offering bytes/link. A concurrent personal mutation requires a fresh selection;
@@ -433,7 +457,7 @@ same-document navigation from a saved list must decode the newly selected link,
 not depend on a reload or unrelated personal-state render.
 
 The exact logical accounting envelope, serialized as compact UTF8 JSON without
-BOM, is `{format:"daasavaani-personal-storage",formatVersion:6,control,personal,lists,recentHistory}`.
+BOM, is `{format:"daasavaani-personal-storage",formatVersion:7,control,personal,lists,recentHistory,learningLabels}`.
 Key order is the order shown; header keys follow the table above. `personal` is
 an empty array or one row with keys `id,favorites,language,theme,fontSize,density`. `lists` is sorted
 by ASCII UUID; row keys are `id,name,entries`. Favorite keys are `kind,lyricId`
@@ -441,6 +465,8 @@ or `kind,videoId`. Each entry uses `id,kind,lyricId` or `id,kind,videoId`
 then optional `fallback`, or `id,kind,text`. No text/array normalization occurs.
 `recentHistory` is one row with keys `id,enabled,entries`; each history reference
 uses `kind,lyricId` or `kind,videoId` in authoritative most-recent-first order.
+`learningLabels` is one row with keys `id,entries`; assignments use
+`kind,lyricId,label` or `kind,videoId,label` in stable first-assignment order.
 Every header, UUID, JSON escape, comma/bracket and revision digit is included.
 No timestamps exist in this version; adding them requires a versioned protocol
 and accounting change rather than an uncounted field.
@@ -455,6 +481,9 @@ v1 entry projection before conversion. Old v4 accounting uses its exact typed
 version4 envelope without history. Old v5 uses its exact version5 envelope with
 history and only `id,favorites,language,theme` preferences. Validate that frozen
 old representation before constructing/counting new reading defaults.
+Old v6 uses its exact version6 envelope with font/density and history but no
+learning property. Every migration then validates the complete prospective v7
+envelope, including the initially empty label row.
 Transport decoding never selects a database
 version. Unmodified v1 previews re-export v1; confirmed v1 imports structurally
 adapt to local v2 records with fresh IDs, while all saved-list exports use v2.

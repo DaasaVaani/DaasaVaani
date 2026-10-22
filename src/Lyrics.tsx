@@ -3,11 +3,13 @@ import { Link, Route, Routes, useLocation, useNavigate, useParams } from "react-
 import messages from "../shared/generated/web/ui.json";
 import { loadLyricCatalog, type LyricLibrary } from "./lyric-publication";
 import type { LyricItem } from "../shared/types/lyrics";
-import { hasFavorite, referenceKey, type PersonalStore } from "./personal-model";
+import { hasFavorite, learningLabelFor, referenceKey, type PersonalStore } from "./personal-model";
 import type { Publication } from "./artifacts";
 import type { PersonalReference } from "./list-transfer-types";
 import { AddToList } from "./AddToList";
 import { ReadingPreferences, type ReadingPreferencesProps } from "./ReadingPreferences";
+import { LearningControl } from "./Learning";
+import { LyricPagination, useLyricPaging } from "./LyricPaging";
 import styles from "./App.module.css";
 
 type Labels = typeof messages.en;
@@ -32,31 +34,6 @@ function AnotherLyric({ publication, labels, excludedId, reading = false }: {
     {error && <p role="alert" className={styles.error}>{labels.error}: {error}</p>}
   </section>;
 }
-function useLyricPaging(readPrefix: string) {
-  const [query, setQuery] = useState(""), [pages, setPages] = useState(1);
-  const nextFocus = useRef<string | undefined>(undefined), resultsId = useId();
-  useEffect(() => { setPages(1); nextFocus.current = undefined; }, [query]);
-  useEffect(() => {
-    const id = nextFocus.current;
-    if (!id) return;
-    nextFocus.current = undefined;
-    const frame = requestAnimationFrame(() => document.getElementById(`${readPrefix}-${id}`)?.focus());
-    return () => cancelAnimationFrame(frame);
-  }, [pages, readPrefix]);
-  return { query, setQuery, resultsId, limit: pages * __WEB_CONFIG__.lyricPreview.pageSize,
-    readId: (id: string) => `${readPrefix}-${id}`,
-    more: (id: string | undefined) => { nextFocus.current = id; setPages(value => value + 1); } };
-}
-function LyricPagination({ count, nextId, paging, labels }: {
-  count: number; nextId?: string; paging: ReturnType<typeof useLyricPaging>; labels: Labels;
-}) {
-  if (count <= __WEB_CONFIG__.lyricPreview.pageSize) return null;
-  const shown = Math.min(count, paging.limit);
-  return <div>
-    <p role="status">{labels.resultCount.replace("{shown}", String(shown)).replace("{total}", String(count))}</p>
-    {shown < count && <button aria-controls={paging.resultsId} onClick={() => paging.more(nextId)}>{labels.showMoreResults}</button>}
-  </div>;
-}
 function LyricReader({ publication, labels, personal, preferences, change, toggle, opened }: {
   publication: LyricLibrary; labels: Labels; personal?: PersonalStore; toggle: (reference: PersonalReference) => void;
   preferences: ReadingPreferencesProps["personal"]; change: ReadingPreferencesProps["change"];
@@ -66,7 +43,7 @@ function LyricReader({ publication, labels, personal, preferences, change, toggl
   const location = useLocation(), navigate = useNavigate();
   const state: unknown = location.state;
   const origin = state !== null && typeof state === "object" && "browseFrom" in state ? state.browseFrom : undefined;
-  const fromBrowsing = origin === "/lyrics" || origin === "/lists" || origin === "/favorites" || origin === "/recent";
+  const fromBrowsing = origin === "/lyrics" || origin === "/lists" || origin === "/favorites" || origin === "/recent" || origin === "/learning";
   const [loaded, setLoaded] = useState<LyricItem>();
   const [busy, setBusy] = useState(false), [error, setError] = useState(""), [cancelled, setCancelled] = useState(false);
   const [attempt, setAttempt] = useState(0);
@@ -98,7 +75,7 @@ function LyricReader({ publication, labels, personal, preferences, change, toggl
         event.preventDefault(); navigate(-1);
       }
     }}>← {origin === "/lists" ? labels.backToList : origin === "/favorites" ? labels.favorites
-      : origin === "/recent" ? labels.recentHistory : labels.lyricBack}</Link>
+      : origin === "/recent" ? labels.recentHistory : origin === "/learning" ? labels.learning : labels.lyricBack}</Link>
     {!known ? <p role="alert">{labels.lyricsUnavailable}</p> : !item ? <>
       {error ? <p role="alert" className={styles.error}>{labels.error}: {error}</p>
         : <p role="status">{cancelled ? labels.loadingCancelled : labels.loading}</p>}
@@ -114,6 +91,8 @@ function LyricReader({ publication, labels, personal, preferences, change, toggl
       </header>
       <AnotherLyric publication={publication} labels={labels} excludedId={item.lyricId} reading />
       {personal && <ReadingPreferences labels={labels} personal={preferences} change={change} />}
+      {personal && reference && <LearningControl key={referenceKey(reference)} labels={labels} reference={reference}
+        label={learningLabelFor(personal.learning, reference)} revision={personal.control} />}
       <div lang="kn" className={styles.lyrics}>{item.lines.map((line, index) =>
         <p key={line.kind === "line" ? line.lineId : `layout-${index}`}
           {...(line.kind === "line" ? { id: line.lineId } : { "data-layout": true })}>{line.text || <br />}</p>)}</div>

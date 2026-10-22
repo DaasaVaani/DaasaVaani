@@ -73,8 +73,8 @@ test("on-demand profile adoption preserves newly equal and formerly equal raw na
   const lists = names.map(name => newList({ format: "daasavaani-list", formatVersion: 1, name, entries: [
     { kind: "placeholder", text: "  Synthetic preserved text  " },
   ] }));
-  const state: PersonalStore = { control: newControl(), personal: defaultPersonal(), lists, history: defaultHistory() }, before = structuredClone(state);
-  expect(parseStore([state.control], [state.personal], lists, [{ id: "history", ...state.history }])).toEqual(before);
+  const state: PersonalStore = { control: newControl(), personal: defaultPersonal(), lists, history: defaultHistory(), learning: { entries: [] } }, before = structuredClone(state);
+  expect(parseStore([state.control], [state.personal], lists, [{ id: "history", ...state.history }], [{ id: "learning", ...state.learning }])).toEqual(before);
   const [first, second, split] = names;
   if (first === undefined || second === undefined || split === undefined) throw new Error("Missing name fixtures");
   expect(unicodeNameKey(first)).toBe(unicodeNameKey(second));
