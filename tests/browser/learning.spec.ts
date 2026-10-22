@@ -65,12 +65,16 @@ test("reader assignments persist all states, peer updates and exact literal layo
     await peer.goto("/#/settings");
     await peer.getByRole("button", { name: labels.clearRecentHistory, exact: true }).click();
     await expect(peer.getByRole("button", { name: labels.clearRecentHistory, exact: true })).toBeDisabled();
+    await expect.poll(async () => (await personalSnapshot(page)).tables.recentHistory)
+      .toEqual([{ id: "history", enabled: true, entries: [] }]);
     const cleared = await personalSnapshot(page);
     await setLabel(page, "practising");
     expect((await personalSnapshot(page)).tables.recentHistory).toEqual(cleared.tables.recentHistory);
     expect(await layout()).toEqual(original); expect(requests).toHaveLength(3);
   } finally { await peer.close(); }
   await page.reload(); await expect(assignment(page)).toHaveValue("practising");
+  await expect.poll(async () => (await personalSnapshot(page)).tables.recentHistory[0]?.entries)
+    .toEqual([{ kind: "lyric", lyricId: lyricId(1) }]);
   await setLabel(page, "");
   expect((await personalSnapshot(page)).tables.learningLabels).toEqual([{ id: "learning", entries: [] }]);
 });
@@ -150,6 +154,8 @@ test("complete Learning paging and filter retain true reader origin through Back
 
 test("fixture reader assignment stays independent and Learning resolves its exact return destination", async ({ page }) => {
   await page.goto("/#/item/fixture-one"); await expect(assignment(page)).toHaveValue("");
+  await expect.poll(async () => (await personalSnapshot(page)).tables.recentHistory[0]?.entries)
+    .toEqual([{ kind: "legacyVideo", videoId: "fixture-one" }]);
   await setLabel(page, "comfortableReciting");
   await nav(page, labels.learning).click();
   const card = region(page).getByRole("article");

@@ -173,6 +173,12 @@ pending, actual active/released, unsupported or failed adapter state, not a
 guarantee against OS restrictions. Exit/navigation/background release it; late
 acquisition cannot reactivate an abandoned reader and foreground return does not
 silently reacquire. Unsupported/failure paths keep Recite usable.
+Native independently exposes this bounded mode after its existing complete
+in-memory preparation. Android Back first exits focused Recite; native
+screen-awake requests preserve pre-existing view ownership and are released on
+background/navigation/disposal without foreground reacquisition. Consult the
+[native guide](https://github.com/DaasaVaani/AndroidApp/blob/main/README.md)
+for its platform lifecycle and separate validation boundaries.
 Already verified session text remains usable without a network connection, but
 this is not durable offline readiness: reload retains the existing online/
 preparation gate. List traversal and Continue recitation remain unimplemented.

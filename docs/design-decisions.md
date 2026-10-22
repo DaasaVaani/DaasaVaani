@@ -75,6 +75,13 @@ silently reacquires or promises control over OS restrictions. REC-03/04 list
 traversal/latest-occurrence resume, reviewed verse Practice and durable offline
 content remain open; no automatic entry or verse inference is authorized.
 
+Native independently implements the same bounded REC-01/02 surface and retains
+its own Shared pin and validation. Android Back first exits focused Recite;
+leaving/replacing the reader or backgrounding releases the scoped native request.
+Pre-existing screen-awake ownership is preserved and foreground return does not
+automatically reacquire. Native device checks do not prove every device/OS power
+policy or the remaining list/resume/offline surfaces.
+
 The [Shared learning-label contract](https://github.com/DaasaVaani/shared/blob/main/docs/learning-labels.md)
 defines only optional Want to learn, Practising and Comfortable reciting
 assignments per exact typed reference. Website v7 and native Room6 independently

@@ -1,5 +1,69 @@
 # Documentation history
 
+## 2026-10-22: Recite publication and committed-history test synchronization
+
+- Archived the prior Website-only REC-01/02 capability/Native-adoption-open
+  descriptions. Native now independently implements the bounded individual
+  mode, explicit Back exit and ownership-preserving scoped screen-awake lifecycle;
+  list recitation/resume, verse Practice, durable offline content and broad
+  device/power-policy acceptance remain open.
+- Exact Website68b2119 preflight39800427732 attempt1 had successful steps but
+  stale unfinished job metadata; publication remained blocked. A complete
+  unchanged-SHA rerun (attempt2) passed every actual required job/step with only
+  the intended preflight upload/deployment skips. Fresh live admin/main/
+  no-bypass guard/clean-tree/pin/baseline/ancestry checks preceded normal main
+  publication. Shared525 remains independently pinned.
+- First main39808952967 passed115 units and356/357 browser cases, then correctly
+  withheld artifact upload/deployment. The failed Learning peer-clear test used
+  a disabled button as a proxy for the completed history transaction; that
+  button is also disabled while clearing is pending. Its baseline could still
+  contain the old entry and then incorrectly blame the later label assignment
+  for the completed clear. Added an explicit wait for the exact committed empty,
+  enabled history record before taking the preservation baseline. Existing
+  equality/layout/request-count assertions and all suite/time limits remain.
+  This change still needs final full validation; the native-owned stable
+  dist/device/HTTP slot must be released before any parent rebuild.
+- Native reported finaldd1551a8c7b042fae372af3ed1d3fbd611e2f354/tree1769711
+  with independent Shared525: `npm run config` and clean core/all app builds/
+  both lints/full connected command passed48 core/88 connected, zero failures/
+  errors/skips. Lints58/59 warnings, zero errors; app JVM NO-SOURCE and existing
+  SDK XML diagnostic distinguished. Hygiene96/YAML5/actionlint/ShellCheck and
+  all whitespace checks passed. It released the frozen slot and preserved
+  user5173/PID3840/emulator5556. Parent verified the exact clean tree/pin/trailer
+  and submitted only that validated commit for native preflight.
+- After slot release, the first complete Website rerun passed115 units and
+  356/357 browsers. A different fixture Learning case selected a label before
+  the initial successful-open history transaction completed and correctly
+  received the existing stale-data error. Added the same exact committed
+  initial-history wait already used by the canonical case before testing its
+  normal assignment journey. No stale-write protection, error assertion,
+  runtime behavior, retry count or timeout was changed.
+- The next complete run again passed115 units/356 browsers: the canonical
+  case's deliberate full reload legitimately recorded a new successful open
+  after its peer-cleared history, racing its immediate final label clear.
+  Added the exact initial-history assertion at that reload boundary as well.
+  All three initial/reloaded reader boundaries now distinguish a successful
+  initial history write from forbidden history replay by a mounted control.
+- Focused stress command
+  `node node_modules\@playwright\test\cli.js test learning --grep 'reader assignments persist|fixture reader assignment' --repeat-each 3`
+  passed18 cases across all three viewports. Final `npm run check` passed115
+  units, strict TypeScript/production build and357 browser cases, zero failures/
+  skips. Hygiene75, strict YAML4, actionlint1.7.12/ShellCheck0.11.0 and both
+  whitespace checks passed. No production runtime, personal schema/default or
+  consumer Shared pin changed in this synchronization follow-up.
+- Exact Native preflight39810715872/main39811787648 passed every actual required
+  job/step for dd1551a8c7b042fae372af3ed1d3fbd611e2f354. Parent checked current
+  admin/main/guard, exact clean tested tree/pin, unchanged128e9eb baseline and
+  ancestry before normal main push. Owned contained no-PR ref cleaned; this
+  does not create a signed release or broad device/power-policy acceptance.
+- Shared list-caption397988ff2b74a1cc14152ecc706441b28b6d4556 passed37 tests,
+  hygiene75/YAML11/actionlint/ShellCheck/whitespace, exactly7 additive keys per
+  locale with prior captions/contracts/settings unchanged and21 deterministic
+  outputs. Exact preflight39808837612/main39809055003 passed every actual job/
+  step; live gates preceded normal main push. Owned contained no-PR ref cleaned.
+  Both current clients still pin525 independently; these captions do not
+  implement REC-03/04 or authorize automatic consumer adoption.
+
 ## 2026-10-22: focused individual Recite and prior learning publication
 
 - Archived the preceding blanket Recite limitation: no dedicated focused
