@@ -70,10 +70,10 @@ Initial values and exact field bounds belong only in the linked owning files.
 | Owner/source and keys | Current application and validation | Compatibility/open work |
 | --- | --- | --- |
 | [Web settings/schema](../settings/web.schema.json): `base`, `descriptorUrl`, `canonicalBaseUrl`, `listLinkPath`, `listFileName` | Strict build-time settings; fixture artifact entry and minimal-list URL/file projection | Public route/origin changes require old-link/hosting review; distinct real-publication settings below never reinterpret fixture formats |
-| [Web settings/schema](../settings/web.schema.json): `lyricPreview.descriptorUrl`, `pageSize`, `maxItems`, `maxEncodedBytes`, `maxDecodedBytes`, `concurrentRequests` | Credential-free absolute HTTPS endpoint, verified metadata/catalog count, bounded requested-item cache/in-flight byte reservations and complete paging; complete-preparation helper retains whole-plan/concurrent-worker validation | Separate prelaunch `lyric-preview-v1`, on-demand online memory-only lifecycle; no persistent offline or complete production-profile claim; see the [reader lifecycle](lyric-preview.md#online-loading-and-failure-behavior) and independent personal v5 protocol below |
+| [Web settings/schema](../settings/web.schema.json): `lyricPreview.descriptorUrl`, `pageSize`, `maxItems`, `maxEncodedBytes`, `maxDecodedBytes`, `concurrentRequests` | Credential-free absolute HTTPS endpoint, verified metadata/catalog count, bounded requested-item cache/in-flight byte reservations and complete paging; complete-preparation helper retains whole-plan/concurrent-worker validation | Separate prelaunch `lyric-preview-v1`, on-demand online memory-only lifecycle; no persistent offline or complete production-profile claim; see the [reader lifecycle](lyric-preview.md#online-loading-and-failure-behavior) and independent personal v6 protocol below |
 | [Web settings](../settings/web.yml): `transferChunkBytes`, `listCompressionLevel` | Byte allocation/compression controls passed to the dedicated codec worker; schema and actual-ceiling codec tests | Encoding choices do not narrow accepted valid input or change decoded/text limits |
 | [Web settings](../settings/web.yml): `databaseName` | Build-time Dexie/native IndexedDB identity | Changing it is not a migration; it would strand the prior database and requires explicit compatibility handling |
-| [Web settings](../settings/web.yml): `fontFamily`, `readerFontSize`, `space`, `contentWidth`, `readerWidth`, `themes` | Typed CSS tokens, system fonts, three palettes and measured contrast checks | Personal font/density/helper/script settings and physical-device/font conformance remain incomplete |
+| [Web settings](../settings/web.yml): `fontFamily`, `readerFontSize`, `readerFontSizeMin`, `readerFontSizeMax`, `readerFontSizeStep`, `readerLineHeights`, `space`, `contentWidth`, `readerWidth`, `themes` | Typed CSS tokens, lyric-only bounded font/density preferences, system fonts, three palettes and measured contrast checks; portable density choices/default come from Shared | Onboarding/helper/script/Recite/Practice/offline integration and physical-device/font conformance remain incomplete |
 | [Web settings](../settings/web.yml): `demoPort`, `demoViewports` | Development server and desktop/mobile demo tooling, not a runtime user preference | Supported-browser/device acceptance is broader than configured demo viewports |
 | [Portable defaults/schema](../shared/schemas/ui-defaults.schema.json) | Build-time locale/theme/default history recording and allowed choices; first supported browser locale, explicit persisted override, independent device appearance | Canonical `lyricScript` remains the fixture invariant, not an implemented selectable transliteration profile; explicit stored history choices win |
 | [Personal-transfer settings/schema](../shared/schemas/personal-transfer-settings.schema.json) | Build-time favorite/list/occurrence/recent-window/text/logical-byte and encoded/decoded/link bounds; generated schemas and transactional/codec tests | Bookmark/learning/backup bounds are declared but their complete features and protocols are not implemented |
@@ -173,7 +173,7 @@ Personal values never enter repository settings; payloads cannot override limits
 - Root /open/ hash links, narrow signed Android association and browser fallback;
   no forced routing or claim that installation guarantees handoff.
 
-## Web typed personal storage v5
+## Web typed personal storage v6
 
 This is the executable Website protocol for typed favorites/preferences and
 logical lists and recent history, not the full production personal/backup contract. The
@@ -182,16 +182,16 @@ owns list/occurrence fields. All four tables share the configured personal DB:
 
 | Table | Exact logical rows |
 | --- | --- |
-| `personal` | Zero or one `{id:"personal", favorites, language, theme}`; favorites are exact typed lyric/legacy references, unique by kind plus case-sensitive ID; absent row means first supported browser language plus validated configured defaults |
+| `personal` | Zero or one `{id:"personal", favorites, language, theme, fontSize, density}`; favorites are exact typed lyric/legacy references, unique by kind plus case-sensitive ID; absent row means first supported browser language plus validated configured defaults |
 | `lists` | Independently identified Shared list records; entry array order is authoritative |
-| `control` | Exactly one `{id:"state", formatVersion:5, epoch, revision}`; fresh local UUIDv4 epoch and nonnegative safe-integer revision |
+| `control` | Exactly one `{id:"state", formatVersion:6, epoch, revision}`; fresh local UUIDv4 epoch and nonnegative safe-integer revision |
 | `recentHistory` | Exactly one `{id:"history", enabled, entries}`; ordered unique typed references following the [Shared logical history record](https://github.com/DaasaVaani/shared/blob/main/docs/recent-history.md) |
 
 ### Opening and migration
 
-Native IndexedDB version50 is the typed v5 schema. Supported migration inputs
+Native IndexedDB version60 is the typed v6 schema. Supported migration inputs
 are native version10 (personal-only v1), version20 (three-table v2) and version30
-(three-table v3), plus version40 (typed three-table v4).
+(three-table v3), version40 (typed three-table v4) and version50 (four-table v5).
 Open at the exact native version **before** opening Dexie,
 which can otherwise retry a newer version and patch missing schema parts.
 Native upgrade creates only the specified stores/header, validates legacy
@@ -202,10 +202,13 @@ old opaque-string favorites/v1 entries before structural adaptation. Convert
 favorites only to typed legacy references and `item` only to `legacyVideo`,
 retaining every raw ID, list/occurrence UUID, name, fallback, repetition and order.
 UUID-looking old IDs are never lyric aliases. Write converted rows and a fresh
-v5 epoch/revision0 together. Version40 validates its exact typed schema/old
-accounting, preserving all typed rows unchanged. Every upgrade creates only an
-empty history with the configured initially-enabled preference; no previous
-activity is inferred from favorites/lists. The longer representation can exceed capacity:
+v6 epoch/revision0 together. Version40 validates its exact typed schema/old
+accounting; version50 additionally validates and preserves its exact history,
+including disabled state and unresolved typed references. Both preserve every
+existing typed value and identity. Existing preference rows gain only configured
+font/density defaults; absent rows remain absent. Upgrades from versions10..40
+create empty initially-enabled history; no activity is inferred from collections.
+Future70 and unfamiliar native schemas are refused. The longer representation can exceed capacity:
 abort rather than truncate/relax limits. New-mode or typed values mislabeled as
 older schemas are invalid. Any failure aborts the entire schema transaction.
 New initialization creates control and empty history, not a personal preference or list row.
@@ -219,7 +222,7 @@ over browser preferences. UI selection never changes canonical Kannada, lyric
 script or theme. The pure model accepts preference tags explicitly; only the
 browser adapter reads navigator values.
 
-V5 preferences accept `light`, `dark`, `warm` and `device`; `device` follows the
+V6 preferences accept `light`, `dark`, `warm` and `device`; `device` follows the
 current browser light/dark media preference. Explicit modes ignore system changes;
 stored mode selection survives reload and remains independent of UI locale and
 canonical lyrics. Media changes update colors only, never a personal row/revision.
@@ -227,6 +230,25 @@ The configured initial theme remains Light, not implicit Follow device.
 Owned web settings define all three palettes; portable defaults/allowed choices
 use Shared's strict UI-defaults schema. Text/accent/highlight and interactive
 boundary contrast are executable numeric checks, not font/device-matrix proof.
+
+### Lyric reading preferences
+
+`fontSize` is an integer in owned16..80 CSS-pixel bounds; its configured default
+is28 and A-/A+ use2px steps, clamped at those bounds. `density` is one of Shared's
+Compact/Normal/Relaxed tokens with Normal initially selected. Owned unitless
+line heights are1.8/2.3/2.8 respectively. Build validation rejects inconsistent
+font bounds/default/step and unordered density spacing.
+Settings and both actual canonical/fixture readers reuse localized controls.
+Only lyric body CSS changes: titles/UI, literal text, line/layout IDs, distinct
+paragraphs/separators,8px paragraph padding, system font and column width remain
+independent. No cross-platform font-unit conversion is defined.
+Mutations use the latest complete transaction state. Bound/same-density actions
+are no-ops without a row/revision write; default rendering stores no preferences.
+Changes propagate to peer tabs and survive reload without additional successful
+reader-open/history events or implicit content requests.
+This covers later reading/settings controls only. Onboarding, helper/scripts,
+Recite/Practice, persistent offline use and full device/font accessibility remain
+separate requirements, not inferred from canonical/fixture browser tests.
 
 Reject future/unknown versions, extra/missing stores, unexpected indexes/keypaths,
 invalid rows, duplicate identities and invalid capacities; do not delete, reset,
@@ -259,7 +281,7 @@ locale, trim, lowercase or moving package table participates. Strict build check
 bind the pinned Shared settings/manifest/table/vector/license bytes; complete
 Unicode License V3 is included in the distribution.
 
-The v5 database stores raw names only, not derived keys or profile caches.
+The v6 database stores raw names only, not derived keys or profile caches.
 Compute this explicit profile on demand without rewriting any name, ID, occurrence,
 reference, order, preference or header. Existing names that now compare equal
 remain independent and opening a database does not ask for destructive repair.
@@ -334,9 +356,9 @@ same-document navigation from a saved list must decode the newly selected link,
 not depend on a reload or unrelated personal-state render.
 
 The exact logical accounting envelope, serialized as compact UTF8 JSON without
-BOM, is `{format:"daasavaani-personal-storage",formatVersion:5,control,personal,lists,recentHistory}`.
+BOM, is `{format:"daasavaani-personal-storage",formatVersion:6,control,personal,lists,recentHistory}`.
 Key order is the order shown; header keys follow the table above. `personal` is
-an empty array or one row with keys `id,favorites,language,theme`. `lists` is sorted
+an empty array or one row with keys `id,favorites,language,theme,fontSize,density`. `lists` is sorted
 by ASCII UUID; row keys are `id,name,entries`. Favorite keys are `kind,lyricId`
 or `kind,videoId`. Each entry uses `id,kind,lyricId` or `id,kind,videoId`
 then optional `fallback`, or `id,kind,text`. No text/array normalization occurs.
@@ -353,7 +375,10 @@ buffer. Physical IndexedDB/index/quota usage differs from logical bytes.
 This envelope contains local control data and is **never a full-backup export**.
 Old v2/v3 accounting uses its exact `fixture-personal-storage` format/header and
 v1 entry projection before conversion. Old v4 accounting uses its exact typed
-version4 envelope without history. Transport decoding never selects a database
+version4 envelope without history. Old v5 uses its exact version5 envelope with
+history and only `id,favorites,language,theme` preferences. Validate that frozen
+old representation before constructing/counting new reading defaults.
+Transport decoding never selects a database
 version. Unmodified v1 previews re-export v1; confirmed v1 imports structurally
 adapt to local v2 records with fresh IDs, while all saved-list exports use v2.
 Full-backup headers, complete personal collections, replacement/crash/locale

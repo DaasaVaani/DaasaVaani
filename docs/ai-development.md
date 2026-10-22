@@ -42,17 +42,17 @@ demonstrations do not close remaining production contracts or prove full readine
 
 | Surface | Current capability |
 | --- | --- |
-| Website | Verified real text-only online catalog/on-demand UUID reading with bounded in-memory content, typed favorites/lists and device-only recent history; separate fixture reader/search, browsing/list-reader continuity, preferences, preserving personal v5 upgrade and worker v1/v2 transfer/export |
+| Website | Verified real text-only online catalog/on-demand UUID reading with bounded in-memory content, typed favorites/lists and device-only recent history; separate fixture reader/search, browsing/list-reader continuity, independent persisted lyric font/density preferences, preserving personal v6 upgrade and worker v1/v2 transfer/export |
 | Shared | Lyric/source/publication and fixture/minimal-list/logical-list contracts, official Unicode16 name-matching resources, portable settings and generated web/Android UI catalogs |
 | Library | Reviewed owner-text import with stable identities/held exceptions, complete empty authoring fields, canonical text-only post-merge publication; separate synthetic indexed fixture publisher |
-| Android | Separate real canonical preparation/reading; typed Room4 favorites with independent literal filtering/paging/reader-return context, durable lists/occurrences/recent history, preserving upgrades, locale/theme, bounded v1/v2 preview/new-list save/re-export and reader/list navigation; production lifecycle/full personal parity remain incomplete |
+| Android | Separate real canonical preparation/reading; typed Room5 favorites with independent literal filtering/paging/reader-return context, durable lists/occurrences/recent history, preserving upgrades, independent font/density/locale/theme, bounded v1/v2 preview/new-list save/re-export and reader/list navigation; production lifecycle/full personal parity remain incomplete |
 | Website library/ | Absent; reviewed sources belong only to Library |
 | Website settings/ | Web schema/settings; portable defaults and bounds consumed from Shared |
 | Tooling | Exact npm lockfiles and Gradle wrapper/version catalog; use the current command registry |
 | Approval | Staged implementation authorized; production language/lifecycle/personal/publication gates and release evidence remain incomplete |
 
 Website/native personal-name matching uses the official Shared Unicode16 profile.
-Website v5 stores only raw names and computes explicit-profile keys on demand:
+Website v6 stores only raw names and computes explicit-profile keys on demand:
 there is no stored cache to rewrite or schema migration to invent. Keep existing
 names/IDs/contents unchanged and never auto-merge/rename newly equivalent lists.
 See [the storage/name protocol](architecture.md#transactions-names-and-exact-accounting).
@@ -68,19 +68,23 @@ See [the storage/name protocol](architecture.md#transactions-names-and-exact-acc
   structured credits as provenance rather than inventing registry/media facts.
   Real UUIDs must never enter fixture `videoId` fields. Follow the
   [preview boundary](lyric-preview.md) and preserving typed personal protocol.
-  Structural v1/v2/v3-to-v5 adaptation changes only legacy discriminants, never
+  Structural v1/v2/v3-to-v6 adaptation changes only legacy discriminants, never
   legacy-to-lyric identity mappings.
-  V4-to-v5 preserves every typed value/identity and adds empty initially-enabled
-  history, never reconstructed prior activity. Recent recording is device-only;
+  V4-to-v6 preserves typed values/identities, adds only default font/density and
+  empty initially-enabled history; v5-to-v6 additionally preserves all history.
+  No prior activity is reconstructed. Recent recording is device-only;
   disabling stops writes, Clear preserves all other personal state.
 - Kannada canonical; transliterate never translate. UI locale and lyric script
   independent; first-use UI follows supported browser preferences with configured
   fallback, and explicit stored override wins. Uncertain lyrics held, corrections
   and identities preserved.
 - Website appearance uses persisted Light/Dark/Warm/Follow device, strict
-  non-destructive personal v1/v2/v3/v4-to-v5 migration and color-only system
+  non-destructive personal v1/v2/v3/v4/v5-to-v6 migration and color-only system
   updates. Portable defaults/allowed choices and owned palette settings remain
   authoritative; no full offline-shell/device/font coverage is inferred.
+  Independent lyric font/density controls in Settings and both readers affect
+  body text only and preserve canonical layout/history; onboarding/helper/
+  Recite/Practice/offline preference coverage remains incomplete.
 - Shared owns portable contracts/settings/fixtures and UI catalogs/generator/
   committed resources. Library owns source/assets/registries/ingestion/publisher.
   Consumers query published artifacts and pin Shared independently.

@@ -38,7 +38,7 @@ The [approved lyric identity contract](https://github.com/DaasaVaani/shared/blob
 owns typed lyric/legacy references, target minimal-list v2, text-only publication
 eligibility and staged compatibility. Real source/publication schemas and separate
 canonical readers implement the initial text-only slice. Website typed personal
-v5/v2 transfers and native Room4 typed collections preserve old identities through structural legacy adapters;
+v6/v2 transfers and native Room5 typed collections preserve old identities through structural legacy adapters;
 fixture/v1 formats remain legacy-only. Full personal collections/backup and
 production adapters remain open. The [preview guide](lyric-preview.md) defines the current narrower lifecycle,
 not a change to approved production PWA on-demand reading/offline behavior.
@@ -46,9 +46,16 @@ not a change to approved production PWA on-demand reading/offline behavior.
 Recently opened recording is initially enabled, device-only and bounded to the
 latest50 distinct successful opens, with separate clear/disable controls.
 The [Shared recent-history contract](https://github.com/DaasaVaani/shared/blob/main/docs/recent-history.md)
-owns the exact ordered typed record and portable default. Website v5 implements
-the successful-open/controls/preserving-upgrade slice; native Room4 independently
+owns the exact ordered typed record and portable default. Website v6 implements
+the successful-open/controls/preserving-upgrade slice; native Room5 independently
 implements the same bounded device-only history. This is not permission to record search queries or send history.
+
+Website/native later reading/Settings controls independently persist native
+font units (CSS pixels/Android sp) and Shared Compact/Normal/Relaxed density, preserving canonical layout,
+UI/theme independence and mounted-reader history. The
+[v6 storage/reading protocol](architecture.md#web-typed-personal-storage-v6)
+defines exact defaults, preserving older inputs and platform-owned spacing.
+Onboarding/helper/Recite/Practice/offline and complete font/device evidence remain open.
 
 ## Current readiness gates
 

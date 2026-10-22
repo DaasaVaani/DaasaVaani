@@ -5,7 +5,7 @@ import transferSchema from "../shared/schemas/list-transfer.schema.json";
 import transferSchemaV2 from "../shared/schemas/list-transfer-v2.schema.json";
 import referenceSchema from "../shared/schemas/personal-reference.schema.json";
 import historySchema from "../shared/schemas/recent-history.schema.json";
-import type { RecentHistoryV1 } from "../shared/types/personal";
+import type { ReadingDensity, RecentHistoryV1 } from "../shared/types/personal";
 export type { RecentHistoryV1 } from "../shared/types/personal";
 import { typedEntry, type ListSnapshot, type ListSnapshotV1, type ListEntryV2, type ListTransferV2, type PersonalReference } from "./list-transfer-types";
 import { unicodeNameKey as listNameKey } from "./unicode-names";
@@ -13,11 +13,12 @@ export { unicodeNameKey as listNameKey, unicodeNameProfile } from "./unicode-nam
 
 export interface Personal {
   id: "personal"; favorites: PersonalReference[]; language: "en" | "kn"; theme: WebConfig["defaultTheme"];
+  fontSize: number; density: ReadingDensity;
 }
 export type ListEntry = ListEntryV2 & { id: string };
 export interface ListRecord { id: string; name: string; entries: ListEntry[] }
 export interface Revision { epoch: string; revision: number }
-export interface Control extends Revision { id: "state"; formatVersion: 5 }
+export interface Control extends Revision { id: "state"; formatVersion: 6 }
 export interface PersonalStore { control: Control; personal?: Personal; lists: ListRecord[]; history: RecentHistoryV1 }
 export type PersonalErrorCode = "invalid" | "listInvalid" | "capacity" | "stale" | "duplicate";
 export class PersonalError extends Error {
@@ -31,7 +32,8 @@ export class PersonalError extends Error {
 }
 const ajv = new Ajv2020({ strict: true });
 const validList = ajv.compile<ListRecord>(recordSchema);
-type LegacyPersonal = Omit<Personal, "favorites"> & { favorites: string[] };
+type PreviousPersonal = Pick<Personal, "id" | "favorites" | "language" | "theme">;
+type LegacyPersonal = Omit<PreviousPersonal, "favorites"> & { favorites: string[] };
 type LegacyList = Omit<ListRecord, "entries"> & { entries: (ListSnapshotV1["entries"][number] & { id: string })[] };
 const validLegacyList = ajv.compile<LegacyList>(legacyRecordSchema);
 const validReference = ajv.compile<PersonalReference>(referenceSchema);
@@ -73,12 +75,15 @@ export function promoteRecent(history: RecentHistoryV1, reference: PersonalRefer
 export function defaultPersonal(preferredLanguages: readonly string[] = []): Personal {
   for (const tag of preferredLanguages) {
     const language = __WEB_CONFIG__.uiLanguages.find(value => value === tag.split("-")[0]?.toLowerCase());
-    if (language) return { id: "personal", favorites: [], language, theme: __WEB_CONFIG__.defaultTheme };
+    if (language) return { id: "personal", favorites: [], language, theme: __WEB_CONFIG__.defaultTheme, ...readingDefaults() };
   }
-  return { id: "personal", favorites: [], language: __WEB_CONFIG__.defaultUiLanguage, theme: __WEB_CONFIG__.defaultTheme };
+  return { id: "personal", favorites: [], language: __WEB_CONFIG__.defaultUiLanguage, theme: __WEB_CONFIG__.defaultTheme, ...readingDefaults() };
 }
-export function validatePersonal(value: unknown, limits = __PERSONAL_LIMITS__): asserts value is Personal {
-  if (!object(value) || !keys(value, ["id", "favorites", "language", "theme"]) || value.id !== "personal" ||
+function readingDefaults() {
+  return { fontSize: __WEB_CONFIG__.readerFontSize, density: __WEB_CONFIG__.defaultReadingDensity };
+}
+function validatePreferenceFields(value: unknown, fields: string[], limits: PersonalLimits): asserts value is PreviousPersonal & Record<string, unknown> {
+  if (!object(value) || !keys(value, fields) || value.id !== "personal" ||
       !Array.isArray(value.favorites) || Object.keys(value.favorites).length !== value.favorites.length ||
       !Array.from(value.favorites).every(value => validReference(value)) ||
       new Set(value.favorites.map(referenceKey)).size !== value.favorites.length ||
@@ -88,8 +93,24 @@ export function validatePersonal(value: unknown, limits = __PERSONAL_LIMITS__): 
   }
   if (value.favorites.length > limits.maxFavorites) throw new PersonalError("capacity");
 }
+export function validatePersonal(value: unknown, limits = __PERSONAL_LIMITS__): asserts value is Personal {
+  validatePreferenceFields(value, ["id", "favorites", "language", "theme", "fontSize", "density"], limits);
+  if (typeof value.fontSize !== "number" || !Number.isInteger(value.fontSize) ||
+      value.fontSize < __WEB_CONFIG__.readerFontSizeMin || value.fontSize > __WEB_CONFIG__.readerFontSizeMax ||
+      !__WEB_CONFIG__.readingDensities.some(density => density === value.density)) throw new PersonalError("invalid");
+}
+export function adjustFontSize(personal: Personal, direction: -1 | 1): Personal {
+  const fontSize = Math.max(__WEB_CONFIG__.readerFontSizeMin,
+    Math.min(__WEB_CONFIG__.readerFontSizeMax, personal.fontSize + direction * __WEB_CONFIG__.readerFontSizeStep));
+  return fontSize === personal.fontSize ? personal : { ...personal, fontSize };
+}
+export function setReadingDensity(personal: Personal, value: unknown): Personal {
+  const density = __WEB_CONFIG__.readingDensities.find(density => density === value);
+  if (!density) throw new PersonalError("invalid");
+  return personal.density === density ? personal : { ...personal, density };
+}
 export function newControl(): Control {
-  return { id: "state", formatVersion: 5, epoch: crypto.randomUUID(), revision: 0 };
+  return { id: "state", formatVersion: 6, epoch: crypto.randomUUID(), revision: 0 };
 }
 function controlRevision(controls: unknown[], version: number): Revision {
   const control = controls[0];
@@ -98,35 +119,59 @@ function controlRevision(controls: unknown[], version: number): Revision {
       typeof control.revision !== "number" || !Number.isSafeInteger(control.revision) || control.revision < 0) throw new PersonalError("invalid");
   return { epoch: control.epoch, revision: control.revision };
 }
-function typedContents(personal: unknown[], lists: unknown[]) {
+function preferenceRow(personal: unknown[]) {
   if (personal.length > 1) throw new PersonalError("invalid");
   const preferences = personal[0];
   if (preferences === undefined && personal.length !== 0) throw new PersonalError("invalid");
-  if (preferences !== undefined) validatePersonal(preferences);
+  return preferences;
+}
+function typedRecords(lists: unknown[]): ListRecord[] {
   const records: ListRecord[] = [];
   for (const list of lists) {
     if (!validList(list)) throw new PersonalError("invalid");
     records.push(list);
   }
-  return { personal: preferences, lists: records };
+  return records;
 }
-export function parseStore(controls: unknown[], personal: unknown[], lists: unknown[], histories: unknown[]): PersonalStore {
-  const control = controlRevision(controls, 5), row = histories[0];
+function previousContents(personal: unknown[], lists: unknown[], limits: PersonalLimits) {
+  const preferences = preferenceRow(personal);
+  if (preferences !== undefined) validatePreferenceFields(preferences, ["id", "favorites", "language", "theme"], limits);
+  return { personal: preferences, lists: typedRecords(lists) };
+}
+function historyRow(histories: unknown[]): RecentHistoryV1 {
+  const row = histories[0];
   if (histories.length !== 1 || !object(row) || !keys(row, ["id", "enabled", "entries"]) || row.id !== "history") {
     throw new PersonalError("invalid");
   }
   const history = { enabled: row.enabled, entries: row.entries };
   validateHistory(history);
-  const state: PersonalStore = { control: { id: "state", formatVersion: 5, ...control },
-    ...typedContents(personal, lists), history };
+  return history;
+}
+export function parseStore(controls: unknown[], personal: unknown[], lists: unknown[], histories: unknown[]): PersonalStore {
+  const control = controlRevision(controls, 6), preferences = preferenceRow(personal);
+  if (preferences !== undefined) validatePersonal(preferences);
+  const state: PersonalStore = { control: { id: "state", formatVersion: 6, ...control },
+    personal: preferences, lists: typedRecords(lists), history: historyRow(histories) };
   validateStore(state);
   return state;
 }
 export function migrateStoreV4(controls: unknown[], personal: unknown[], lists: unknown[], limits = __PERSONAL_LIMITS__): PersonalStore {
-  const old = { control: controlRevision(controls, 4), ...typedContents(personal, lists) };
+  const old = { control: controlRevision(controls, 4), ...previousContents(personal, lists, limits) };
   validateCollections(old, limits);
   storedBytes(old, 4, limits.maxPersonalStoredBytes);
-  const state: PersonalStore = { ...old, control: newControl(), history: defaultHistory() };
+  const state: PersonalStore = { ...old, personal: old.personal && { ...old.personal, ...readingDefaults() },
+    control: newControl(), history: defaultHistory() };
+  validateStore(state, limits);
+  return state;
+}
+export function migrateStoreV5(controls: unknown[], personal: unknown[], lists: unknown[], histories: unknown[],
+  limits = __PERSONAL_LIMITS__): PersonalStore {
+  const old = { control: controlRevision(controls, 5), ...previousContents(personal, lists, limits) }, history = historyRow(histories);
+  validateCollections(old, limits);
+  validateHistory(history, limits);
+  storedBytes(old, 5, limits.maxPersonalStoredBytes, history);
+  const state: PersonalStore = { ...old, personal: old.personal && { ...old.personal, ...readingDefaults() },
+    control: newControl(), history };
   validateStore(state, limits);
   return state;
 }
@@ -170,7 +215,7 @@ function migrateLegacy(controls: unknown[], personal: unknown[], lists: unknown[
   }
   if (version !== 1) storedBytes({ control, personal: preferences, lists: records }, version, limits.maxPersonalStoredBytes);
   const state: PersonalStore = { control: newControl(), history: defaultHistory(), personal: preferences && { ...preferences,
-    favorites: preferences.favorites.map(videoId => ({ kind: "legacyVideo", videoId })) },
+    favorites: preferences.favorites.map(videoId => ({ kind: "legacyVideo", videoId })), ...readingDefaults() },
     lists: records.map(list => ({ ...list, entries: list.entries.map(entry => ({ ...typedEntry(entry), id: entry.id })) })) };
   validateStore(state, limits);
   return state;
@@ -230,9 +275,9 @@ export function jsonBytes(value: unknown, limit = Number.MAX_SAFE_INTEGER): numb
   return bytes;
 }
 export function storageBytes(state: PersonalStore, limit = Number.MAX_SAFE_INTEGER): number {
-  return storedBytes(state, 5, limit, state.history);
+  return storedBytes(state, 6, limit, state.history);
 }
-function storedBytes(state: { control: Revision; personal?: Personal | LegacyPersonal; lists: (ListRecord | LegacyList)[] },
+function storedBytes(state: { control: Revision; personal?: PreviousPersonal | LegacyPersonal; lists: (ListRecord | LegacyList)[] },
   version: number, limit: number, history?: RecentHistoryV1): number {
   const personal = state.personal;
   return jsonBytes({
@@ -240,7 +285,8 @@ function storedBytes(state: { control: Revision; personal?: Personal | LegacyPer
     control: { id: "state", formatVersion: version, epoch: state.control.epoch, revision: state.control.revision },
     personal: personal ? [{ id: "personal", favorites: personal.favorites.map(reference => typeof reference === "string" ? reference
       : reference.kind === "lyric" ? { kind: "lyric", lyricId: reference.lyricId } : { kind: "legacyVideo", videoId: reference.videoId }),
-      language: personal.language, theme: personal.theme }] : [],
+      language: personal.language, theme: personal.theme,
+      ...(version >= 6 && "fontSize" in personal && "density" in personal ? { fontSize: personal.fontSize, density: personal.density } : {}) }] : [],
     lists: [...state.lists].sort((a, b) => a.id < b.id ? -1 : a.id > b.id ? 1 : 0).map(list => ({
       id: list.id, name: list.name, entries: list.entries.map(entry => ({ id: entry.id, ...wireEntry(entry) })),
     })),
@@ -248,8 +294,7 @@ function storedBytes(state: { control: Revision; personal?: Personal | LegacyPer
       reference.kind === "lyric" ? { kind: "lyric", lyricId: reference.lyricId } : { kind: "legacyVideo", videoId: reference.videoId }) }] } : {}),
   }, limit);
 }
-function validateCollections(state: Pick<PersonalStore, "personal" | "lists">, limits: PersonalLimits): void {
-  if (state.personal) validatePersonal(state.personal, limits);
+function validateCollections(state: { personal?: PreviousPersonal; lists: ListRecord[] }, limits: PersonalLimits): void {
   if (state.lists.length > limits.maxLists) throw new PersonalError("capacity");
   const lists = new Set<string>(), occurrences = new Set<string>();
   let total = 0;
@@ -266,6 +311,7 @@ function validateCollections(state: Pick<PersonalStore, "personal" | "lists">, l
   }
 }
 export function validateStore(state: PersonalStore, limits = __PERSONAL_LIMITS__): void {
+  if (state.personal) validatePersonal(state.personal, limits);
   validateCollections(state, limits);
   validateHistory(state.history, limits);
   storageBytes(state, limits.maxPersonalStoredBytes);

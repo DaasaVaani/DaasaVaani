@@ -1,5 +1,69 @@
 # Documentation history
 
+## 2026-10-22: independent lyric font size and reading density
+
+- Archived Website v5/native IndexedDB50: preference rows had exactly
+  `id,favorites,language,theme`; its logical UTF8 envelope and control header
+  used version5, with typed lists and one `id,enabled,entries` history row.
+  Versions10/20/30/40 upgraded to50, adding only empty default history and
+  structural legacy discriminants as applicable. Future60 was refused.
+  Those input grammars/accounting remain frozen for preserving migration.
+  Reading used a fixed28px lyric font and2.3 line-height, with8px paragraph
+  padding. Personal font/density controls were not implemented.
+- Shared published additive bilingual reading controls in
+  a404e0a9a81407588870150b9f0fbc22a9cd605a:29 tests, hygiene72,
+  YAML11, actionlint/ShellCheck, whitespace and deterministic generation passed;
+  exact preflight39731083818/main39731223346 passed.
+  Portable density defaults/type followed in44c21b9d139239e3003c293dfe8058ad80393fa6:
+  Normal plus Compact/Normal/Relaxed, with30 tests and all the same checks
+  passing. Exact preflight39731901423/main39732154093 passed before either
+  consumer was authorized to adopt this independent pin.
+- Website implementation keeps28px/2.3 and literal paragraph padding as Normal,
+  owns16..80px bounds/2px steps and1.8/2.3/2.8 density line heights, and uses
+  Shared portable density choices/captions. Its v6/native60 migration validates
+  exact old and prospective accounting, preserves history and identities, and
+  adds only reading defaults to existing preference rows. Default display and
+  unchanged choices do not create rows or increment revisions.
+- Incremental `npx tsc --noEmit` and `npm test` passed92 unit tests. Initial
+  targeted checks identified missing canonical-reader prop wiring and legacy
+  tests deriving old rows from the newly extended default shape; both were
+  corrected without weakening the old grammar. Full browser/publication
+  validation is not established by these incremental checks.
+- The first full Website `npm run check` passed92 units and245 browser cases,
+  failing4: three viewports of an existing current-Unicode seed still opened
+  native50 instead of60; the narrow future-schema case selected two independent
+  alerts. Its intended schema refusal was present alongside a fixture decode
+  `network error`; captured HTTP200 bytes independently matched their encoded
+  SHA256 and decoded as valid gzip/JSON. Updated the current-version seed, and
+  explicitly failed the independent fixture endpoint in the future-schema test,
+  asserting the exact schema-refusal alert and unchanged database instead of
+  assuming the page has only one error. No retry, timeout increase, product
+  fallback or weakened database-preservation assertion was added.
+  Focused `node node_modules\@playwright\test\cli.js test lists --grep
+  'new Unicode16 equivalence|newer personal schemas'` passed all6 cases across
+  desktop, mobile and320px after a fresh production build.
+- Archived native Room4/accounting4 descriptions. The independent native
+  font/density slice uses Room5/accounting5 and preserves28sp/48sp/20dp Normal
+  rendering, previous personal values/history and identities. Full
+  `npm run config` and
+  `.\gradlew.bat :core:build :app:build :app:lintDebug :app:lintRelease :app:connectedDebugAndroidTest --no-daemon --console=plain`
+  passed40 core/58 connected tests, zero failures/errors/skips, in8m36s.
+  Initial device failures came from a prohibited tab in a synthetic placeholder;
+  the seed was corrected without relaxing validation. Both lints reported55
+  warnings/zero errors; app JVM is NO-SOURCE. Hygiene82/whitespace passed.
+  The native slot was explicitly released before Website fresh builds;
+  existing server5173/emulator5556 were preserved. Publication remained pending
+  at this validation handoff; connected evidence is local, not CI.
+- Corrected Website final-tree `npm run check` passed92 unit tests, the fresh
+  fixture publication/strict TypeScript/Vite production build and all249 browser
+  cases across desktop, Pixel7 and320px (no retries/skips). This includes actual
+  configured font bounds/steps/line heights, bound keyboard focus, peer history
+  independence, preserving native50-to60 upgrades and the actual64MiB old/new
+  accounting boundary. Workflow lint/ShellCheck and whitespace passed.
+  Documentation checks passed20 Markdown files/201 local links/all153 unique
+  normative requirement IDs; strict YAML passed4 files.
+  Vite's500kB chunk-size advisory remains a warning, not a performance pass.
+
 ## 2026-10-22: on-demand online reading and accelerated delivery
 
 - The owner approved parallel Website/native slices, larger coherent validated

@@ -17,6 +17,10 @@ demoPort: 5173
 databaseName: DaasaVaani-personal
 fontFamily: system-ui, "Nirmala UI", sans-serif
 readerFontSize: 28
+readerFontSizeMin: 16
+readerFontSizeMax: 80
+readerFontSizeStep: 2
+readerLineHeights: { compact: 1.8, normal: 2.3, relaxed: 2.8 }
 space: 8
 contentWidth: 1160
 readerWidth: 760

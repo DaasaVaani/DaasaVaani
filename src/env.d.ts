@@ -7,8 +7,12 @@ interface WebConfig {
   canonicalBaseUrl: string; listLinkPath: string; listFileName: string; transferChunkBytes: number; listCompressionLevel: number;
   defaultUiLanguage: "en" | "kn"; defaultTheme: "light" | "dark" | "warm" | "device";
   defaultRecentHistoryEnabled: boolean;
+  defaultReadingDensity: import("../shared/types/personal").ReadingDensity;
+  readingDensities: import("../shared/types/personal").ReadingDensity[];
   databaseName: string; maxFavorites: number; fontFamily: string;
   readerFontSize: number; space: number; contentWidth: number; readerWidth: number;
+  readerFontSizeMin: number; readerFontSizeMax: number; readerFontSizeStep: number;
+  readerLineHeights: Record<import("../shared/types/personal").ReadingDensity, number>;
   uiLanguages: ("en" | "kn")[];
   uiThemes: ("light" | "dark" | "warm" | "device")[];
   demoViewports: { desktop: { width: number; height: number }; mobile: { width: number; height: number } };

@@ -2,7 +2,7 @@ import { test, expect, type Page } from "@playwright/test";
 import { gzipSync } from "node:zlib";
 import messages from "../../shared/generated/web/ui.json" with { type: "json" };
 import type { PersonalReference } from "../../shared/types/personal";
-import { config, maxRecents, personalSnapshot, serveLyrics } from "../lyric-browser";
+import { config, readingDefaults, maxRecents, personalSnapshot, serveLyrics } from "../lyric-browser";
 import { lyricId } from "../lyric-fixture";
 
 const labels = messages.en;
@@ -256,9 +256,13 @@ for (const invalid of [false, true]) {
     } else {
       await expect(page.getByRole("checkbox", { name: labels.recentHistoryEnabled, exact: true })).toBeChecked();
       const after = await personalSnapshot(page);
-      expect(after.version).toBe(50); expect(after.tables.personal).toEqual(before.tables.personal);
+      expect(after.version).toBe(60);
+      expect(after.tables.personal).toEqual(before.tables.personal.map((row: unknown) => {
+        if (!row || typeof row !== "object") throw new Error("Invalid seeded personal row");
+        return { ...row, ...readingDefaults };
+      }));
       expect(after.tables.lists).toEqual(before.tables.lists);
-      expect(after.tables.control).toMatchObject([{ id: "state", formatVersion: 5, revision: 0 }]);
+      expect(after.tables.control).toMatchObject([{ id: "state", formatVersion: 6, revision: 0 }]);
       expect(after.tables.control).not.toEqual(before.tables.control);
       await expectHistory(page, []);
       await page.reload(); await expect(page.getByRole("checkbox", { name: labels.recentHistoryEnabled, exact: true })).toBeChecked();

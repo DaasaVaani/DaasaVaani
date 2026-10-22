@@ -1,6 +1,6 @@
 import { describe, expect, test } from "vitest";
 import {
-  defaultHistory, defaultPersonal, editEntry, exportListSnapshot, hasFavorite, jsonBytes, listNameKey, listSnapshot, migratePersonalV1, migrateStoreV2, migrateStoreV3, migrateStoreV4, moveEntry, newControl, newList, nextRevision, parseStore, promoteRecent, removeEntry, toggleFavorite, validateHistory,
+  adjustFontSize, defaultHistory, defaultPersonal, editEntry, exportListSnapshot, hasFavorite, jsonBytes, listNameKey, listSnapshot, migratePersonalV1, migrateStoreV2, migrateStoreV3, migrateStoreV4, migrateStoreV5, moveEntry, newControl, newList, nextRevision, parseStore, promoteRecent, removeEntry, setReadingDensity, toggleFavorite, validateHistory,
   PersonalError, saveRecord, storageBytes, validatePersonal, validateStore, type PersonalStore,
 } from "./personal-model";
 import { typedEntry, type ListSnapshotV1, type ListTransferV2 } from "./list-transfer-types";
@@ -14,6 +14,8 @@ const legacyList = () => ({ id: crypto.randomUUID(), name: legacySnapshot.name,
   entries: legacySnapshot.entries.map(entry => ({ ...entry, id: crypto.randomUUID() })) });
 const empty = (): PersonalStore => ({ control: newControl(), lists: [], history: defaultHistory() });
 const historyRows = () => [{ id: "history", ...defaultHistory() }];
+const previousPersonal = () => ({ id: "personal" as const, favorites: [], language: "en" as const, theme: "light" as const });
+const readingDefaults = () => ({ fontSize: __WEB_CONFIG__.readerFontSize, density: __WEB_CONFIG__.defaultReadingDensity });
 function code(action: () => unknown, expected: string) {
   try { action(); throw new Error("Expected an explicit personal error"); }
   catch (reason) {
@@ -22,6 +24,65 @@ function code(action: () => unknown, expected: string) {
   }
 }
 describe("transactional personal model", () => {
+  test("font controls clamp to actual configured bounds, density choices are strict and unchanged choices retain identity", () => {
+    const personal = defaultPersonal(["kn"]), before = structuredClone(personal);
+    expect(personal).toMatchObject(readingDefaults());
+    expect(adjustFontSize(personal, 1)).toEqual({ ...personal, fontSize: personal.fontSize + __WEB_CONFIG__.readerFontSizeStep });
+    expect(adjustFontSize(personal, -1)).toEqual({ ...personal, fontSize: personal.fontSize - __WEB_CONFIG__.readerFontSizeStep });
+    for (const [fontSize, direction] of [[__WEB_CONFIG__.readerFontSizeMin, -1], [__WEB_CONFIG__.readerFontSizeMax, 1]] as const) {
+      const bound = { ...personal, fontSize };
+      expect(adjustFontSize(bound, direction)).toBe(bound);
+    }
+    for (const density of __WEB_CONFIG__.readingDensities) {
+      const changed = setReadingDensity(personal, density);
+      expect(changed).toEqual({ ...personal, density });
+      expect(setReadingDensity(changed, density)).toBe(changed);
+      expect(() => validatePersonal(changed)).not.toThrow();
+    }
+    for (const density of ["cozy", "", null, 0, undefined]) {
+      code(() => setReadingDensity(personal, density), "invalid");
+      code(() => validatePersonal({ ...personal, density }), "invalid");
+    }
+    for (const fontSize of [__WEB_CONFIG__.readerFontSizeMin - 1, __WEB_CONFIG__.readerFontSizeMax + 1, 28.5, NaN, "28", null]) {
+      code(() => validatePersonal({ ...personal, fontSize }), "invalid");
+      const state = { ...empty(), personal: structuredClone(personal) };
+      Reflect.set(state.personal, "fontSize", fontSize);
+      code(() => validateStore(state), "invalid");
+    }
+    code(() => validatePersonal(previousPersonal()), "invalid");
+    expect(personal).toEqual(before);
+  });
+  test("v5 migration freezes old accounting and adds only reading defaults while preserving disabled typed history and every identity", () => {
+    const id = "abcdef01-2345-4678-9abc-def012345678", list = newList(snapshot);
+    const control = { ...newControl(), formatVersion: 5, revision: 17 };
+    const personal = { ...previousPersonal(), favorites: [
+      { kind: "lyric" as const, lyricId: id }, { kind: "legacyVideo" as const, videoId: id },
+    ] };
+    const history = { enabled: false, entries: [...personal.favorites].reverse() }, rows = [{ id: "history", ...history }];
+    const before = structuredClone({ control, personal, list, rows });
+    const migrated = migrateStoreV5([control], [personal], [list], rows);
+    expect(migrated.personal).toEqual({ ...personal, ...readingDefaults() });
+    expect(migrated.lists).toEqual([list]); expect(migrated.history).toEqual(history);
+    expect(migrated.control).toMatchObject({ formatVersion: 6, revision: 0 });
+    expect(migrated.control.epoch).not.toBe(control.epoch);
+    const oldBytes = jsonBytes({ format: "daasavaani-personal-storage", formatVersion: 5, control, personal: [personal],
+      lists: [{ ...list, entries: list.entries.map(({ id, ...entry }) => ({ id, ...entry })) }], recentHistory: rows });
+    const bytes = storageBytes(migrated);
+    expect(bytes).toBeGreaterThan(oldBytes);
+    expect(bytes).toBe(jsonBytes({ format: "daasavaani-personal-storage", formatVersion: 6, control: migrated.control,
+      personal: [migrated.personal], lists: [{ ...list, entries: list.entries.map(({ id, ...entry }) => ({ id, ...entry })) }],
+      recentHistory: rows }));
+    expect(() => migrateStoreV5([control], [personal], [list], rows, { ...__PERSONAL_LIMITS__, maxPersonalStoredBytes: bytes })).not.toThrow();
+    for (const maxPersonalStoredBytes of [oldBytes - 1, oldBytes, bytes - 1]) {
+      code(() => migrateStoreV5([control], [personal], [list], rows, { ...__PERSONAL_LIMITS__, maxPersonalStoredBytes }), "capacity");
+    }
+    code(() => migrateStoreV5([control], [{ ...personal, ...readingDefaults() }], [list], rows), "invalid");
+    code(() => migrateStoreV5([{ ...control, formatVersion: 6 }], [personal], [list], rows), "invalid");
+    code(() => migrateStoreV5([control], [personal], [list], [{ ...rows[0], hidden: true }]), "invalid");
+    code(() => migrateStoreV5([control], [personal], [list], []), "invalid");
+    expect(migrateStoreV5([control], [], [list], rows).personal).toBeUndefined();
+    expect({ control, personal, list, rows }).toEqual(before);
+  });
   test("recent history is initially enabled and keeps the actual latest distinct typed window without mutating inputs", () => {
     const initial = defaultHistory(), before = structuredClone(initial);
     expect(initial).toEqual({ enabled: true, entries: [] });
@@ -50,17 +111,17 @@ describe("transactional personal model", () => {
     code(() => validateHistory({ enabled: "true", entries: [] }), "invalid");
     code(() => promoteRecent(initial, { kind: "lyric", lyricId: "invalid" }), "invalid");
   });
-  test("v4 migration preserves every typed value and identity, adds only empty history and a fresh v5 fence", () => {
+  test("v4 migration preserves every typed value and identity, adds only default reading preferences, empty history and a fresh v6 fence", () => {
     const control = { ...newControl(), formatVersion: 4, revision: 9 }, list = newList(snapshot);
-    const personal = { ...defaultPersonal(), favorites: [
+    const personal = { ...previousPersonal(), favorites: [
       { kind: "lyric" as const, lyricId: "abcdef01-2345-4678-9abc-def012345678" },
       { kind: "legacyVideo" as const, videoId: "abcdef01-2345-4678-9abc-def012345678" },
     ] };
     const before = structuredClone({ control, personal, list });
     const migrated = migrateStoreV4([control], [personal], [list]);
-    expect(migrated.personal).toEqual(personal); expect(migrated.lists).toEqual([list]);
+    expect(migrated.personal).toEqual({ ...personal, ...readingDefaults() }); expect(migrated.lists).toEqual([list]);
     expect(migrated.history).toEqual(defaultHistory());
-    expect(migrated.control).toMatchObject({ formatVersion: 5, revision: 0 });
+    expect(migrated.control).toMatchObject({ formatVersion: 6, revision: 0 });
     expect(migrated.control.epoch).not.toBe(control.epoch);
     expect({ control, personal, list }).toEqual(before);
     const bytes = storageBytes(migrated);
@@ -69,7 +130,7 @@ describe("transactional personal model", () => {
     code(() => migrateStoreV4([{ ...control, formatVersion: 5 }], [personal], [list]), "invalid");
     code(() => migrateStoreV4([control], [{ ...personal, ignored: true }], [list]), "invalid");
   });
-  test("the v5 history row is mandatory, strictly typed and counted in exact complete-envelope bytes", () => {
+  test("the current history row is mandatory, strictly typed and counted in exact complete-envelope bytes", () => {
     const state = empty(), reference = { kind: "legacyVideo" as const, videoId: "synthetic" };
     state.history = { enabled: false, entries: [reference] };
     const rows = [{ id: "history", ...state.history }];
@@ -77,7 +138,7 @@ describe("transactional personal model", () => {
     for (const invalid of [[], [undefined], [...rows, ...rows], [{ ...rows[0], id: "other" }], [{ ...rows[0], title: "private" }]]) {
       code(() => parseStore([state.control], [], [], invalid), "invalid");
     }
-    const expected = { format: "daasavaani-personal-storage", formatVersion: 5, control: state.control,
+    const expected = { format: "daasavaani-personal-storage", formatVersion: 6, control: state.control,
       personal: [], lists: [], recentHistory: rows };
     expect(storageBytes(state)).toBe(new TextEncoder().encode(JSON.stringify(expected)).length);
     const bytes = storageBytes(state);
@@ -115,12 +176,12 @@ describe("transactional personal model", () => {
     const control = { ...newControl(), formatVersion: 3, revision: 19 };
     const list = legacyList(); list.entries.push({ id: crypto.randomUUID(), kind: "item", videoId: id });
     for (const theme of __WEB_CONFIG__.uiThemes) {
-      const personal = { ...defaultPersonal(), theme, favorites: [id, "Case_Sensitive"] };
+      const personal = { ...previousPersonal(), theme, favorites: [id, "Case_Sensitive"] };
       const before = structuredClone({ control, personal, list });
       const next = migrateStoreV3([control], [personal], [list]);
-      expect(next.control).toMatchObject({ formatVersion: 5, revision: 0 });
+      expect(next.control).toMatchObject({ formatVersion: 6, revision: 0 });
       expect(next.control.epoch).not.toBe(control.epoch);
-      expect(next.personal).toEqual({ ...personal, favorites: personal.favorites.map(videoId => ({ kind: "legacyVideo", videoId })) });
+      expect(next.personal).toEqual({ ...personal, favorites: personal.favorites.map(videoId => ({ kind: "legacyVideo", videoId })), ...readingDefaults() });
       expect(next.lists).toEqual([{ ...list, entries: list.entries.map(entry => ({ ...typedEntry(entry), id: entry.id })) }]);
       expect({ control, personal, list }).toEqual(before);
       code(() => exportListSnapshot(next, list.id, control), "stale");
@@ -130,7 +191,7 @@ describe("transactional personal model", () => {
     code(() => migrateStoreV3([{ ...control, formatVersion: 4 }], [], []), "invalid");
   });
   test("migration accounts for both old and larger typed envelopes and fails at exact capacity minus one without mutation", () => {
-    const control = { ...newControl(), formatVersion: 3 }, personal = { ...defaultPersonal(), favorites: ["fixture_ref"] };
+    const control = { ...newControl(), formatVersion: 3 }, personal = { ...previousPersonal(), favorites: ["fixture_ref"] };
     const list = legacyList(), before = structuredClone({ control, personal, list });
     const target = migrateStoreV3([control], [personal], [list]), bytes = storageBytes(target);
     expect(() => migrateStoreV3([control], [personal], [list], { ...__PERSONAL_LIMITS__, maxPersonalStoredBytes: bytes })).not.toThrow();
@@ -156,22 +217,22 @@ describe("transactional personal model", () => {
     expect(independent.id).not.toBe(repeated.id);
     expect(independent.entries.every(entry => !repeated.entries.some(other => other.id === entry.id))).toBe(true);
   });
-  test("v2 migration preserves every identity/value while structurally typing references behind a fresh v4 fence", () => {
+  test("v2 migration preserves every identity/value while structurally typing references behind a fresh v6 fence", () => {
     const control = { ...newControl(), formatVersion: 2, revision: 7 };
-    const personal = { ...defaultPersonal(), favorites: ["fixture_ref"] }, lists = [legacyList(), legacyList()];
+    const personal = { ...previousPersonal(), favorites: ["fixture_ref"] }, lists = [legacyList(), legacyList()];
     const before = structuredClone({ control, personal, lists });
     const migrated = migrateStoreV2([control], [personal], lists);
-    expect(migrated.personal).toEqual({ ...personal, favorites: [{ kind: "legacyVideo", videoId: "fixture_ref" }] });
+    expect(migrated.personal).toEqual({ ...personal, favorites: [{ kind: "legacyVideo", videoId: "fixture_ref" }], ...readingDefaults() });
     expect(migrated.lists).toEqual(lists.map(list => ({ ...list, entries: list.entries.map(entry => ({ ...typedEntry(entry), id: entry.id })) })));
-    expect(migrated.control).toMatchObject({ id: "state", formatVersion: 5, revision: 0 });
+    expect(migrated.control).toMatchObject({ id: "state", formatVersion: 6, revision: 0 });
     expect(migrated.control.epoch).not.toBe(control.epoch);
     expect(parseStore([migrated.control], [migrated.personal], migrated.lists, historyRows())).toEqual(migrated);
     code(() => exportListSnapshot(migrated, lists[0]!.id, control), "stale");
     expect({ control, personal, lists }).toEqual(before);
   });
   test("legacy migrations refuse malformed headers and new-mode values mislabeled as older schemas", () => {
-    const control = { ...newControl(), formatVersion: 2 }, personal = defaultPersonal();
-    expect(migratePersonalV1([personal]).personal).toEqual(personal);
+    const control = { ...newControl(), formatVersion: 2 }, personal = previousPersonal();
+    expect(migratePersonalV1([personal]).personal).toEqual({ ...personal, ...readingDefaults() });
     for (const theme of ["warm", "device", "unknown"]) {
       code(() => migratePersonalV1([{ ...personal, theme }]), "invalid");
       code(() => migrateStoreV2([control], [{ ...personal, theme }], []), "invalid");
@@ -199,7 +260,8 @@ describe("transactional personal model", () => {
     expect(defaultPersonal(["en-GB", "kn"]).language).toBe("en");
     expect(defaultPersonal(["KN-IN"]).language).toBe("kn");
     expect(defaultPersonal(["fr-FR", "de"]).language).toBe(__WEB_CONFIG__.defaultUiLanguage);
-    expect(defaultPersonal([])).toEqual({ id: "personal", favorites: [], language: __WEB_CONFIG__.defaultUiLanguage, theme: __WEB_CONFIG__.defaultTheme });
+    expect(defaultPersonal([])).toEqual({ id: "personal", favorites: [], language: __WEB_CONFIG__.defaultUiLanguage,
+      theme: __WEB_CONFIG__.defaultTheme, ...readingDefaults() });
     expect(defaultPersonal(["kn-IN"]).theme).toBe(__WEB_CONFIG__.defaultTheme);
   });
   test("stable-read exports project only minimal fields without writing, allocating identities or wrapping revision counters", () => {
@@ -357,10 +419,16 @@ describe("transactional personal model", () => {
     expect(remainder).toBe(0);
     expect(storageBytes(state)).toBe(ceiling);
     expect(() => validateStore(state)).not.toThrow();
+    const oldControl = { ...state.control, formatVersion: 5 };
+    const oldPersonal = { id: state.personal.id, favorites: state.personal.favorites,
+      language: state.personal.language, theme: state.personal.theme };
+    const histories = [{ id: "history", ...state.history }];
+    expect(storageBytes(migrateStoreV5([oldControl], [oldPersonal], state.lists, histories))).toBe(ceiling);
     const entry = state.lists.at(-1)?.entries.at(-1);
     if (!entry || entry.kind !== "placeholder") throw new Error("Missing capacity occurrence");
     entry.text += "x";
     expect(storageBytes(state)).toBe(ceiling + 1);
     code(() => validateStore(state), "capacity");
+    code(() => migrateStoreV5([oldControl], [oldPersonal], state.lists, histories), "capacity");
   }, 30000);
 });

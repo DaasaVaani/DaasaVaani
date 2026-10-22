@@ -1,6 +1,6 @@
 import Dexie, { liveQuery, type Transaction } from "dexie";
 import {
-  defaultPersonal, exportListSnapshot, migratePersonalV1, migrateStoreV2, migrateStoreV3, migrateStoreV4, nextRevision, parseStore, PersonalError,
+  defaultPersonal, exportListSnapshot, migratePersonalV1, migrateStoreV2, migrateStoreV3, migrateStoreV4, migrateStoreV5, nextRevision, parseStore, PersonalError,
   promoteRecent, saveRecord, validatePersonal, validateStore,
   type ListRecord, type Personal, type PersonalStore, type Revision, type RecentHistoryV1,
 } from "./personal-model";
@@ -14,7 +14,8 @@ db.version(2).stores({ personal: "id", lists: "id", control: "id" });
 db.version(3).stores({ personal: "id", lists: "id", control: "id" });
 db.version(4).stores({ personal: "id", lists: "id", control: "id" });
 db.version(5).stores({ personal: "id", lists: "id", control: "id", recentHistory: "id" });
-const nativeVersion = 50;
+db.version(6).stores({ personal: "id", lists: "id", control: "id", recentHistory: "id" });
+const nativeVersion = 60;
 const newerSchema = () => new Error("A newer personal database schema is present. Use a compatible app; existing data was not changed.");
 function inspectNative(): Promise<IDBDatabase> {
   return new Promise((resolve, reject) => {
@@ -31,23 +32,27 @@ function inspectNative(): Promise<IDBDatabase> {
       if (!transaction) { reject(new PersonalError("invalid")); return; }
       const abort = (reason: unknown) => { upgradeFailure = reason; transaction.abort(); };
       if (stopped) { transaction.abort(); return; }
-      if (event.oldVersion === 20 || event.oldVersion === 30 || event.oldVersion === 40) {
-        const expected = ["control", "lists", "personal"], names = [...database.objectStoreNames];
+      if (event.oldVersion === 20 || event.oldVersion === 30 || event.oldVersion === 40 || event.oldVersion === 50) {
+        const expected = event.oldVersion === 50 ? ["control", "lists", "personal", "recentHistory"] : ["control", "lists", "personal"];
+        const names = [...database.objectStoreNames];
         if (names.length !== expected.length || expected.some(name => !names.includes(name)) || names.some(name => {
           const store = transaction.objectStore(name);
           return store.keyPath !== "id" || store.autoIncrement || store.indexNames.length !== 0;
         })) { abort(new PersonalError("invalid")); return; }
         const rows = { control: transaction.objectStore("control").getAll(),
           personal: transaction.objectStore("personal").getAll(), lists: transaction.objectStore("lists").getAll() };
-        let pending = Object.keys(rows).length;
-        for (const request of Object.values(rows)) {
+        const histories = event.oldVersion === 50 ? transaction.objectStore("recentHistory").getAll() : undefined;
+        const requests = [...Object.values(rows), ...(histories ? [histories] : [])];
+        let pending = requests.length;
+        for (const request of requests) {
           request.onerror = () => abort(request.error);
           request.onsuccess = () => {
             if (--pending !== 0) return;
             try {
               const migrate = event.oldVersion === 20 ? migrateStoreV2 : event.oldVersion === 30 ? migrateStoreV3 : migrateStoreV4;
-              const state = migrate(rows.control.result, rows.personal.result, rows.lists.result);
-              database.createObjectStore("recentHistory", { keyPath: "id" }).put({ id: "history", ...state.history });
+              const state = histories ? migrateStoreV5(rows.control.result, rows.personal.result, rows.lists.result, histories.result)
+                : migrate(rows.control.result, rows.personal.result, rows.lists.result);
+              if (!histories) database.createObjectStore("recentHistory", { keyPath: "id" }).put({ id: "history", ...state.history });
               if (state.personal) transaction.objectStore("personal").put(state.personal);
               for (const list of state.lists) transaction.objectStore("lists").put(list);
               transaction.objectStore("control").put(state.control);
@@ -151,8 +156,10 @@ export async function updatePersonal(change: (value: Personal) => Personal): Pro
   await ready();
   return db.transaction("rw", personal, lists, control, recentHistory, async transaction => {
     const state = await stored(transaction);
-    const value = change(state.personal ?? browserDefaultPersonal());
+    const previous = state.personal ?? browserDefaultPersonal();
+    const value = change(previous);
     validatePersonal(value);
+    if (value === previous) return value;
     const next = { ...nextRevision(state, state.control), personal: value };
     validateStore(next);
     await personal.put(value);

@@ -34,7 +34,7 @@
 .readLink { text-decoration: none; display: flex; justify-content: space-between; border-top: 1px solid var(--border); padding-top: calc(var(--space) * 2); font-weight: 600; }
 .reader { max-width: var(--reader-width); margin: calc(var(--space) * 5) auto; }
 .readerHeader { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: calc(var(--space) * 2); margin: calc(var(--space) * 3) 0; }
-.lyrics { background: var(--surface); border: 1px solid var(--border); border-radius: calc(var(--space) * 2); padding: clamp(1rem, 4vw, 2.5rem); font-size: var(--reader-font); line-height: 2.3; white-space: pre-wrap; overflow-wrap: anywhere; }
+.lyrics { background: var(--surface); border: 1px solid var(--border); border-radius: calc(var(--space) * 2); padding: clamp(1rem, 4vw, 2.5rem); font-size: var(--reader-font); line-height: var(--reader-line-height); white-space: pre-wrap; overflow-wrap: anywhere; }
 .lyrics p { margin: 0; padding: var(--space); scroll-margin-top: calc(var(--space) * 3); }
 .lyrics p[data-selected="true"] { background: var(--highlight); border-radius: var(--space); }
 .secondary { background: var(--surface); color: var(--accent); margin: var(--space); }

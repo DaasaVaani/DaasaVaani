@@ -4,12 +4,18 @@ import Ajv2020 from "ajv/dist/2020.js";
 import { strictYaml } from "../shared/tools/generate-catalog.mjs";
 import webSchema from "../settings/web.schema.json" with { type: "json" };
 import personalSchema from "../shared/schemas/personal-transfer-settings.schema.json" with { type: "json" };
+import defaultsSchema from "../shared/schemas/ui-defaults.schema.json" with { type: "json" };
 import { lyricFixture } from "./lyric-fixture";
 
 const raw = strictYaml(readFileSync(new URL("../settings/web.yml", import.meta.url), "utf8"));
-const validate = new Ajv2020({ strict: true }).compile<Pick<WebConfig, "lyricPreview" | "databaseName">>(webSchema);
+const validate = new Ajv2020({ strict: true }).compile<Pick<WebConfig, "lyricPreview" | "databaseName" | "readerFontSize" |
+  "readerFontSizeMin" | "readerFontSizeMax" | "readerFontSizeStep" | "readerLineHeights">>(webSchema);
 if (!validate(raw)) throw new Error("Invalid configured lyric browser settings");
 export const config = raw;
+const defaults = strictYaml(readFileSync(new URL("../shared/settings/defaults.yml", import.meta.url), "utf8"));
+const validateDefaults = new Ajv2020({ strict: true }).compile<{ readingDensity: WebConfig["defaultReadingDensity"] }>(defaultsSchema);
+if (!validateDefaults(defaults)) throw new Error("Invalid portable reading defaults");
+export const readingDefaults = { fontSize: config.readerFontSize, density: defaults.readingDensity };
 const limits = strictYaml(readFileSync(new URL("../shared/settings/personal-transfer.yml", import.meta.url), "utf8"));
 const validateLimits = new Ajv2020({ strict: true }).compile<Pick<PersonalLimits, "maxRecents">>(personalSchema);
 if (!validateLimits(limits)) throw new Error("Invalid configured personal history limits");
@@ -39,7 +45,10 @@ export async function personalSnapshot(page: Page) {
     });
     try {
       const names = [...database.objectStoreNames], transaction = database.transaction(names, "readonly");
-      return { version: database.version, tables: Object.fromEntries(await Promise.all(names.map(async name => [name,
+      return { version: database.version, schema: Object.fromEntries(names.map(name => {
+        const store = transaction.objectStore(name);
+        return [name, { keyPath: store.keyPath, autoIncrement: store.autoIncrement, indexes: [...store.indexNames] }];
+      })), tables: Object.fromEntries(await Promise.all(names.map(async name => [name,
         await new Promise<unknown[]>((resolve, reject) => {
           const request = transaction.objectStore(name).getAll();
           request.onsuccess = () => resolve(request.result);

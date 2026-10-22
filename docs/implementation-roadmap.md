@@ -11,7 +11,7 @@ The approved [lyric identity and optional media contract](https://github.com/Daa
 is the target for P1/P4/P5a/P7: text-only lyric publication, permanent UUID lookup,
 typed references and versioned legacy-preserving transfers. Source/publication
 schemas and separate real readers implement the initial slice. Website typed
-favorites/lists/recent history, v1/v2 transfer adapters and preserving personal v5 upgrades are
+favorites/lists/recent history/font/density, v1/v2 transfer adapters and preserving personal v6 upgrades are
 implemented; full personal collections/backups and production publication remain open. Follow its
 Shared-first rollout without inferred legacy mapping or identity changes.
 
@@ -29,9 +29,9 @@ does not waive any validation gate.
 | P2 | Two-locale UI generation with committed web/Android resources | Reviewed five-Latin/nine-non-Latin tables, transliteration, technical grammar, plurals/escaping conformance |
 | P4 | Real canonical text-only hash-addressed publication; separate fixture index producer and sampled OSA/candidate parity | Public populated-metadata/Latin/media adapters, durable ledger/receipts, semantic dates, ZIP/planner and complete language/profile index evidence |
 | P5 | Verified real online metadata/catalog and on-demand UUID reading with bounded in-memory cache, literal title filter, complete paging and reader continuity; existing fixture search/preferences/themes | Complete production-profile reading, full filters/discovery/script/helper/video/accessibility/platform journeys |
-| P5a | Transactional typed lyric/legacy web favorites/lists/preferences/recent history, preserving v1/v2/v3/v4-to-v5 upgrade, worker v1/v2 preview and saved-v2 export, optional share/copy/fallbacks, independent occurrence editing/import/management, exact verified catalog lookup and reader-to-list addition; native Room4 typed favorites/durable lists/occurrences/recent history | Bookmarks/learning/recitation, real sharing-surface interoperability, full backups and remaining production migrations |
+| P5a | Transactional typed lyric/legacy web favorites/lists/preferences/recent history, independent lyric font/density, preserving v1/v2/v3/v4/v5-to-v6 upgrade, worker v1/v2 preview and saved-v2 export, optional share/copy/fallbacks, independent occurrence editing/import/management, exact verified catalog lookup and reader-to-list addition; native Room5 typed favorites/durable lists/occurrences/recent history/font/density | Bookmarks/learning/recitation, real sharing-surface interoperability, full backups and remaining production migrations |
 | P6 | No persistent offline snapshot implementation | Journals/atomic activation/resume/repair/reader-safe GC and service worker lifecycle |
-| P7 | Separate native real canonical full preparation/reading in memory; fixture search, independent real Favorites literal filtering/complete paging/return context, Room4 typed favorites/durable lists/occurrences/preferences/recent history, preserving upgrades, locale/theme, bounded v1/v2 preview/save/re-export and reader/list navigation, core and connected tests | Full personal backups/bookmarks/learning/recitation, signed App Links/receiving-app matrix, durable preparation/recovery and full parity/device matrix |
+| P7 | Separate native real canonical full preparation/reading in memory; fixture search, independent real Favorites literal filtering/complete paging/return context, Room5 typed favorites/durable lists/occurrences/preferences/recent history, preserving upgrades, independent font/density/locale/theme, bounded v1/v2 preview/save/re-export and reader/list navigation, core and connected tests | Full personal backups/bookmarks/learning/recitation, signed App Links/receiving-app matrix, durable preparation/recovery and full parity/device matrix |
 | P3/P8/P9 | Dependency-ordered Shared/fixture-publisher pins; full web fixture CI/Pages and native build/core/lint CI | Live-provider clarification, production ingestion/publication/signing, device CI and release readiness |
 
 The fixture capability is deliberately named `fixture-catalog-v1`; all UIs label
@@ -66,7 +66,7 @@ Settings/preview/list management remain available when the Library endpoint fail
 Saving requires an explicit action after preview and creates a new independent
 list only. Duplicate names require confirmation; revision/epoch changes require
 renewed review. No lyric is fetched by transfer or saving, and no offline readiness
-or signed native App Links is claimed. The [current storage protocol](architecture.md#web-typed-personal-storage-v5)
+or signed native App Links is claimed. The [current storage protocol](architecture.md#web-typed-personal-storage-v6)
 does not establish full-backup exportability, complete list/recitation journeys,
 production migration coverage or native parity.
 Saved-list export rechecks its read revision after encoding and refuses concurrent
@@ -80,7 +80,7 @@ the XFER-08 platform matrix and signed App Links remain open.
 Android's bounded native codec has independent Node/zlib vectors and strict
 actual-ceiling rejection, plus connected preview/new-list save/re-export evidence.
 It displays catalog known/pending/unavailable states without guessing matches.
-Typed favorites and independently identified list occurrences persist in Room4;
+Typed favorites and independently identified list occurrences persist in Room5;
 v1 imports structurally become legacy references and saved lists export v2.
 Actual client-generated v2 gzip/link round trips cover both codec directions,
 not OS delivery. Failed/cancelled provider writes can leave an incomplete selected
@@ -88,7 +88,7 @@ destination; the warning preserves this distinction from unchanged personal data
 Official Unicode16 name matching is implemented in both consumers using Shared's
 pinned tables and conformance fixtures, without platform lowercase/ICU.
 Website derives keys on demand from raw names; no persisted-key cache exists
-in v5. Native list-name behavior follows its
+in v6. Native list-name behavior follows its
 [owning storage/validation guide](https://github.com/DaasaVaani/AndroidApp/blob/main/README.md).
 Existing names/identities remain unchanged; future persisted caches require
 explicit profile-aware preserving migration, never automatic renaming/merging.
@@ -124,10 +124,20 @@ stored as a fallback or exported. Recitation remains incomplete.
 
 UX-11 and SET-04 receive partial Website evidence for persisted Light/Dark/Warm/
 Follow device selection. System-color changes do not write personal data, and
-explicit choices/locale/canonical text stay independent. Strict v1/v2/v3/v4-to-v5
+explicit choices/locale/canonical text stay independent. Strict v1/v2/v3/v4/v5-to-v6
 migrations preserve favorites/lists/identities and create a fresh writer fence;
 future/invalid schemas remain non-destructive refusals. Palette contrast tests
 do not establish full physical-device/font/offline-shell accessibility evidence.
+
+UX-02/03/14 and SET-04 receive partial Website/native evidence for persisted bounded
+lyric-only font controls and all three densities in both canonical/fixture
+readers and Settings. Default platform rendering (Website28px/native28sp,
+Normal density) and literal line/layout
+identities are preserved. Latest-state transactions, no-op choices, peer updates,
+restart, old-history preservation and actual byte-capacity checks belong to the
+v6/native Room5 slices, with independent native font units and spacing. Onboarding, helper/script coverage, Recite/Practice, persistent offline
+use and the complete accessibility/font/device matrix remain unimplemented or
+unverified; this is not full UX-14 completion.
 
 ## Delivery sequence
 

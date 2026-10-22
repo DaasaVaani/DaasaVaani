@@ -1,7 +1,7 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "type": "object", "additionalProperties": false,
-  "required": ["formatVersion", "base", "descriptorUrl", "lyricPreview", "canonicalBaseUrl", "listLinkPath", "listFileName", "transferChunkBytes", "listCompressionLevel", "demoPort", "databaseName", "fontFamily", "readerFontSize", "space", "contentWidth", "readerWidth", "themes", "demoViewports"],
+  "required": ["formatVersion", "base", "descriptorUrl", "lyricPreview", "canonicalBaseUrl", "listLinkPath", "listFileName", "transferChunkBytes", "listCompressionLevel", "demoPort", "databaseName", "fontFamily", "readerFontSize", "readerFontSizeMin", "readerFontSizeMax", "readerFontSizeStep", "readerLineHeights", "space", "contentWidth", "readerWidth", "themes", "demoViewports"],
   "properties": {
     "formatVersion": { "const": 1 }, "base": { "type": "string", "pattern": "^/" },
     "descriptorUrl": { "type": "string", "minLength": 1 },
@@ -26,6 +26,17 @@
     "databaseName": { "type": "string", "minLength": 1 },
     "fontFamily": { "type": "string", "minLength": 1 },
     "readerFontSize": { "type": "integer", "minimum": 16, "maximum": 80 },
+    "readerFontSizeMin": { "type": "integer", "minimum": 16, "maximum": 80 },
+    "readerFontSizeMax": { "type": "integer", "minimum": 16, "maximum": 80 },
+    "readerFontSizeStep": { "type": "integer", "minimum": 1, "maximum": 64 },
+    "readerLineHeights": {
+      "type": "object", "required": ["compact", "normal", "relaxed"], "additionalProperties": false,
+      "properties": {
+        "compact": { "$ref": "#/$defs/lineHeight" },
+        "normal": { "$ref": "#/$defs/lineHeight" },
+        "relaxed": { "$ref": "#/$defs/lineHeight" }
+      }
+    },
     "space": { "type": "integer", "minimum": 1, "maximum": 32 },
     "contentWidth": { "type": "integer", "minimum": 320, "maximum": 2560 },
     "readerWidth": { "type": "integer", "minimum": 240, "maximum": 1600 },
@@ -39,6 +50,7 @@
     }
   },
   "$defs": {
+    "lineHeight": { "type": "number", "minimum": 1.5, "maximum": 4 },
     "theme": {
       "type": "object", "required": ["background", "surface", "text", "muted", "accent", "border", "highlight"],
       "additionalProperties": false,

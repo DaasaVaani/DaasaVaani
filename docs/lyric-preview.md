@@ -100,7 +100,7 @@ loads the requested UUID online, not a guessed substitute. Preview/save/export
 alone never downloads lyrics. List/Favorites origins restore
 available focus/scroll and the selected unsaved list editor in the same session.
 
-The [personal v5 protocol](architecture.md#web-typed-personal-storage-v5) validates
+The [personal v6 protocol](architecture.md#web-typed-personal-storage-v6) validates
 and structurally upgrades old local schemas atomically without changing existing
 list/occurrence IDs or raw legacy values. Transport families remain independent:
 v1 previews can re-export unchanged; confirmed v1 imports adapt to typed legacy

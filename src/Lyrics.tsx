@@ -7,6 +7,7 @@ import { hasFavorite, referenceKey, type PersonalStore } from "./personal-model"
 import type { Publication } from "./artifacts";
 import type { PersonalReference } from "./list-transfer-types";
 import { AddToList } from "./AddToList";
+import { ReadingPreferences, type ReadingPreferencesProps } from "./ReadingPreferences";
 import styles from "./App.module.css";
 
 type Labels = typeof messages.en;
@@ -35,8 +36,9 @@ function LyricPagination({ count, nextId, paging, labels }: {
     {shown < count && <button aria-controls={paging.resultsId} onClick={() => paging.more(nextId)}>{labels.showMoreResults}</button>}
   </div>;
 }
-function LyricReader({ publication, labels, personal, toggle, opened }: {
+function LyricReader({ publication, labels, personal, preferences, change, toggle, opened }: {
   publication: LyricLibrary; labels: Labels; personal?: PersonalStore; toggle: (reference: PersonalReference) => void;
+  preferences: ReadingPreferencesProps["personal"]; change: ReadingPreferencesProps["change"];
   opened: (reference: PersonalReference) => void;
 }) {
   const { id } = useParams();
@@ -89,6 +91,7 @@ function LyricReader({ publication, labels, personal, toggle, opened }: {
           {favorite ? labels.removeFavorite : labels.addFavorite}
         </button>}
       </header>
+      {personal && <ReadingPreferences labels={labels} personal={preferences} change={change} />}
       <div lang="kn" className={styles.lyrics}>{item.lines.map((line, index) =>
         <p key={line.kind === "line" ? line.lineId : `layout-${index}`}
           {...(line.kind === "line" ? { id: line.lineId } : { "data-layout": true })}>{line.text || <br />}</p>)}</div>
@@ -145,9 +148,10 @@ export function ReferenceFavorites({ labels, personal, publication, legacyPublic
   </section>;
   })}</div>;
 }
-export function Lyrics({ labels, publication, onPrepared, personal, toggle, opened }: {
+export function Lyrics({ labels, publication, onPrepared, personal, preferences, change, toggle, opened }: {
   labels: Labels; publication?: LyricLibrary; onPrepared: (publication: LyricLibrary) => void;
   personal?: PersonalStore; toggle: (reference: PersonalReference) => void;
+  preferences: ReadingPreferencesProps["personal"]; change: ReadingPreferencesProps["change"];
   opened: (reference: PersonalReference) => void;
 }) {
   const location = useLocation();
@@ -199,7 +203,7 @@ export function Lyrics({ labels, publication, onPrepared, personal, toggle, open
       </div>
       <Routes>
         <Route path="/lyrics" element={null} />
-        <Route path="/lyrics/:id" element={<LyricReader publication={publication} labels={labels} personal={personal} toggle={toggle} opened={opened} />} />
+        <Route path="/lyrics/:id" element={<LyricReader publication={publication} labels={labels} personal={personal} preferences={preferences} change={change} toggle={toggle} opened={opened} />} />
         <Route path="/lyrics/*" element={<p role="alert">{labels.unknownRoute}</p>} />
         <Route path="*" element={null} />
       </Routes>

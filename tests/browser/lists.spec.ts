@@ -5,6 +5,7 @@ import { readFileSync } from "node:fs";
 import { strictYaml } from "../../shared/tools/generate-catalog.mjs";
 import { typedEntry, type ListSnapshot } from "../../src/list-transfer-types";
 import messages from "../../shared/generated/web/ui.json" with { type: "json" };
+import { readingDefaults } from "../lyric-browser";
 
 const web = strictYaml(readFileSync(new URL("../../settings/web.yml", import.meta.url), "utf8"));
 const limits = strictYaml(readFileSync(new URL("../../shared/settings/personal-transfer.yml", import.meta.url), "utf8"));
@@ -266,11 +267,11 @@ for (const theme of ["warm", "device"]) {
     await page.goto("/#/lists");
     await expect(page.getByRole("heading", { name: "Lists", exact: true })).toBeVisible();
     const after = await records(page);
-    expect(after.version).toBe(50);
+    expect(after.version).toBe(60);
     expect(after.layout).toEqual({ ...before.layout, recentHistory: { keyPath: "id", autoIncrement: false, indexes: [] } });
     expect(after.values.recentHistory).toEqual([{ id: "history", enabled: true, entries: [] }]);
-    expect(after.values.personal).toEqual([{ id: "personal", favorites: [{ kind: "legacyVideo", videoId: "fixture-one" }], language: "en", theme }]);
-    expect(after.values.control).toMatchObject([{ id: "state", formatVersion: 5, revision: 0 }]);
+    expect(after.values.personal).toEqual([{ id: "personal", favorites: [{ kind: "legacyVideo", videoId: "fixture-one" }], language: "en", theme, ...readingDefaults }]);
+    expect(after.values.control).toMatchObject([{ id: "state", formatVersion: 6, revision: 0 }]);
     expect(after.values.control).not.toEqual(before.values.control);
     expect(listIdentities(after.values.lists)).toEqual(listIdentities(before.values.lists));
     expect(after.values.lists).toMatchObject([{ name: "Synthetic v2 list", entries: [
@@ -380,8 +381,8 @@ test("v2 migration retains every favorite list and occurrence while fencing old 
   await page.goto("/#/settings");
   await expect(page.getByRole("button", { name: "Dark", exact: true })).toHaveAttribute("aria-pressed", "true");
   const migrated = await records(page);
-  expect(migrated.version).toBe(50);
-  expect(migrated.values.personal).toEqual([{ id: "personal", favorites: [{ kind: "legacyVideo", videoId: "fixture-one" }], language: "en", theme: "dark" }]);
+  expect(migrated.version).toBe(60);
+  expect(migrated.values.personal).toEqual([{ id: "personal", favorites: [{ kind: "legacyVideo", videoId: "fixture-one" }], language: "en", theme: "dark", ...readingDefaults }]);
   expect(migrated.values.lists).toEqual([{ id: "00000000-0000-4000-8000-000000000002", name: "Synthetic v2 list", entries: [
     { id: "00000000-0000-4000-8000-000000000003", kind: "legacyVideo", videoId: "fixture-one", fallback: "  Preserve this  " },
     { id: "00000000-0000-4000-8000-000000000004", kind: "placeholder", text: "<b>Keep literal</b>" },
@@ -389,7 +390,7 @@ test("v2 migration retains every favorite list and occurrence while fencing old 
   ] }]);
   expect(migrated.layout).toEqual({ ...before.layout, recentHistory: { keyPath: "id", autoIncrement: false, indexes: [] } });
   expect(migrated.values.recentHistory).toEqual([{ id: "history", enabled: true, entries: [] }]);
-  expect(migrated.values.control).toMatchObject([{ id: "state", formatVersion: 5, revision: 0 }]);
+  expect(migrated.values.control).toMatchObject([{ id: "state", formatVersion: 6, revision: 0 }]);
   expect(JSON.stringify(migrated.values.control)).not.toContain("00000000-0000-4000-8000-000000000001");
   await page.getByRole("button", { name: "Warm", exact: true }).click();
   await expect(page.locator("html")).toHaveAttribute("data-theme", "warm");
@@ -465,7 +466,7 @@ test("new Unicode16 equivalence never rewrites existing lists, identities or the
   ] }));
   await page.evaluate(async input => {
     const database = await new Promise<IDBDatabase>((resolve, reject) => {
-      const request = indexedDB.open(input.name, 50);
+      const request = indexedDB.open(input.name, 60);
       request.onsuccess = () => resolve(request.result); request.onerror = () => reject(request.error);
     });
     try {
@@ -891,8 +892,8 @@ test("v1 migration preserves favorites and preferences", async ({ page }) => {
   await expect(page.locator("html")).toHaveAttribute("lang", "kn");
   await expect(page.getByRole("heading", { name: "ಪಟ್ಟಿಗಳು", exact: true })).toBeVisible();
   const after = await records(page);
-  expect(after.version).toBe(50);
-  expect(after.values.personal).toEqual([{ ...value, favorites: [{ kind: "legacyVideo", videoId: "fixture_ref" }] }]);
+  expect(after.version).toBe(60);
+  expect(after.values.personal).toEqual([{ ...value, favorites: [{ kind: "legacyVideo", videoId: "fixture_ref" }], ...readingDefaults }]);
   expect(after.values.lists).toEqual([]); expect(after.values.control).toHaveLength(1);
 });
 test("UUID-looking legacy favorites remain visible and removable without inferred lyric resolution or downloads", async ({ page }) => {
@@ -936,11 +937,12 @@ test("invalid legacy migration rolls back the schema and refuses personal writes
   await expect(page.getByRole("button", { name: "Save to My Library", exact: true })).toBeDisabled();
   expect(await records(page)).toEqual(before);
 });
-test("newer personal schemas are refused without deleting unfamiliar stores", async ({ page }) => {
-  await seedLegacy(page, { id: "personal", favorites: [], language: "en", theme: "light" }, 60);
+test("newer personal schemas are refused without deleting unfamiliar stores even when the fixture endpoint fails", async ({ page }) => {
+  await seedLegacy(page, { id: "personal", favorites: [], language: "en", theme: "light" }, 70);
   const before = await records(page);
+  await page.route("**/demo/latest.json", route => route.abort());
   await page.goto("/#/settings");
-  await expect(page.getByRole("alert")).toContainText("newer personal database schema");
+  await expect(page.getByRole("alert").filter({ hasText: "newer personal database schema" })).toHaveCount(1);
   expect(await records(page)).toEqual(before);
 });
 test("an already-open old client cannot commit a pending confirmation into a future schema", async ({ page }) => {
@@ -951,7 +953,7 @@ test("an already-open old client cannot commit a pending confirmation into a fut
   await expect(page.getByRole("button", { name: "Save with same name", exact: true })).toBeVisible();
   await page.evaluate(async name => {
     const database = await new Promise<IDBDatabase>((resolve, reject) => {
-      const request = indexedDB.open(name, 60);
+      const request = indexedDB.open(name, 70);
       request.onupgradeneeded = () => request.result.createObjectStore("future", { keyPath: "id" }).put({ id: "synthetic-future" });
       request.onsuccess = () => resolve(request.result); request.onerror = () => reject(request.error);
     });
@@ -975,7 +977,7 @@ test("a blocked non-destructive migration reports recovery and can retry after t
     await held.evaluate(database => database.close());
     await app.getByRole("button", { name: "Try again", exact: true }).click();
     await expect(app.getByRole("heading", { name: /^Library/, level: 1 })).toBeVisible();
-    expect((await records(app)).values.personal).toEqual([{ ...value, favorites: [{ kind: "legacyVideo", videoId: "fixture_ref" }] }]);
+    expect((await records(app)).values.personal).toEqual([{ ...value, favorites: [{ kind: "legacyVideo", videoId: "fixture_ref" }], ...readingDefaults }]);
   } finally { await held.evaluate(database => database.close()); await held.dispose(); }
 });
 test("the actual configured list-count ceiling accepts the last list then rejects limit plus one without mutation", async ({ page }) => {

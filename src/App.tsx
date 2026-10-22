@@ -11,6 +11,7 @@ import { Lists } from "./Lists";
 import { AddToList } from "./AddToList";
 import { Lyrics, ReferenceFavorites } from "./Lyrics";
 import { HistoryControls, RecentHistory } from "./RecentHistory";
+import { ReadingPreferences, type ReadingPreferencesProps } from "./ReadingPreferences";
 import type { LyricLibrary } from "./lyric-publication";
 import type { PersonalReference } from "./list-transfer-types";
 import { hasFavorite, toggleFavorite } from "./personal-model";
@@ -32,9 +33,10 @@ const errorText = (error: unknown) => error instanceof Error ? error.message : S
 interface ReaderProps {
   publication: Publication; labels: Labels; personal: Personal; store: PersonalStore;
   toggle: (reference: PersonalReference) => void; opened: (reference: PersonalReference) => void;
+  change: ReadingPreferencesProps["change"];
 }
 
-function Reader({ publication, labels, personal, store, toggle, opened }: ReaderProps) {
+function Reader({ publication, labels, personal, store, toggle, opened, change }: ReaderProps) {
   const { id } = useParams();
   const location = useLocation();
   const navigate = useNavigate();
@@ -81,6 +83,7 @@ function Reader({ publication, labels, personal, store, toggle, opened }: Reader
           {hasFavorite(personal, { kind: "legacyVideo", videoId: item.videoId }) ? labels.removeFavorite : labels.addFavorite}
         </button>
       </header>
+      <ReadingPreferences labels={labels} personal={personal} change={change} />
       <div lang="kn" className={styles.lyrics}>
         {item.lines.map(line => <p id={line.id} key={line.id} data-selected={line.id === lineId}>{line.text || "\u00a0"}</p>)}
       </div>
@@ -259,9 +262,10 @@ export default function App() {
     root.dataset.theme = theme;
     root.style.colorScheme = theme === "dark" ? "dark" : "light";
     for (const [name, value] of Object.entries(__WEB_CONFIG__.themes[theme])) root.style.setProperty(`--${name}`, value);
-    for (const [name, value] of Object.entries({ space: __WEB_CONFIG__.space, "reader-font": __WEB_CONFIG__.readerFontSize,
+    root.style.setProperty("--reader-line-height", String(__WEB_CONFIG__.readerLineHeights[personal.density]));
+    for (const [name, value] of Object.entries({ space: __WEB_CONFIG__.space, "reader-font": personal.fontSize,
       "content-width": __WEB_CONFIG__.contentWidth, "reader-width": __WEB_CONFIG__.readerWidth })) root.style.setProperty(`--${name}`, `${value}px`);
-  }, [personal.language, personal.theme, deviceDark]);
+  }, [personal.language, personal.theme, personal.fontSize, personal.density, deviceDark]);
   async function change(mutator: (state: Personal) => Personal) {
     try { setPersonal(await updatePersonal(mutator)); }
     catch (reason) { setError(errorText(reason)); }
@@ -291,7 +295,7 @@ export default function App() {
           <button onClick={() => setAttempt(value => value + 1)}>{labels.retry}</button></section>}
         {(!publication || !personalReady) && !error && !fixtureError && <p role="status">{labels.loading}</p>}
       </FixtureOnly>
-      <Lyrics labels={labels} publication={lyrics} onPrepared={setLyrics} personal={store} toggle={toggle} opened={opened} />
+      <Lyrics labels={labels} publication={lyrics} onPrepared={setLyrics} personal={store} preferences={personal} change={change} toggle={toggle} opened={opened} />
       {publication && personalReady && <>
         <BrowsingSession key={`all-${attempt}`} publication={publication} labels={labels} personal={personal} favoritesOnly={false} />
         <BrowsingSession key={`favorites-${attempt}`} publication={publication} labels={labels} personal={personal} favoritesOnly />
@@ -306,7 +310,7 @@ export default function App() {
         <Route path="/lists" element={null} />
         <Route path="/lyrics/*" element={null} />
         <Route path="/item/:id" element={publication && personalReady && store
-          ? <Reader publication={publication} labels={labels} personal={personal} store={store} toggle={toggle} opened={opened} /> : null} />
+          ? <Reader publication={publication} labels={labels} personal={personal} store={store} toggle={toggle} opened={opened} change={change} /> : null} />
         <Route path="/settings" element={<section className={styles.reader}><h1>{labels.settings}</h1>
           {personalReady && <>
           <fieldset><legend>{labels.language}</legend>
@@ -319,6 +323,7 @@ export default function App() {
               aria-pressed={personal.theme === theme} onClick={() => void change(state => ({ ...state, theme }))}>
               {theme === "device" ? labels.followDevice : labels[theme]}</button>)}
           </fieldset>
+          <ReadingPreferences labels={labels} personal={personal} change={change} />
           {store && <HistoryControls labels={labels} history={store.history} />}
           </>}
           <ListPreview labels={labels} personal={store} publication={publication} lyrics={lyrics} />

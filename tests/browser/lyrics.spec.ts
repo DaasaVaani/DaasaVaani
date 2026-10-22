@@ -4,7 +4,7 @@ import { gzipSync, gunzipSync } from "node:zlib";
 import type { ListTransferV2 } from "../../src/list-transfer-types";
 import messages from "../../shared/generated/web/ui.json" with { type: "json" };
 import { lyricFixture, lyricId } from "../lyric-fixture";
-import { config, serveLyrics as serve, personalSnapshot } from "../lyric-browser";
+import { config, readingDefaults, serveLyrics as serve, personalSnapshot } from "../lyric-browser";
 
 const labels = messages.en;
 async function holdDownload(page: Page, target: string) {
@@ -41,7 +41,7 @@ test("real Favorites have independent complete title paging and preserve context
   const requests = await serve(page, fixture);
   await page.goto("/#/settings");
   await expect(page.getByRole("button", { name: labels.light, exact: true })).toBeVisible();
-  await page.evaluate(async ({ databaseName, ids }) => {
+  await page.evaluate(async ({ databaseName, ids, readingDefaults }) => {
     const database = await new Promise<IDBDatabase>((resolve, reject) => {
       const request = indexedDB.open(databaseName);
       request.onsuccess = () => resolve(request.result);
@@ -51,14 +51,14 @@ test("real Favorites have independent complete title paging and preserve context
       await new Promise<void>((resolve, reject) => {
         const transaction = database.transaction("personal", "readwrite"), store = transaction.objectStore("personal");
         const request = store.get("personal");
-        request.onsuccess = () => store.put({ id: "personal", language: "en", theme: "light", ...request.result,
+        request.onsuccess = () => store.put({ id: "personal", language: "en", theme: "light", ...readingDefaults, ...request.result,
           favorites: ids.map(lyricId => ({ kind: "lyric", lyricId })) });
         transaction.oncomplete = () => resolve();
         transaction.onerror = () => reject(transaction.error);
         transaction.onabort = () => reject(transaction.error);
       });
     } finally { database.close(); }
-  }, { databaseName: config.databaseName, ids: fixture.manifest.catalog.map(entry => entry.lyricId) });
+  }, { databaseName: config.databaseName, ids: fixture.manifest.catalog.map(entry => entry.lyricId), readingDefaults });
   await page.reload();
   await page.getByRole("link", { name: labels.favorites, exact: true }).click();
   const favorites = page.getByRole("region", { name: labels.ownerLyrics, exact: true });
