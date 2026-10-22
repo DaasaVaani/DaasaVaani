@@ -1,5 +1,69 @@
 # Documentation history
 
+## 2026-10-22: app-interface shell and normal-update work
+
+- Archived the preceding P6 implementation status: no executable service-worker
+  lifecycle or persistent offline snapshot. The selected Workbox/normal activation
+  direction was documentation-only. Persistent complete-library snapshots remain
+  unimplemented; interface caching must not be called offline lyric readiness.
+- Shared published five additive bilingual shell/support/error/update captions in
+  241158f9856d15cf7ff2d1c57c71e9eb4f2db035: full31 tests, hygiene72, strict YAML11,
+  actionlint/ShellCheck/whitespace and all three byte-identical regenerated UI
+  resources passed. Exactly five keys per locale were added; all old captions and
+  schema/settings/type/fixture resources were unchanged. Exact preflight39739394210
+  and main39739916707 passed before the Website independently adopted the pin.
+  Native Library continuity remains on its independently approved44c21b9 pin.
+- Added pinned Workbox7.4.1 after checking its Node compatibility. The npm restore
+  warned that transitive glob11.1.0 is deprecated; `npm audit --json` reported
+  zero known advisories, not a vulnerability-free or release-security claim.
+- Incremental strict TypeScript found a captured optional registration and two
+  incorrect test caption names, corrected without casts. The exact-byte unit
+  exposed repeated legal-notice appends on regeneration; notice generation is now
+  idempotent. Complete-skipped generation correctly throws Workbox's native error;
+  a separate partially skipped case verifies the explicit warning refusal.
+  `npm test -- app-shell` passed3 tests, including exact total bytes/+1.
+  Subsequent strict `node node_modules\typescript\bin\tsc --noEmit` and full
+  `npm test` passed all95 units; final source types/whitespace passed after
+  adding real-navigation exclusion and exact focus-interval/in-flight assertions.
+  Browser/build/publication verification remains pending the native slot release;
+  these source/unit checks do not establish a working deployed shell.
+  No Website demo/build/check/e2e ran during native's reserved connected/HTTP slot.
+- The initial shell browser run found a missing native JSON import attribute in
+  the new test; corrected it without an app change. The next focused run passed
+  all18 cases across desktop/Pixel7/320px. The first full `npm run check` passed95
+  units and262 browser cases but failed5 existing worker fault/concurrency cases:
+  the real precache bypassed HTTP worker-script replacement, so the expected
+  synthetic failures/stalls were not injected. Replaced those four tests'
+  HTTP-only injection with a shared same-origin Blob/native Worker adapter,
+  preserving real worker/error/termination/concurrency and all service-worker
+  behavior. No suite, retry or timeout was weakened. Focused
+  `node node_modules\@playwright\test\cli.js test lists pagination transfers --grep
+  'an export changed during encoding|search worker failure removes|cancelling saved-list encoding|cancelling a pending worker'`
+  passed all12 cases across the three viewports.
+- Mounted synthetic canonical-reader update preservation passed3 focused cases,
+  with exact literal/layout/line identities, all personal rows/history and only3
+  owner-family requests through failed and waiting candidates. Corrected complete
+  final-tree `npm run check` passed95 units, fixture publication/strict
+  TypeScript/Vite/Workbox production build and all270 browser cases, no retries
+  or skips. This includes21 shell-specific cases across desktop/Pixel7/320px.
+  Documentation checked20 tracked Markdown files/203 local links/all153 unique
+  normative IDs; strict YAML4, actionlint/ShellCheck and whitespace passed.
+  Vite chunk-size/plugin-timing warnings are not performance or release evidence.
+- Native Library continuity publishedcde5b199eb08a285e3fc441c90c4d5d00710f5f5
+  with independent Shared44 unchanged. Full config/core/all builds/lints/connected
+  checks passed40 core/61 connected, no failures/errors/skips; both lints55
+  warnings/zero errors, app JVM NO-SOURCE. Hygiene83,YAML5,actionlint/ShellCheck
+  and whitespace passed. Actual touch return focus and test lifecycle
+  synchronization were corrected without weakening assertions.
+  Archived the earlier native Library-continuity-pending status: prepared Library
+  now retains its literal query/pages/viewport and reader/Back/Settings return
+  session independently of Favorites, with no incidental preparation or writes.
+  Exact preflight39743079485/main39743550567 passed; parent independently
+  verified all successful jobs/steps, clean exact local/remote SHA and Shared44
+  pin without re-inspecting delegated source. The owned no-PR validation ref was
+  cleaned. Connected/HTTP helpers stopped before parent Website builds resumed;
+  user server5173/emulator5556 stayed untouched. Device evidence remains local.
+
 ## 2026-10-22: independent lyric font size and reading density
 
 - Archived Website v5/native IndexedDB50: preference rows had exactly
@@ -63,6 +127,23 @@
   Documentation checks passed20 Markdown files/201 local links/all153 unique
   normative requirement IDs; strict YAML passed4 files.
   Vite's500kB chunk-size advisory remains a warning, not a performance pass.
+- Website published1ee3dca067d0151e62b0ac6ca1215a5e7341f539 after exact
+  preflight39737355639; main/Pages39737932282 and CodeQL39737931925 passed.
+  Fresh isolated Chromium matched all8 hosted resources to the successful Pages
+  artifact; main JS741667 bytes,SHA256
+  c4b7a43bccad182b2b9920993156336fb9ad4b32ca3e642f5a1adc6190859774.
+  Actual owner metadata2/item1 requests per session (6 total including restart)
+  verified all18 literal paragraphs/layout/line IDs,30px/Relaxed then28px/Compact,
+  typed favorite, Warm/Kannada independence, disabled history and320px persistence.
+  The first hosted helper incorrectly used immediate `.uncheck()` on an
+  asynchronous committed checkbox; click plus awaited unchecked state fixed the
+  helper without changing application behavior. Owned browser/helpers/artifact
+  extraction and main-contained no-PR validation ref were cleaned.
+- Native independently published33cd2eff7b34177d6e14b41f870712c206bfb9de after
+  exact preflight39736253545/main39736619241 passed. Parent verified complete
+  successful job/step conclusions, exact local/remote SHA and independent Shared44
+  pin; owned completed validation ref was cleaned. The40 core/58 connected result
+  and55 warnings/variant above remain local device evidence, not CI coverage.
 
 ## 2026-10-22: on-demand online reading and accelerated delivery
 

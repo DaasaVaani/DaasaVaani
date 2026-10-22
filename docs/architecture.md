@@ -75,6 +75,7 @@ Initial values and exact field bounds belong only in the linked owning files.
 | [Web settings](../settings/web.yml): `databaseName` | Build-time Dexie/native IndexedDB identity | Changing it is not a migration; it would strand the prior database and requires explicit compatibility handling |
 | [Web settings](../settings/web.yml): `fontFamily`, `readerFontSize`, `readerFontSizeMin`, `readerFontSizeMax`, `readerFontSizeStep`, `readerLineHeights`, `space`, `contentWidth`, `readerWidth`, `themes` | Typed CSS tokens, lyric-only bounded font/density preferences, system fonts, three palettes and measured contrast checks; portable density choices/default come from Shared | Onboarding/helper/script/Recite/Practice/offline integration and physical-device/font conformance remain incomplete |
 | [Web settings](../settings/web.yml): `demoPort`, `demoViewports` | Development server and desktop/mobile demo tooling, not a runtime user preference | Supported-browser/device acceptance is broader than configured demo viewports |
+| [Web settings](../settings/web.yml): `appShell` | Production-only Workbox GenerateSW worker filename/cache namespace, complete shell-byte ceiling and deduplicated visible-focus update interval; see the [shell protocol](#web-app-interface-shell-and-normal-updates) | No Library/content readiness, automatic snapshot replacement or browser installation guarantee; `base` must be a directory path |
 | [Portable defaults/schema](../shared/schemas/ui-defaults.schema.json) | Build-time locale/theme/default history recording and allowed choices; first supported browser locale, explicit persisted override, independent device appearance | Canonical `lyricScript` remains the fixture invariant, not an implemented selectable transliteration profile; explicit stored history choices win |
 | [Personal-transfer settings/schema](../shared/schemas/personal-transfer-settings.schema.json) | Build-time favorite/list/occurrence/recent-window/text/logical-byte and encoded/decoded/link bounds; generated schemas and transactional/codec tests | Bookmark/learning/backup bounds are declared but their complete features and protocols are not implemented |
 | [Publication-safety settings/schema](../shared/schemas/publication-policy-settings.schema.json) | Strict build-time required fields, safe byte counts, platform-bounded request milliseconds and implemented required capabilities; artifact fetch/decoder checks | Untrusted remote data cannot raise these limits; this is not the full production publication/offline policy |
@@ -168,10 +169,47 @@ Personal values never enter repository settings; payloads cannot override limits
   recognizes only the explicit Library/Favorites/Lists origins; direct/new-tab
   readers use Library fallback. A hidden list's captured revision is not silently
   advanced by concurrent personal writes.
-- Workbox shell resources separate from content. Normal worker activation,
-  notify/no forced reload or skipWaiting; preserve active reading/personal state.
+- Workbox shell resources separate from content under the
+  [normal-update protocol](#web-app-interface-shell-and-normal-updates).
 - Root /open/ hash links, narrow signed Android association and browser fallback;
   no forced routing or claim that installation guarantees handoff.
+
+## Web app-interface shell and normal updates
+
+The production build uses pinned Workbox GenerateSW after the root and configured
+`open/` HTML, compiled assets and legal notices exist. It precaches only those
+HTML entries, every compiled JavaScript/CSS asset (including both lazy workers)
+and the complete application/dependency/Unicode notices. The inline worker has no
+runtime-cache rules, automatic Library download or content/personal database API.
+Fixture/Library artifacts, compressed transfers, images/video and unrelated
+projects are not precached. The configured ceiling covers all precached bytes
+plus worker bytes; skipped/oversized resources or generator warnings fail the
+build rather than publishing an incomplete shell.
+
+Navigation fallback admits only the configured root/index and canonical
+`open/`/index entries, including their query strings. Missing binaries, assets,
+Library paths and other projects never receive the app HTML fallback.
+The worker's actual root scope still controls windows at other host paths:
+fetch exclusions do not narrow that scope. Other projects' named caches are
+not deleted. An activated precache prunes only its own obsolete entries.
+
+Registration runs only for a production build on a supporting browser.
+Unavailable support keeps online behavior and displays its boundary; registration,
+installation and update errors are visible with explicit retry. Visible focus
+and visibility return check for code updates no more than the owned interval,
+deduplicating in-flight checks. A waiting worker produces the localized notice
+to close every website tab/window and reopen. The app never posts `SKIP_WAITING`,
+claims existing clients or forces reload; activation follows the browser's normal
+controlled-client lifecycle. Unsaved UI state and personal data are not replaced
+by merely discovering code. Code updates do not authorize content refresh.
+
+After successful shell installation, offline Settings/list management and bounded
+local transfer decoding can use the cached lazy worker. This is not a validated
+offline lyric snapshot, per-list readiness, persistent-storage/eviction guarantee,
+complete compatible-schema upgrade proof or full browser/device/installability
+coverage. A first-ever offline visit still cannot load the site. Manifest/icons,
+installation UX and persistent complete-library lifecycle remain separate work.
+The [shell suites](testing-and-release.md) define executable boundaries.
 
 ## Web typed personal storage v6
 

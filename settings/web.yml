@@ -14,6 +14,11 @@ listFileName: list.dvlist.json.gz
 transferChunkBytes: 65536
 listCompressionLevel: 6
 demoPort: 5173
+appShell:
+  workerFile: sw.js
+  cacheId: DaasaVaani-app-interface
+  maxPrecacheBytes: 8388608
+  updateCheckIntervalMs: 60000
 databaseName: DaasaVaani-personal
 fontFamily: system-ui, "Nirmala UI", sans-serif
 readerFontSize: 28

@@ -12,6 +12,7 @@ import personalSchema from "./shared/schemas/personal-transfer-settings.schema.j
 import defaultsSchema from "./shared/schemas/ui-defaults.schema.json" with { type: "json" };
 import publicationSettingsSchema from "./shared/schemas/publication-policy-settings.schema.json" with { type: "json" };
 import { verifyUnicodeResources } from "./tools/unicode-resources.ts";
+import { prepareAppShell } from "./tools/app-shell.ts";
 
 verifyUnicodeResources();
 const config = strictYaml(readFileSync(new URL("./settings/web.yml", import.meta.url), "utf8"));
@@ -78,6 +79,7 @@ export default defineConfig({
       await copyFile(fileURLToPath(new URL("./shared/resources/unicode16/LICENSE.txt", import.meta.url)), resolve(options.dir, "unicode16-license.txt"));
       await appendFile(resolve(options.dir, "third-party-licenses.md"),
         "\n## Unicode 16.0.0 personal-name data\n\nDerived from the pinned official Unicode data. See [the complete Unicode License V3](unicode16-license.txt).\n");
+      await prepareAppShell(options.dir, config);
     },
   }], base: config.base, build: { license: { fileName: "third-party-licenses.md" } },
   server: { port: config.demoPort, watch: { ignored: path => {

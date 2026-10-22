@@ -12,12 +12,21 @@ import { AddToList } from "./AddToList";
 import { Lyrics, ReferenceFavorites } from "./Lyrics";
 import { HistoryControls, RecentHistory } from "./RecentHistory";
 import { ReadingPreferences, type ReadingPreferencesProps } from "./ReadingPreferences";
+import { useAppShell } from "./app-shell";
 import type { LyricLibrary } from "./lyric-publication";
 import type { PersonalReference } from "./list-transfer-types";
 import { hasFavorite, toggleFavorite } from "./personal-model";
 import styles from "./App.module.css";
 
 type Labels = typeof messages.en;
+function ShellNotices({ labels, shell }: { labels: Labels; shell: ReturnType<typeof useAppShell> }) {
+  return <>
+    {shell.updateAvailable && <aside className={styles.notice} role="status">{labels.appUpdateAvailable}</aside>}
+    {shell.unsupported && <p role="status">{labels.appShellUnsupported}</p>}
+    {shell.error && <section role="alert" className={styles.error}><h2>{labels.appShellFailed}</h2>
+      <p>{shell.error}</p><button onClick={shell.retry}>{labels.retry}</button></section>}
+  </>;
+}
 function FixtureOnly({ children }: { children: ReactNode }) {
   return /^\/lyrics(?:\/|$)/u.test(useLocation().pathname) ? null : children;
 }
@@ -213,6 +222,7 @@ function Library({ publication, labels, personal, favoritesOnly }: {
 }
 
 export default function App() {
+  const shell = useAppShell();
   const [publication, setPublication] = useState<Publication>();
   const [lyrics, setLyrics] = useState<LyricLibrary>();
   const [personalReady, setPersonalReady] = useState(false);
@@ -287,6 +297,7 @@ export default function App() {
       <NavLink to="/settings">{labels.settings}</NavLink>
     </nav></header>
     <main id="content" tabIndex={-1} className={styles.main}>
+      <ShellNotices labels={labels} shell={shell} />
       <FixtureOnly><aside className={styles.notice}>{labels.fixtureNotice}</aside></FixtureOnly>
       {error && <section className={styles.error} role="alert"><h2>{labels.error}</h2><p>{error}</p>
         <button onClick={() => setAttempt(value => value + 1)}>{labels.retry}</button></section>}
@@ -327,6 +338,7 @@ export default function App() {
           {store && <HistoryControls labels={labels} history={store.history} />}
           </>}
           <ListPreview labels={labels} personal={store} publication={publication} lyrics={lyrics} />
+          <section><h2>{labels.appShell}</h2><p>{labels.appShellNotice}</p></section>
         </section>} />
         <Route path="/list/:payload" element={<ListRoute labels={labels} personal={store} publication={publication} lyrics={lyrics} />} />
         <Route path="*" element={<p role="alert">{labels.unknownRoute} <Link to="/">{labels.back}</Link></p>} />

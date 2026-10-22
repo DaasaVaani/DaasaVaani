@@ -15,7 +15,7 @@ recording preserves existing entries. Catalog loading and previews do not record
 activity. Explicit controls save
 typed lyric favorites and independent list occurrences locally. List v2 transfers
 preserve lyric/legacy identities and user text; v1 imports remain supported.
-Existing identifiers are never guessed or remapped. Persistent offline state,
+Existing identifiers are never guessed or remapped. Persistent offline Library state,
 production metadata adapters and the complete production lifecycle remain open.
 
 The responsive React Website reads hash-verified artifacts from the Library fixture
@@ -38,6 +38,14 @@ explicitly save new independent lists. Lists supports creation, rename,
 duplication and confirmed deletion, with repeated occurrences and duplicate-name
 confirmation. Occurrences can be added, edited, moved, removed and explicitly
 replaced without changing their independent identities or other repetitions.
+Production builds cache the interface and lazy workers separately from Library
+content. An installed interface can reopen Settings and decode local transfers
+offline, but does not make lyrics ready offline. New app code shows a notice to
+close all website windows and reopen, without forced reload/activation or personal
+data replacement. Registration/update errors have explicit retry; unsupported
+browsers retain online features. See the [shell protocol](docs/architecture.md#web-app-interface-shell-and-normal-updates).
+Manifest/icons, installability/platform coverage and persistent Library snapshots
+remain incomplete.
 Saved lists export independent minimal gzip files/links with stable-read revision
 checks. Supported browsers offer explicit system sharing and clipboard copy;
 selectable links and complete downloads remain available as fallbacks. System

@@ -1,5 +1,6 @@
 interface WebConfig {
   formatVersion: 1; base: string; descriptorUrl: string; demoPort: number;
+  appShell: { workerFile: string; cacheId: string; maxPrecacheBytes: number; updateCheckIntervalMs: number };
   lyricPreview: {
     descriptorUrl: string; pageSize: number; maxItems: number;
     maxEncodedBytes: number; maxDecodedBytes: number; concurrentRequests: number;

@@ -30,8 +30,8 @@ does not waive any validation gate.
 | P4 | Real canonical text-only hash-addressed publication; separate fixture index producer and sampled OSA/candidate parity | Public populated-metadata/Latin/media adapters, durable ledger/receipts, semantic dates, ZIP/planner and complete language/profile index evidence |
 | P5 | Verified real online metadata/catalog and on-demand UUID reading with bounded in-memory cache, literal title filter, complete paging and reader continuity; existing fixture search/preferences/themes | Complete production-profile reading, full filters/discovery/script/helper/video/accessibility/platform journeys |
 | P5a | Transactional typed lyric/legacy web favorites/lists/preferences/recent history, independent lyric font/density, preserving v1/v2/v3/v4/v5-to-v6 upgrade, worker v1/v2 preview and saved-v2 export, optional share/copy/fallbacks, independent occurrence editing/import/management, exact verified catalog lookup and reader-to-list addition; native Room5 typed favorites/durable lists/occurrences/recent history/font/density | Bookmarks/learning/recitation, real sharing-surface interoperability, full backups and remaining production migrations |
-| P6 | No persistent offline snapshot implementation | Journals/atomic activation/resume/repair/reader-safe GC and service worker lifecycle |
-| P7 | Separate native real canonical full preparation/reading in memory; fixture search, independent real Favorites literal filtering/complete paging/return context, Room5 typed favorites/durable lists/occurrences/preferences/recent history, preserving upgrades, independent font/density/locale/theme, bounded v1/v2 preview/save/re-export and reader/list navigation, core and connected tests | Full personal backups/bookmarks/learning/recitation, signed App Links/receiving-app matrix, durable preparation/recovery and full parity/device matrix |
+| P6 | Production-only shell precache with offline lazy-worker coverage, narrow root/open fallback, explicit support/error/retry states and normal deferred code-update notice | Manifest/icons/installability matrix, persistent snapshots/journals/atomic activation/resume/repair/reader-safe GC, eviction/readiness and complete lifecycle compatibility |
+| P7 | Separate native real canonical full preparation/reading in memory; session-local Library and independent Favorites literal filtering/complete paging/reader/Back return context, Library Settings return, fixture search, Room5 typed favorites/durable lists/occurrences/preferences/recent history, preserving upgrades, independent font/density/locale/theme, bounded v1/v2 preview/save/re-export and reader/list navigation, core and connected tests | Full personal backups/bookmarks/learning/recitation, signed App Links/receiving-app matrix, durable preparation/recovery and full parity/device matrix |
 | P3/P8/P9 | Dependency-ordered Shared/fixture-publisher pins; full web fixture CI/Pages and native build/core/lint CI | Live-provider clarification, production ingestion/publication/signing, device CI and release readiness |
 
 The fixture capability is deliberately named `fixture-catalog-v1`; all UIs label
@@ -52,12 +52,14 @@ changes. Configured first/second/final-page boundary journeys cover keyboard foc
 completeness and worker-failure recovery without a false no-results state.
 List-origin reading retains the selected list, unsaved editor state and available
 focus/scroll through return/Back/Forward in the same session; reload resets selection.
-Native real Favorites independently retains its literal title query, expanded
-configured pages and viewport through reader return/Android Back. Query changes
-reset paging; unresolved typed references remain visible and filtering/navigation
-does not write personal data. Successful reader opens still obey the history
-contract. This narrow parity does not establish full native Library/Explore or
-offline continuity, and native complete preparation remains required.
+Native prepared real Library and independent Favorites retain literal title
+queries, expanded configured pages and viewport through reader return/Android
+Back; Library also retains its context through Settings return. Query changes
+reset paging; unresolved typed favorites remain visible and filtering/navigation
+does not write personal data. This state is session-only, does not implicitly
+prepare/download content, and successful reader opens still obey the history
+contract. Full production search/filter/Explore and offline continuity remain
+incomplete; native complete preparation remains required.
 
 XFER-01/02/03/04/05/06/08 receive partial web evidence: strict settings-derived
 schema, bounded single-member gzip/raw-deflate/base64url codecs, local plain-text

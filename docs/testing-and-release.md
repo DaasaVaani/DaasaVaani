@@ -48,6 +48,26 @@ The full check runs unit tests, then publishes fixtures, builds/typechecks the
 current tree and runs browser tests against that fresh production build, not the
 development server. `npm run build` and `npm test` are available incrementally;
 `npm run test:e2e` also prepares/builds before starting its isolated preview server.
+Production build additionally generates the complete bounded Workbox interface
+precache; missing/skipped/oversized resources fail it. The
+[shell units](../src/app-shell.test.ts) exercise the exact total ceiling/+1,
+complete-versus-skipped generation and narrow root/open route grammar. The
+[shell browser suite](../tests/browser/app-shell.spec.ts) uses isolated actual
+HTTP hosts/generated workers, not a mocked readiness flag: offline Settings and
+lazy local-transfer decode, no Library/media cache or fallback, controlled
+multi-window waiting/normal activation, unsaved/personal/foreign-cache preservation,
+failed candidate recovery and unsupported/registration-retry paths.
+Mounted synthetic canonical-reader checks compare literal text/layout/IDs,
+the complete personal database and exact item-request counts through failed and
+waiting code candidates, with no history replay. Worker fault/cancellation tests
+use the [native-worker script adapter](../tests/worker-script.ts) because a
+precache can correctly bypass HTTP route replacement; service workers stay
+enabled and real worker lifecycle/error/cancellation assertions remain intact.
+`npm test -- app-shell` and
+`node node_modules\@playwright\test\cli.js test app-shell` are incremental only.
+Do not rebuild Website output while native connected tests hold its shared
+HTTP slot. These checks do not establish manifest/installability, complete offline
+Library readiness, eviction handling or full browser/device coverage.
 
 Browser tests require the clean Library revision in settings/tooling.yml with `npm ci` completed and
 the installed Playwright Chromium (`npx playwright install chromium` if missing).
@@ -281,7 +301,7 @@ IDs or a release acceptance declaration.
 | LIB-01/02/03/04/05/08/09/10/11 | Typed web/native lyric/legacy favorites/lists, independent occurrences/plain text, duplicate-name confirmation, management/manual replacement, exact catalog details/explicit reading, reader-to-list addition and preserving web v6/native Room5 upgrades | Recitation/offline/full personal collections and remaining production migrations remain incomplete |
 | LIB-06, SET-04, QUAL-05 | Web v6/native Room5 default-on device-only typed50-distinct successful-open history, explicit disable/re-enable/clear, retained unresolved refs, exact accounting, migration/failure/no-network and restart checks | Selected-script/offline parity and full personal backup remain incomplete |
 | UX-02/03/14, SET-04 | Website/native canonical/fixture and later Settings lyric-only bounded font/all densities, exact layout preservation, persisted independent native-unit choices, no-op/history and preserving web v6/native Room5 checks; Website peer propagation | Onboarding/helper/Recite/Practice/offline and complete font/device evidence remain open |
-| UX-13 | Web in-session Library/Favorites context and list-origin selected editor state, Back/Forward/reader return with measured scroll/focus; removed-result/direct-reader/reload coverage; native real Favorites query/pages/viewport and reader/Android Back context | No persistent search history; full filters/Explore, offline and remaining native Library continuity pending |
+| UX-13 | Web in-session Library/Favorites context and list-origin selected editor state, Back/Forward/reader return with measured scroll/focus; removed-result/direct-reader/reload coverage; native prepared real Library and independent Favorites literal query/pages/viewport and reader/Android Back context, plus Library Settings return | No persistent search history; full production filters/search/Explore and offline continuity remain incomplete |
 | XFER-01/02/03/04/05/06/08 | Bounded web worker/native v1/v2 codecs with independent vectors, explicit previews/transactional new-list saves and saved-v2 exports, actual cross-client v2 codec round trips, catalog-only details, browser share/copy adapters, cancellation/errors/no-write checks | Real sharing-surface delivery, verified App Links and full backups incomplete |
 | SET-01/02 | Owned settings/schema guards, Shared policy binding and immutable clean fixture-tool pin | Complete production settings inventory, language/protocol/backup contracts and all compatibility fixtures pending |
 | QUAL-01/02/03 | Semantic browser controls, keyboard focus entrypoint, standalone canonical reading and no video/tracking dependencies | Full keyboard/screen-reader/contrast/scaling/platform journeys remain unverified; no formal conformance claim |

@@ -57,6 +57,11 @@ UI/theme independence and mounted-reader history. The
 defines exact defaults, preserving older inputs and platform-owned spacing.
 Onboarding/helper/Recite/Practice/offline and complete font/device evidence remain open.
 
+The Website [app-interface protocol](architecture.md#web-app-interface-shell-and-normal-updates)
+implements the selected Workbox shell-only/normal-update direction independently
+of Library snapshots and the personal DB. Manifest/installability, persistent
+content/readiness/eviction and full platform/upgrade evidence remain open.
+
 ## Current readiness gates
 
 1. Verify compatible stable toolchain/dependency pins and real command registry.

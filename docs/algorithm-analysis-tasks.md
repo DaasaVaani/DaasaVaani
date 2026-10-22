@@ -705,10 +705,13 @@ validation must be settled before implementation.
 ### MED-12: Shell updates and safe activation
 
 - **Requirements:** PLAT-01/06, OFF-03/12/17, CI-03/05.
-- **Analysis needed:** define notification/deduplication states around Workbox's
-  selected normal worker lifecycle, old controlled windows and focus-time
-  rechecks. Specify shell resource coverage and route/fetch exclusions so code
-  updates do not become automatic Library downloads or content replacement.
+- **Current executable boundary:** the [Website shell protocol](architecture.md#web-app-interface-shell-and-normal-updates)
+  defines the settings-owned cache-byte ceiling/visible-focus interval, complete
+  compiled/lazy/legal resource allowlist, narrow navigation fallback, waiting
+  notice and explicit unsupported/error/retry states. Code updates neither download
+  Library artifacts nor force activation/reload or write personal data.
+- **Remaining analysis:** installation/platform/eviction and full compatible
+  schema/active-content upgrade coordination, including persistent offline readiness.
 - **Evidence/dependencies:** D1 build output, D7 scope/routes and compatible local
   schemas; multiple controlled windows, deferred activation, offline lazy chunks
   and preserved personal/active content. No forced skipWaiting/reload; fetch

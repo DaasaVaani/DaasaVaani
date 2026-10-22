@@ -6,6 +6,7 @@ import { strictYaml } from "../../shared/tools/generate-catalog.mjs";
 import { typedEntry, type ListSnapshot } from "../../src/list-transfer-types";
 import messages from "../../shared/generated/web/ui.json" with { type: "json" };
 import { readingDefaults } from "../lyric-browser";
+import { replaceWorkerScript } from "../worker-script";
 
 const web = strictYaml(readFileSync(new URL("../../settings/web.yml", import.meta.url), "utf8"));
 const limits = strictYaml(readFileSync(new URL("../../shared/settings/personal-transfer.yml", import.meta.url), "utf8"));
@@ -797,7 +798,7 @@ test("an export changed during encoding is refused until a fresh list selection"
   await page.getByRole("link", { name: "View saved lists", exact: true }).click();
   const choose = () => page.getByRole("list", { name: "Lists", exact: true }).getByRole("button", { name: snapshot.name, exact: true }).click();
   await choose();
-  await page.route("**/*list-transfer.worker*.js", route => route.fulfill({ contentType: "text/javascript", body: "self.onmessage = () => {};" }));
+  const restoreWorker = await replaceWorkerScript(page, "list-transfer.worker", "self.onmessage = () => {};");
   const created = page.waitForEvent("worker");
   await page.getByRole("button", { name: "Download list file", exact: true }).click();
   const worker = await created;
@@ -809,7 +810,7 @@ test("an export changed during encoding is refused until a fresh list selection"
   await expect(page.getByRole("alert")).toContainText("Personal data changed.");
   await expect(page.getByRole("link", { name: "Download list file", exact: true })).toHaveCount(0);
   expect(await records(page)).toEqual(changed);
-  await page.unroute("**/*list-transfer.worker*.js"); await choose();
+  await restoreWorker(); await choose();
   await page.getByRole("button", { name: "Create snapshot link", exact: true }).click();
   await expect(page.locator("input[readonly]")).toBeVisible();
   expect(await records(page)).toEqual(changed);
@@ -819,7 +820,7 @@ test("cancelling saved-list encoding terminates its worker and leaves all tables
   await page.getByRole("link", { name: "View saved lists", exact: true }).click();
   await page.getByRole("list", { name: "Lists", exact: true }).getByRole("button", { name: snapshot.name, exact: true }).click();
   const before = await records(page);
-  await page.route("**/*list-transfer.worker*.js", route => route.fulfill({ contentType: "text/javascript", body: "self.onmessage = () => {};" }));
+  const restoreWorker = await replaceWorkerScript(page, "list-transfer.worker", "self.onmessage = () => {};");
   const created = page.waitForEvent("worker");
   await page.getByRole("button", { name: "Download list file", exact: true }).click();
   const worker = await created, closed = worker.waitForEvent("close");
@@ -827,6 +828,7 @@ test("cancelling saved-list encoding terminates its worker and leaves all tables
   await expect(page.getByRole("link", { name: "Download list file", exact: true })).toHaveCount(0);
   await expect(page.getByRole("button", { name: "Download list file", exact: true })).toBeEnabled();
   expect(await records(page)).toEqual(before);
+  await restoreWorker();
 });
 test("oversized saved links retain a lossless file fallback without database writes", async ({ page }) => {
   const large: ListSnapshot = { ...snapshot, name: "Large synthetic export", entries: Array.from({ length: 64 }, (_, index) => ({

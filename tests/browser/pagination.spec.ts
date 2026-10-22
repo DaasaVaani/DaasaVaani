@@ -6,6 +6,7 @@ import Ajv2020 from "ajv/dist/2020.js";
 import { strictYaml } from "../../shared/tools/generate-catalog.mjs";
 import schema from "../../shared/schemas/search-policy.schema.json" with { type: "json" };
 import type { Descriptor, FixtureItem, Manifest, SearchIndex, SearchPolicy } from "../../shared/types/publication";
+import { replaceWorkerScript } from "../worker-script";
 
 const raw = strictYaml(readFileSync(new URL("../../shared/settings/search.yml", import.meta.url), "utf8"));
 const validate = new Ajv2020({ strict: true }).compile<SearchPolicy>(schema);
@@ -134,14 +135,13 @@ test("search worker failure removes stale pages without claiming no matches and 
   await query.fill("needle"); await expect(cards).toHaveCount(policy.pageSize);
   await page.getByRole("button", { name: "Show more results", exact: true }).click();
   await expect(cards).toHaveCount(policy.pageSize * 2);
-  await page.route("**/*search.worker*.js", route => route.fulfill({ contentType: "text/javascript",
-    body: 'throw new Error("Synthetic pagination worker failure");' }));
+  const restoreWorker = await replaceWorkerScript(page, "search.worker", 'throw new Error("Synthetic pagination worker failure");');
   await query.fill("needles");
   await expect(page.getByRole("alert")).toContainText("Synthetic pagination worker failure");
   await expect(cards).toHaveCount(0);
   await expect(page.getByText("No matching records. Try another word.", { exact: true })).toHaveCount(0);
   await expect(page.getByRole("button", { name: "Show more results", exact: true })).toHaveCount(0);
-  await page.unroute("**/*search.worker*.js");
+  await restoreWorker();
   await query.fill("needle"); await expect(cards).toHaveCount(policy.pageSize);
   await expect(page.getByRole("alert")).toHaveCount(0);
 });

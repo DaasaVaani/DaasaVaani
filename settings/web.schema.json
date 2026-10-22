@@ -1,9 +1,9 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "type": "object", "additionalProperties": false,
-  "required": ["formatVersion", "base", "descriptorUrl", "lyricPreview", "canonicalBaseUrl", "listLinkPath", "listFileName", "transferChunkBytes", "listCompressionLevel", "demoPort", "databaseName", "fontFamily", "readerFontSize", "readerFontSizeMin", "readerFontSizeMax", "readerFontSizeStep", "readerLineHeights", "space", "contentWidth", "readerWidth", "themes", "demoViewports"],
+  "required": ["formatVersion", "base", "descriptorUrl", "lyricPreview", "canonicalBaseUrl", "listLinkPath", "listFileName", "transferChunkBytes", "listCompressionLevel", "demoPort", "appShell", "databaseName", "fontFamily", "readerFontSize", "readerFontSizeMin", "readerFontSizeMax", "readerFontSizeStep", "readerLineHeights", "space", "contentWidth", "readerWidth", "themes", "demoViewports"],
   "properties": {
-    "formatVersion": { "const": 1 }, "base": { "type": "string", "pattern": "^/" },
+    "formatVersion": { "const": 1 }, "base": { "type": "string", "pattern": "^/(?:[A-Za-z0-9_-]+/)*$" },
     "descriptorUrl": { "type": "string", "minLength": 1 },
     "lyricPreview": {
       "type": "object", "additionalProperties": false,
@@ -23,6 +23,16 @@
     "transferChunkBytes": { "type": "integer", "minimum": 1, "maximum": 1048576 },
     "listCompressionLevel": { "type": "integer", "minimum": 0, "maximum": 9 },
     "demoPort": { "type": "integer", "minimum": 1024, "maximum": 65535 },
+    "appShell": {
+      "type": "object", "additionalProperties": false,
+      "required": ["workerFile", "cacheId", "maxPrecacheBytes", "updateCheckIntervalMs"],
+      "properties": {
+        "workerFile": { "type": "string", "pattern": "^[A-Za-z0-9_-]+\\.js$" },
+        "cacheId": { "type": "string", "pattern": "^[A-Za-z0-9_-]+$" },
+        "maxPrecacheBytes": { "type": "integer", "minimum": 1, "maximum": 67108864 },
+        "updateCheckIntervalMs": { "type": "integer", "minimum": 1000, "maximum": 2147483647 }
+      }
+    },
     "databaseName": { "type": "string", "minLength": 1 },
     "fontFamily": { "type": "string", "minLength": 1 },
     "readerFontSize": { "type": "integer", "minimum": 16, "maximum": 80 },
