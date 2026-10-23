@@ -1,5 +1,77 @@
 # Documentation history
 
+## 2026-10-23: current-state backup scope and replacement prerequisite
+
+- Owner approved same-platform backup v1 covering every currently implemented
+  personal field, with versioned extension when new features arrive, rather than
+  blocking the entire feature on unimplemented bookmarks/Practice/setup contracts.
+  Shared owns the independent schema/fixture/catalog batch. Website consumers
+  remain independently pinned; no provisional transliteration activation follows.
+- Implemented the Website replacement prerequisite: complete copied allowlist,
+  preview revision check, fresh writer epoch, full prospective byte/collection
+  validation and cancellable six-store replacement. Reused the existing
+  recitation transaction cancellation path. No file codec, backup UI, automatic
+  restore, bookmark/Practice state or native restore is claimed.
+- Incremental `npm test -- personal-restore recitation-position personal-model`
+  passed33/33; `node node_modules\typescript\bin\tsc --noEmit` passed.
+  Final `npm test` passed130/130 across15 files. With the documented clean pinned
+  fixture publisher override,
+  `node node_modules\@playwright\test\cli.js test --workers=2` passed423/423
+  across all three projects in6.1 minutes, with fresh fixture publication and
+  strict production build, zero failures/skips. The12 replacement browser cases
+  exercised actual IndexedDB commit/restart, stale/invalid/aborted refusal and
+  quota/cancellation rollback at the final control write. The test-only API
+  bundle was compiled in memory, without production hooks or generated files.
+  The build retained its large-chunk and plugin-timing warnings; neither was
+  represented as a release-readiness pass.
+  `python shared\tools\check_repository.py` passed78 tracked files/local links;
+  installed actionlint1.7.12 with ShellCheck0.11.0 passed; both GitHub YAML files
+  passed strict parsing; `git diff --check` and `git diff --cached --check`
+  passed. Website's prerequisite is retained as a local-only checkpoint:
+  no Website push or consumer Shared-pin change accompanies the pause.
+- Owner then requested completion of in-flight tasks followed by a pause.
+  Further consumer UI/features remain queued, not automatically started.
+  Shared completed and published the approved prerequisite at
+  b9ed5321791bfc69f466caa4cd46c58f2c60631f/
+  tree626ae6537201f9e32c65c77d17d81e19bbcdee38. Its full125 tests,26 deterministic
+  outputs, hygiene97,13 strict YAML files,15 Markdown documents/31 anchors,
+  installed actionlint/ShellCheck and drift/whitespace checks passed.
+  Exact preflight39892761347/job120216103093 and
+  main39892894437/job120216525444 passed every actual job/all10 steps through
+  paginated no-cache verification. Its owned validation ref was deleted.
+  No consumer pin/adoption, user-facing backup or native restore followed.
+  Both agents are paused with no owned active helpers.
+- The published Website resume batch a614c5c/tree95ccb434 independently pinned
+  Shared c386bf8. Exact preflight39879555836, main/Pages39880270926 and
+  CodeQL39880271459 passed every actual required job/step. The owned contained
+  no-PR validation ref was deleted. Exact Pages artifact24-file comparison and
+  public HTTPS proof passed:871 catalog,6 Library requests through exact repeated
+  occurrence/explicit Continue, native70-to80 preservation, literal layout digest
+  `33e63f6fa2e6967abebafe827a7d897bacc1b3f35c189b82073e2d80ab1e7f6f`,
+  installed-shell offline placeholder Continue without autoentry/awake, and
+  12 cache bodies plus worker1025429/8388608 bytes without Library/media caching.
+- Shared independently published provisional Latin rules e409162 and all14
+  directions a049a242. Its final115 tests and24 deterministic generated outputs
+  passed; exact preflight39880471928/main39880626539 passed all actual steps.
+  Both consumers retain c386bf8; no linguistic review or client activation is
+  inferred. Library's local verse proposals568db957 remain unpublished after a
+  required full37-test run failed36/37 with Windows EBUSY; deferred workflow
+  support667a2a7 remains separately preserved.
+- Native's final resume validation ended with2 device passes,1 failure during an
+  Android system crash and107 unrun. Earlier54-core/110-device evidence predates
+  its final guard and is not a final pass. The aborted final command executed
+  no core tests; core build/release assembly/both full lints did not finish.
+  Its17 staged files remain uncommitted/
+  unpushed at79acdb3, staged tree5786601e, independent Shared c386bf8. Device/
+  local-runtime ownership was released; only bounded read-only diagnosis remains
+  authorized before the requested pause. That read-only diagnosis confirmed
+  a system-server watchdog/foreground handler blocked185 seconds under CPU
+  pressure, with system-server process replacement but no emulator reboot.
+  It established no application assertion failure or justified source fix.
+  Resource quiescence/responsive system-service health and, if necessary, an
+  explicitly authorized non-wiping restart remain prerequisites to a newly
+  granted full run. Native is paused; no retry/restart/helper was started.
+
 ## 2026-10-23: exact saved-list position implementation and parallel review drafts
 
 - Replaced Website v7/native70 five-store current protocol with v8/native80

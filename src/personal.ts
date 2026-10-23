@@ -1,8 +1,8 @@
 import Dexie, { liveQuery, type Transaction } from "dexie";
 import {
   defaultPersonal, exportListSnapshot, migratePersonalV1, migrateStoreV2, migrateStoreV3, migrateStoreV4, migrateStoreV5, migrateStoreV6, migrateStoreV7, nextRevision, parseStore, PersonalError,
-  promoteRecent, saveLearningLabel, saveRecitationPosition, saveRecord, validatePersonal, validateStore,
-  type ListRecord, type Personal, type PersonalStore, type Revision, type RecentHistoryV1,
+  promoteRecent, replacePersonalContents, saveLearningLabel, saveRecitationPosition, saveRecord, validatePersonal, validateStore,
+  type ListRecord, type Personal, type PersonalContents, type PersonalStore, type Revision, type RecentHistoryV1,
 } from "./personal-model";
 import type { PersonalReference } from "./list-transfer-types";
 import type { LearningLabel } from "../shared/types/personal";
@@ -227,8 +227,7 @@ export async function updateLearningLabel(reference: PersonalReference, label: L
   });
 }
 export interface RecitationReceipt { before: Revision; after: Revision }
-export async function rememberRecitation(record: ListRecord, entryId: string, epoch: string,
-  signal: AbortSignal): Promise<RecitationReceipt> {
+async function cancellablePersonalWrite<T>(signal: AbortSignal, change: (state: PersonalStore) => Promise<T>): Promise<T> {
   signal.throwIfAborted();
   await ready();
   signal.throwIfAborted();
@@ -241,6 +240,15 @@ export async function rememberRecitation(record: ListRecord, entryId: string, ep
       signal.throwIfAborted();
       const state = await stored(transaction);
       signal.throwIfAborted();
+      const result = await change(state);
+      signal.throwIfAborted();
+      return result;
+    });
+  } finally { signal.removeEventListener("abort", abort); }
+}
+export async function rememberRecitation(record: ListRecord, entryId: string, epoch: string,
+  signal: AbortSignal): Promise<RecitationReceipt> {
+  return cancellablePersonalWrite(signal, async state => {
       if (state.control.epoch !== epoch || !sameRecitationList(record, state.lists.find(list => list.id === record.id))) {
         throw new PersonalError("stale");
       }
@@ -249,8 +257,24 @@ export async function rememberRecitation(record: ListRecord, entryId: string, ep
         await recitationPosition.put({ id: "recitation", ...next.recitation });
         await control.put(next.control);
       }
-      signal.throwIfAborted();
       return { before: state.control, after: next.control };
-    });
-  } finally { signal.removeEventListener("abort", abort); }
+  });
+}
+export async function restorePersonalContents(contents: PersonalContents, expected: Revision, signal: AbortSignal): Promise<Revision> {
+  const candidate = structuredClone(contents);
+  return cancellablePersonalWrite(signal, async state => {
+    const next = replacePersonalContents(state, candidate, expected);
+    await personal.clear();
+    await lists.clear();
+    await recentHistory.clear();
+    await learningLabels.clear();
+    await recitationPosition.clear();
+    if (next.personal) await personal.put(next.personal);
+    await lists.bulkAdd(next.lists);
+    await recentHistory.put({ id: "history", ...next.history });
+    await learningLabels.put({ id: "learning", ...next.learning });
+    await recitationPosition.put({ id: "recitation", ...next.recitation });
+    await control.put(next.control);
+    return next.control;
+  });
 }

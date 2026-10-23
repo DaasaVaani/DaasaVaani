@@ -27,7 +27,7 @@ archive of questionnaires, alternatives, changes and dated observations.
 | Offline | Explicit full validation/atomic pointer, active+one target, verified-artifact resume, safe reader pins/GC/fences, same-version repair/degradation, current-only hosting |
 | Personal | One transactional Room/Dexie personal DB, typed identities, repeated occurrences, exact byte/collection bounds, forward non-destructive migration |
 | Personal name matching | Official Unicode16 NFC/full default C/F folding/NFC with preserving derived-key migration; no automatic list renaming or merging |
-| Lists/backups | Portable new-list-only minimal transfers; same-platform logical gzip full backups/confirmed replacement, preview revision/fencing, truthful locale postcommit |
+| Lists/backups | Portable new-list-only minimal transfers; same-platform logical gzip full backups/confirmed replacement covering all currently implemented personal fields, versioned extension when new fields arrive, preview revision/fencing, truthful locale postcommit |
 | Reading | Independent UI/script preferences; explicit Latin choice, system fonts, themes/density/helper, accessible navigation and explicit latest-list resume |
 | Links/shell | Root Website and /open/ hash links, host-root association, normal worker activation, no forced reload or automatic content replacement |
 | Ingestion | YouTube automation deferred to a later release, not an initial-release gate; retain local full uploads scan/reconciliation/source PR design and provider clarification before first API access |

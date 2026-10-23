@@ -27,6 +27,7 @@ export interface PersonalStore {
   control: Control; personal?: Personal; lists: ListRecord[]; history: RecentHistoryV1;
   learning: LearningLabelsV1; recitation: RecitationPositionV1;
 }
+export type PersonalContents = Omit<PersonalStore, "control">;
 export type PersonalErrorCode = "invalid" | "listInvalid" | "capacity" | "stale" | "duplicate";
 export class PersonalError extends Error {
   constructor(readonly code: PersonalErrorCode) {
@@ -426,6 +427,15 @@ export function nextRevision(state: PersonalStore, expected: Revision): Personal
 }
 function assertRevision(actual: Revision, expected: Revision): void {
   if (actual.epoch !== expected.epoch || actual.revision !== expected.revision) throw new PersonalError("stale");
+}
+export function replacePersonalContents(state: PersonalStore, contents: PersonalContents, expected: Revision,
+  limits = __PERSONAL_LIMITS__): PersonalStore {
+  assertRevision(state.control, expected);
+  const snapshot = structuredClone({ personal: contents.personal, lists: contents.lists, history: contents.history,
+    learning: contents.learning, recitation: contents.recitation });
+  const next: PersonalStore = { control: newControl(), ...snapshot };
+  validateStore(next, limits);
+  return next;
 }
 export function exportListSnapshot(state: PersonalStore, id: string, expected: Revision): ListSnapshot {
   assertRevision(state.control, expected);

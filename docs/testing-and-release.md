@@ -100,6 +100,15 @@ full equivalent is `npm test` followed by
 `node node_modules\@playwright\test\cli.js test --workers=2`.
 Both commands must pass, without test selectors; the browser runner must report
 all configured projects and the intended worker count.
+The replacement prerequisite maps to XFER-09 and REC-04:
+`npm test -- personal-restore recitation-position personal-model` checks the
+complete allowlist, copying, fresh fences, exact byte admission and rejection
+without mutation. `node node_modules\@playwright\test\cli.js test personal-restore`
+checks the actual six-store transaction, stale writers and final-write
+quota/cancellation rollback across all configured layouts. Its API harness is
+compiled from current source entirely in memory; it adds no production route,
+test hook or file-format support. These checks do not establish the still-pending
+full-backup file/preview/confirmation UI or native restore.
 The configured suite exercises desktop, Pixel7 and320px layouts, explicit index
 consent, actual search/reading, preference/favorite persistence and corrupt-artifact
 errors. First-use locale cases exercise ordered supported/regional browser

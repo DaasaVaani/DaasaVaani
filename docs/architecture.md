@@ -474,7 +474,7 @@ verse Practice remain separate unimplemented requirements.
 
 ### Transactions, names and exact accounting
 
-Every personal mutation uses one read-write transaction spanning all five
+Every personal mutation uses one read-write transaction spanning all six
 tables. Read/validate the complete current state, check captured epoch/revision,
 validate the prospective state including the incremented revision, then write
 only the intended record and header. Failure rolls back all writes. Creation/
@@ -603,8 +603,21 @@ including the null position row and preserved or initially empty labels.
 Transport decoding never selects a database
 version. Unmodified v1 previews re-export v1; confirmed v1 imports structurally
 adapt to local v2 records with fresh IDs, while all saved-list exports use v2.
-Full-backup headers, complete personal collections, replacement/crash/locale
-recovery and exportability require their own exact contracts/tests.
+The replacement prerequisite accepts only the current personal-field allowlist,
+deep-copies the candidate, checks the captured epoch/revision and validates the
+complete prospective state before clearing any data. One cancellable transaction
+replaces preferences, lists, history, learning and the exact recitation position,
+then writes a fresh local epoch with revision zero. It preserves absent preference
+rows, raw names, repeated occurrence IDs and structurally valid unresolved
+positions without merging or repair guesses. A quota error or cancellation before
+commit rolls the entire transaction back. Old editor revisions are invalid after
+success. The local control header is never imported.
+
+The staged backup v1 scope covers every currently implemented personal field;
+new personal features require a versioned backup extension, not fabricated empty
+bookmarks, Practice or setup records. Full-backup file headers, codec/adapter,
+preview/confirmation UI, locale recovery and exportability remain separate
+prerequisites. The replacement API alone does not provide a user-facing backup.
 
 ### Recently opened lifecycle
 
