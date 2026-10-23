@@ -1,5 +1,74 @@
 # Documentation history
 
+## 2026-10-23: exact saved-list position implementation and parallel review drafts
+
+- Replaced Website v7/native70 five-store current protocol with v8/native80
+  six-store protocol. Frozen v7 accounting remains exactly
+  `{format:"daasavaani-personal-storage",formatVersion:7,control,personal,lists,recentHistory,learningLabels}`;
+  its rows, raw values and learning assignments are preserved. Every supported
+  upgrade adds only null position and a fresh epoch; the old session-only
+  list cursor/no-position behavior is superseded by explicit latest-pair storage.
+- Implemented bounded REC-04 exact list/occurrence persistence, explicit Continue
+  and per-entry selection, commit-before-cursor movement, no-op repeats,
+  deletion recovery without substitution, empty-list preservation and strict
+  minimal-transfer exclusion. Whole-state transactions retain unrelated rows;
+  own-write receipts cannot rebase unrelated stale editor revisions.
+  Native resume remains independently owned; full backup/durable snapshots and
+  full REC-04/XFER-09 conformance are not claimed.
+- Targeted `npm test -- personal-model learning unicode-names list-recite
+  recitation-position` passed81 units; strict production build passed.
+  `runTests` found no registered editor tests, so actual documented Vitest was
+  used instead; the editor tool's result was not counted as a test pass.
+  `node node_modules\@playwright\test\cli.js test list-recite --workers=2`
+  passed54 browser cases across all three configured projects, including
+  quota rollback/retry, real database-lock cancellation and native70 upgrade.
+- Initial browser setup correctly refused the parallel Library worktree after
+  its source-tooling batch advanced HEAD. Created an isolated clean detached
+  fixture publisher at configured c2837cc with its own pinned Shared, restored
+  its missing locked dependencies after an actual MODULE_NOT_FOUND failure and
+  used the documented environment override. No fixture pin/clean guard was
+  weakened. Explicit Node runner reported two workers; the earlier npm
+  invocation did not forward that worker flag and never started browser tests.
+- Owner authorized parallel implementation and best-guess global transliteration
+  rules/verse boundaries for subsequent review. Shared/Library agents own
+  isolated provisional batches, not automatic approval or linguistic proof.
+  Canonical text, protected sources and125 held originals remain unchanged.
+  Full final Website source validation subsequently passed:
+  `npm test`126/126 and
+  `node node_modules\@playwright\test\cli.js test --workers=2`411/411 across all
+  three projects with fresh strict build, zero failures/skips; actual browser
+  duration7.0 minutes. Hygiene78, installed actionlint1.7.12/ShellCheck0.11.0,
+  both GitHub YAML files and whitespace passed. Current Markdown validation
+  covered16 files/174 local links and153 unique requirement IDs. The first
+  temporary ID regex omitted the four I18N IDs; baseline comparison confirmed
+  no ID changed, and the corrected alphanumeric-family validator passed.
+  No tracked standalone shell scripts exist; actionlint uses installed ShellCheck
+  for workflow shell analysis. Frozen dist/device/HTTP ownership then passed
+  explicitly to native for its complete independent validation. Publication
+  and hosted verification remain required.
+- Prior ordered-list publication follow-up8853f9d/treeeebf218 independently pinned
+  Shared397988. Exact preflight39843733332, main/Pages39844401526 and
+  CodeQL39844401260 passed every actual required job/step. Final exact29-entry
+  artifact matched24 hosted bodies; isolated public proof exercised871 catalog/
+  3 Library requests,8 mixed occurrences+empty, literal layout, full native70
+  schema/personal/history preservation, actual offline session traversal and
+  installed interface restart without autoentry.12 cache bodies plus worker
+  totaled1016553/8388608 bytes, with no Library/media cache. Owned publication
+  refs/helpers/extracted artifacts were cleaned and user pages/processes preserved.
+
+## 2026-10-23: YouTube ingestion automation deferred
+
+- Owner deferred YouTube ingestion automation to a later release. Previously,
+  initial scope included official-API local historical/incremental ingestion,
+  and roadmap P8 depended on P3. ING-01 through ING-11 and the local ingestion
+  design remain later-release targets; P3 is no longer an initial-release
+  dependency or acceptance gate.
+- Provider clarification remains mandatory before first API ingestion, but is
+  not an initial-release blocker. Reviewed existing-content publication,
+  source preservation, content review, applicable provider terms and all other
+  release validation gates remain unchanged. No API access is authorized by
+  this deferral.
+
 ## 2026-10-22: list publication and selected-content readiness synchronization
 
 - Website9170414fc789df679fc0d0b577901d417e523e91/tree20adf7d independently

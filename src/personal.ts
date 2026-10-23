@@ -1,11 +1,12 @@
 import Dexie, { liveQuery, type Transaction } from "dexie";
 import {
-  defaultPersonal, exportListSnapshot, migratePersonalV1, migrateStoreV2, migrateStoreV3, migrateStoreV4, migrateStoreV5, migrateStoreV6, nextRevision, parseStore, PersonalError,
-  promoteRecent, saveLearningLabel, saveRecord, validatePersonal, validateStore,
+  defaultPersonal, exportListSnapshot, migratePersonalV1, migrateStoreV2, migrateStoreV3, migrateStoreV4, migrateStoreV5, migrateStoreV6, migrateStoreV7, nextRevision, parseStore, PersonalError,
+  promoteRecent, saveLearningLabel, saveRecitationPosition, saveRecord, validatePersonal, validateStore,
   type ListRecord, type Personal, type PersonalStore, type Revision, type RecentHistoryV1,
 } from "./personal-model";
 import type { PersonalReference } from "./list-transfer-types";
 import type { LearningLabel } from "../shared/types/personal";
+import { sameRecitationList } from "./list-recite";
 export type { Personal, PersonalStore } from "./personal-model";
 export const browserDefaultPersonal = () => defaultPersonal(navigator.languages.length ? navigator.languages : [navigator.language]);
 
@@ -17,7 +18,8 @@ db.version(4).stores({ personal: "id", lists: "id", control: "id" });
 db.version(5).stores({ personal: "id", lists: "id", control: "id", recentHistory: "id" });
 db.version(6).stores({ personal: "id", lists: "id", control: "id", recentHistory: "id" });
 db.version(7).stores({ personal: "id", lists: "id", control: "id", recentHistory: "id", learningLabels: "id" });
-const nativeVersion = 70;
+db.version(8).stores({ personal: "id", lists: "id", control: "id", recentHistory: "id", learningLabels: "id", recitationPosition: "id" });
+const nativeVersion = 80;
 const newerSchema = () => new Error("A newer personal database schema is present. Use a compatible app; existing data was not changed.");
 function inspectNative(): Promise<IDBDatabase> {
   return new Promise((resolve, reject) => {
@@ -34,8 +36,9 @@ function inspectNative(): Promise<IDBDatabase> {
       if (!transaction) { reject(new PersonalError("invalid")); return; }
       const abort = (reason: unknown) => { upgradeFailure = reason; transaction.abort(); };
       if (stopped) { transaction.abort(); return; }
-      if (event.oldVersion === 20 || event.oldVersion === 30 || event.oldVersion === 40 || event.oldVersion === 50 || event.oldVersion === 60) {
-        const expected = event.oldVersion >= 50 ? ["control", "lists", "personal", "recentHistory"] : ["control", "lists", "personal"];
+      if ([20, 30, 40, 50, 60, 70].includes(event.oldVersion)) {
+        const expected = event.oldVersion === 70 ? ["control", "lists", "personal", "recentHistory", "learningLabels"]
+          : event.oldVersion >= 50 ? ["control", "lists", "personal", "recentHistory"] : ["control", "lists", "personal"];
         const names = [...database.objectStoreNames];
         if (names.length !== expected.length || expected.some(name => !names.includes(name)) || names.some(name => {
           const store = transaction.objectStore(name);
@@ -44,7 +47,8 @@ function inspectNative(): Promise<IDBDatabase> {
         const rows = { control: transaction.objectStore("control").getAll(),
           personal: transaction.objectStore("personal").getAll(), lists: transaction.objectStore("lists").getAll() };
         const histories = event.oldVersion >= 50 ? transaction.objectStore("recentHistory").getAll() : undefined;
-        const requests = [...Object.values(rows), ...(histories ? [histories] : [])];
+        const learning = event.oldVersion === 70 ? transaction.objectStore("learningLabels").getAll() : undefined;
+        const requests = [...Object.values(rows), ...(histories ? [histories] : []), ...(learning ? [learning] : [])];
         let pending = requests.length;
         for (const request of requests) {
           request.onerror = () => abort(request.error);
@@ -53,10 +57,13 @@ function inspectNative(): Promise<IDBDatabase> {
             try {
               const migrate = event.oldVersion === 20 ? migrateStoreV2 : event.oldVersion === 30 ? migrateStoreV3 : migrateStoreV4;
               const current = event.oldVersion === 60 ? migrateStoreV6 : migrateStoreV5;
-              const state = histories ? current(rows.control.result, rows.personal.result, rows.lists.result, histories.result)
+              const state = learning && histories
+                ? migrateStoreV7(rows.control.result, rows.personal.result, rows.lists.result, histories.result, learning.result)
+                : histories ? current(rows.control.result, rows.personal.result, rows.lists.result, histories.result)
                 : migrate(rows.control.result, rows.personal.result, rows.lists.result);
               if (!histories) database.createObjectStore("recentHistory", { keyPath: "id" }).put({ id: "history", ...state.history });
-              database.createObjectStore("learningLabels", { keyPath: "id" }).put({ id: "learning", ...state.learning });
+              if (!learning) database.createObjectStore("learningLabels", { keyPath: "id" }).put({ id: "learning", ...state.learning });
+              database.createObjectStore("recitationPosition", { keyPath: "id" }).put({ id: "recitation", ...state.recitation });
               if (state.personal) transaction.objectStore("personal").put(state.personal);
               for (const list of state.lists) transaction.objectStore("lists").put(list);
               transaction.objectStore("control").put(state.control);
@@ -75,6 +82,7 @@ function inspectNative(): Promise<IDBDatabase> {
           database.createObjectStore("control", { keyPath: "id" }).put(state.control);
           database.createObjectStore("recentHistory", { keyPath: "id" }).put({ id: "history", ...state.history });
           database.createObjectStore("learningLabels", { keyPath: "id" }).put({ id: "learning", ...state.learning });
+          database.createObjectStore("recitationPosition", { keyPath: "id" }).put({ id: "recitation", ...state.recitation });
         } catch (reason) { abort(reason); }
       };
       if (event.oldVersion === 0) initialize([]);
@@ -94,7 +102,7 @@ function inspectNative(): Promise<IDBDatabase> {
     request.onsuccess = () => {
       const database = request.result;
       if (stopped) { database.close(); return; }
-      const expected = ["control", "lists", "personal", "recentHistory", "learningLabels"];
+      const expected = ["control", "lists", "personal", "recentHistory", "learningLabels", "recitationPosition"];
       const stores = [...database.objectStoreNames];
       if (database.version !== nativeVersion || stores.length !== expected.length || expected.some(name => !stores.includes(name))) {
         database.close(); reject(new PersonalError("invalid")); return;
@@ -137,16 +145,18 @@ const lists = db.table<unknown, string>("lists");
 const control = db.table<unknown, string>("control");
 const recentHistory = db.table<unknown, string>("recentHistory");
 const learningLabels = db.table<unknown, string>("learningLabels");
+const recitationPosition = db.table<unknown, string>("recitationPosition");
 async function stored(transaction: Transaction): Promise<PersonalStore> {
-  const [headers, preferences, records, histories, learning] = await Promise.all([
+  const [headers, preferences, records, histories, learning, recitation] = await Promise.all([
     transaction.table("control").toArray(), transaction.table("personal").toArray(), transaction.table("lists").toArray(),
     transaction.table("recentHistory").toArray(), transaction.table("learningLabels").toArray(),
+    transaction.table("recitationPosition").toArray(),
   ]);
-  return parseStore(headers, preferences, records, histories, learning);
+  return parseStore(headers, preferences, records, histories, learning, recitation);
 }
 export async function readStore(): Promise<PersonalStore> {
   await ready();
-  return db.transaction("r", personal, lists, control, recentHistory, learningLabels, stored);
+  return db.transaction("r", [personal, lists, control, recentHistory, learningLabels, recitationPosition], stored);
 }
 export async function readListSnapshot(id: string, expected: Revision) {
   return exportListSnapshot(await readStore(), id, expected);
@@ -160,7 +170,7 @@ export async function readPersonal(): Promise<Personal> {
 }
 export async function updatePersonal(change: (value: Personal) => Personal): Promise<Personal> {
   await ready();
-  return db.transaction("rw", personal, lists, control, recentHistory, learningLabels, async transaction => {
+  return db.transaction("rw", [personal, lists, control, recentHistory, learningLabels, recitationPosition], async transaction => {
     const state = await stored(transaction);
     const previous = state.personal ?? browserDefaultPersonal();
     const value = change(previous);
@@ -175,7 +185,7 @@ export async function updatePersonal(change: (value: Personal) => Personal): Pro
 }
 export async function saveList(record: ListRecord, expected: Revision, existing = false, confirmDuplicate = false): Promise<Revision> {
   await ready();
-  return db.transaction("rw", personal, lists, control, recentHistory, learningLabels, async transaction => {
+  return db.transaction("rw", [personal, lists, control, recentHistory, learningLabels, recitationPosition], async transaction => {
     const next = saveRecord(await stored(transaction), record, expected, existing, confirmDuplicate);
     await lists.put(record);
     await control.put(next.control);
@@ -184,7 +194,7 @@ export async function saveList(record: ListRecord, expected: Revision, existing 
 }
 export async function deleteList(id: string, expected: Revision): Promise<void> {
   await ready();
-  return db.transaction("rw", personal, lists, control, recentHistory, learningLabels, async transaction => {
+  return db.transaction("rw", [personal, lists, control, recentHistory, learningLabels, recitationPosition], async transaction => {
     const state = await stored(transaction);
     if (!state.lists.some(list => list.id === id)) throw new PersonalError("stale");
     const next = { ...nextRevision(state, expected), lists: state.lists.filter(list => list.id !== id) };
@@ -195,7 +205,7 @@ export async function deleteList(id: string, expected: Revision): Promise<void> 
 }
 export async function updateHistory(change: (history: RecentHistoryV1) => RecentHistoryV1): Promise<void> {
   await ready();
-  await db.transaction("rw", personal, lists, control, recentHistory, learningLabels, async transaction => {
+  await db.transaction("rw", [personal, lists, control, recentHistory, learningLabels, recitationPosition], async transaction => {
     const state = await stored(transaction), history = change(state.history);
     if (history === state.history) return;
     const next = { ...nextRevision(state, state.control), history };
@@ -209,10 +219,38 @@ export function recordOpened(reference: PersonalReference): Promise<void> {
 }
 export async function updateLearningLabel(reference: PersonalReference, label: LearningLabel | undefined, expected: Revision): Promise<void> {
   await ready();
-  await db.transaction("rw", personal, lists, control, recentHistory, learningLabels, async transaction => {
+  await db.transaction("rw", [personal, lists, control, recentHistory, learningLabels, recitationPosition], async transaction => {
     const state = await stored(transaction), next = saveLearningLabel(state, reference, label, expected);
     if (next === state) return;
     await learningLabels.put({ id: "learning", ...next.learning });
     await control.put(next.control);
   });
+}
+export interface RecitationReceipt { before: Revision; after: Revision }
+export async function rememberRecitation(record: ListRecord, entryId: string, epoch: string,
+  signal: AbortSignal): Promise<RecitationReceipt> {
+  signal.throwIfAborted();
+  await ready();
+  signal.throwIfAborted();
+  let active: Transaction | undefined;
+  const abort = () => { if (active?.active) active.abort(); };
+  signal.addEventListener("abort", abort, { once: true });
+  try {
+    return await db.transaction("rw", [personal, lists, control, recentHistory, learningLabels, recitationPosition], async transaction => {
+      active = transaction;
+      signal.throwIfAborted();
+      const state = await stored(transaction);
+      signal.throwIfAborted();
+      if (state.control.epoch !== epoch || !sameRecitationList(record, state.lists.find(list => list.id === record.id))) {
+        throw new PersonalError("stale");
+      }
+      const next = saveRecitationPosition(state, { listId: record.id, entryId }, state.control);
+      if (next !== state) {
+        await recitationPosition.put({ id: "recitation", ...next.recitation });
+        await control.put(next.control);
+      }
+      signal.throwIfAborted();
+      return { before: state.control, after: next.control };
+    });
+  } finally { signal.removeEventListener("abort", abort); }
 }

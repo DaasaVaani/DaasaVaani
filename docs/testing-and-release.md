@@ -90,6 +90,16 @@ bounded shell. See the [installation protocol](architecture.md#web-installation-
 
 Browser tests require the clean Library revision in settings/tooling.yml with `npm ci` completed and
 the installed Playwright Chromium (`npx playwright install chromium` if missing).
+When parallel Library development makes its main worktree dirty or advances its
+HEAD, use a separate clean detached worktree at the configured fixture revision,
+with its independently pinned Shared and installed locked dependencies. Set
+`DAASAVAANI_FIXTURE_PUBLISHER_ROOT` to that worktree in the same PowerShell process
+as validation; do not repin fixtures or bypass the clean/revision guard.
+For explicit runner concurrency without npm argument-forwarding ambiguity, the
+full equivalent is `npm test` followed by
+`node node_modules\@playwright\test\cli.js test --workers=2`.
+Both commands must pass, without test selectors; the browser runner must report
+all configured projects and the intended worker count.
 The configured suite exercises desktop, Pixel7 and320px layouts, explicit index
 consent, actual search/reading, preference/favorite persistence and corrupt-artifact
 errors. First-use locale cases exercise ordered supported/regional browser
@@ -98,13 +108,13 @@ override/reload and independent theme/canonical Kannada behavior.
 Appearance journeys exercise actual media changes, persisted Warm/Follow device,
 configured palettes and independent Kannada UI/canonical text. Pure checks enforce
 at least4.5:1 normal text/accent contrast on configured reading surfaces and3:1
-interactive-boundary contrast. Native10/20/30/40/50/60-to70 database cases structurally
+interactive-boundary contrast. Native10/20/30/40/50/60/70-to80 database cases structurally
 type legacy favorites/entries while preserving their raw values and every
 list/occurrence ID, refreshing the local fence and rolling back invalid or
 over-capacity legacy data/schema, add configured reading defaults only to existing
 preference rows and preserve exact v5 history (earlier inputs gain empty history);
-preserve v6 font/density and initialize only empty labels;
-future80 refusal and stale already-open
+preserve v6 font/density, initialize empty pre-v7 labels, preserve v7 labels and
+add only null recitation position; future90 refusal and stale already-open
 clients stay non-destructive. Media
 changes compare every personal table/header/index without automatic writes.
 The [reading-preference suite](../tests/browser/reading-preferences.spec.ts)
@@ -156,7 +166,18 @@ The [list comparison units](../src/list-recite.test.ts) check exact occurrence/
 fallback/kind/order invalidation, independent equal records and empty lists.
 `npm test -- list-recite screen-awake` and
 `node node_modules\@playwright\test\cli.js test recite` are incremental only.
-REC-04 resume, durable offline content,
+The [position units](../src/recitation-position.test.ts) consume Shared strict
+shape/exact-resolution vectors, preserve unresolved pointers, enforce no-op
+revision and exact envelope ceilings, freeze old v7 accounting and exclude
+position/local IDs from minimal exports. List browsers additionally check exact
+second-occurrence restart/Continue without automatic entry or wake, current
+reorder/replacement, missing list/entry recovery, empty-list preservation, real
+quota-write rollback/retry and departure while an actual native transaction
+holds the store lock. Native70 migration preserves all old rows/IDs/raw values
+or rolls back the complete version/schema on corruption.
+`npm test -- recitation-position list-recite personal-model` and
+`node node_modules\@playwright\test\cli.js test list-recite` are incremental only.
+Full-backup position inclusion, durable offline content,
 real-device screen/power behavior and the broad supported-platform matrix remain open.
 Session-continuity journeys verify query/results, restored keyboard focus
 and measured scroll position through Back/Forward and reader return, no repeated
@@ -391,11 +412,11 @@ IDs or a release acceptance declaration.
 | SEARCH-12/13 | Sampled independent substring/full-matrix oracle, counted-gram candidates, native core checks and real browser search | Ordinary fixture text only; reviewed profiles/aliases/markers, exhaustive proof and complete native parity pending |
 | PLAT-01/05/06 | Real React and Compose apps; built-site desktop/mobile/320px journeys; stable PWA manifest/root and direct-entry links, decoded original icons, Chromium installability diagnostics and independent chrome/theme checks; one native API36 reading journey | Actual OS installation/launcher behavior, complete routes/layout/interaction modes and supported-platform/device matrix pending |
 | I18N-01/02/03, SET-04 | Matching two-locale resources; web first-use ordered browser-language selection, configured fallback, persisted four-mode appearance with contrast/media checks; native durable locale/theme preferences; canonical text remains independent | Complete script/personal preferences, device/font matrix and full localization conformance pending |
-| LIB-01/02/03/04/05/08/09/10/11 | Typed web/native lyric/legacy favorites/lists, independent occurrences/plain text, duplicate-name confirmation, management/manual replacement, exact catalog details/explicit reading, reader-to-list addition and preserving web v7/native Room6 upgrades | Recitation/offline/full personal collections and remaining production migrations remain incomplete |
-| LIB-06, SET-04, QUAL-05 | Web v7/native Room6 default-on device-only typed50-distinct successful-open history, explicit disable/re-enable/clear, retained unresolved refs, exact accounting, migration/failure/no-network and restart checks | Selected-script/offline parity and full personal backup remain incomplete |
-| LEARN-04, QUAL-05, XFER-01 | Website v7/native Room6 self-assigned typed labels/local filtered paged Learning view, no-network/offline management, preserving upgrade, exact limits/fences/no-ops and exclusion from minimal transfers | Reviewed verse Practice shortcut and full backups remain incomplete |
-| REC-01/02/03, QUAL-05 | Website/native canonical/fixture focused Recite with explicit exit/restorable controls, exact text/font/personal/history preservation and optional scoped screen-awake lifecycle/error handling; Website late-acquisition races and native ownership/Back/background handling; session-only saved-list ordered independent occurrences, explicit empty/boundaries/unavailable states, preserved list context, typed history and active-list invalidation; Website on-demand cancellation/retry and native complete-preparation gating | REC-04 resume, selected-script generation, durable offline content and complete real-device power-policy/platform evidence remain open |
-| UX-02/03/14, SET-04 | Website/native canonical/fixture and later Settings lyric-only bounded font/all densities, exact layout preservation, persisted independent native-unit choices, no-op/history and preserving web v7/native Room6 checks; Website peer propagation and saved-list reading controls | Onboarding/helper/resume/Practice/offline and complete font/device evidence remain open |
+| LIB-01/02/03/04/05/08/09/10/11 | Typed web/native lyric/legacy favorites/lists, independent occurrences/plain text, duplicate-name confirmation, management/manual replacement, exact catalog details/explicit reading, reader-to-list addition and preserving web v8/native Room6 upgrades | Offline/full personal collections and remaining production migrations remain incomplete |
+| LIB-06, SET-04, QUAL-05 | Web v8/native Room6 default-on device-only typed50-distinct successful-open history, explicit disable/re-enable/clear, retained unresolved refs, exact accounting, migration/failure/no-network and restart checks | Selected-script/offline parity and full personal backup remain incomplete |
+| LEARN-04, QUAL-05, XFER-01 | Website v8/native Room6 self-assigned typed labels/local filtered paged Learning view, no-network/offline management, preserving upgrade, exact limits/fences/no-ops and exclusion from minimal transfers | Reviewed verse Practice shortcut and full backups remain incomplete |
+| REC-01/02/03/04, QUAL-05 | Website/native canonical/fixture focused Recite with explicit exit/restorable controls, exact text/font/history preservation and optional scoped screen-awake lifecycle/error handling; ordered independent occurrences, explicit empty/boundaries/unavailable states, preserved list context and active-list invalidation; Website exact latest-pair persistence, commit-gated movement, explicit Continue/recovery, preserving v8 migration and failure/cancellation checks; native complete-preparation gating | Native resume/device validation, full-backup position inclusion, selected-script generation, durable offline content and complete real-device power-policy/platform evidence remain open |
+| UX-02/03/14, SET-04 | Website/native canonical/fixture and later Settings lyric-only bounded font/all densities, exact layout preservation, persisted independent native-unit choices, no-op/history and preserving web v8/native Room6 checks; Website peer propagation and saved-list reading controls | Onboarding/helper/full-backup resume inclusion/Practice/offline and complete font/device evidence remain open |
 | UX-13 | Web in-session Library/Favorites context and list-origin selected editor state, Back/Forward/reader return with measured scroll/focus; removed-result/direct-reader/reload coverage; native prepared real Library and independent Favorites literal query/pages/viewport and reader/Android Back context, plus Library Settings return | No persistent search history; full production filters/search/Explore and offline continuity remain incomplete |
 | EXP-02/04 | Web/native explicit entire-verified-catalog canonical selection, current/session-last-opened exclusion, honest sole/current/error states and ordinary typed favorite/list/history controls; web on-demand selected-object requests, native prepared-only/no-request selection and truthful original collection/unsaved-preview/Settings/Back continuity | Reviewed Explore groups/first-publication dates, Practice and complete persistent active-snapshot offline discovery remain incomplete; consumers adopt Shared and validate independently |
 | XFER-01/02/03/04/05/06/08 | Bounded web worker/native v1/v2 codecs with independent vectors, explicit previews/transactional new-list saves and saved-v2 exports, actual cross-client v2 codec round trips, catalog-only details, browser share/copy adapters and native complete-link chooser/payload/Back/fallback/no-write checks | Real receiving-app/provider/device interoperability, direct native file sharing, verified App Links and full backups incomplete |

@@ -39,8 +39,10 @@ controls and optional screen-awake requests with honest support/lifecycle/error
 feedback. Individual mode does not write personal data, reload text or force full
 screen. Website and native saved lists additionally offer explicit ordered Recite with every
 independent repetition/placeholder, honest unavailable/empty/boundary states and
-Previous/Next without wrapping. This is session-only, not Continue recitation or
-durable offline readiness. Native retains its complete-preparation gate.
+Previous/Next without wrapping. Website remembers the exact latest occurrence
+and offers explicit **Continue recitation**, including after restart; it never
+automatically enters mode or substitutes a missing occurrence. This is not
+durable offline content readiness. Native retains its complete-preparation gate.
 Successful selected lyrics use normal recent history. See the
 [focused-reading guide](docs/lyric-preview.md#focused-recite).
 Recently opened retains the configured latest50 distinct typed references across
@@ -77,8 +79,8 @@ checks. Supported browsers offer explicit system sharing and clipboard copy;
 selectable links and complete downloads remain available as fallbacks. System
 handoff is not delivery confirmation. Available verified catalog titles resolve list references without fetching
 lyrics; explicit Read opens known entries, and readers can add independent
-occurrences to chosen lists. Latest-occurrence resume and durable offline recitation
-remain incomplete.
+occurrences to chosen lists. Same-platform full backups (including the saved
+recitation pair) and durable offline recitation remain incomplete.
 Shared generates the English/Kannada UI resources; Android has separate real
 text-only preparation/reading and fixture features with typed Room favorites,
 durable lists/independent occurrences, recent history, learning labels, preferences and locale/theme controls.

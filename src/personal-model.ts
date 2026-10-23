@@ -6,7 +6,9 @@ import transferSchemaV2 from "../shared/schemas/list-transfer-v2.schema.json";
 import referenceSchema from "../shared/schemas/personal-reference.schema.json";
 import historySchema from "../shared/schemas/recent-history.schema.json";
 import learningSchema from "../shared/schemas/learning-labels.schema.json";
-import type { LearningLabel, LearningLabelsV1, ReadingDensity, RecentHistoryV1 } from "../shared/types/personal";
+import recitationSchema from "../shared/schemas/recitation-position.schema.json";
+import type { LearningLabel, LearningLabelsV1, ReadingDensity, RecentHistoryV1, RecitationPositionV1 } from "../shared/types/personal";
+export type { RecitationPositionV1 } from "../shared/types/personal";
 export type { LearningLabel, LearningLabelsV1 } from "../shared/types/personal";
 export type { RecentHistoryV1 } from "../shared/types/personal";
 import { typedEntry, type ListSnapshot, type ListSnapshotV1, type ListEntryV2, type ListTransferV2, type PersonalReference } from "./list-transfer-types";
@@ -20,8 +22,11 @@ export interface Personal {
 export type ListEntry = ListEntryV2 & { id: string };
 export interface ListRecord { id: string; name: string; entries: ListEntry[] }
 export interface Revision { epoch: string; revision: number }
-export interface Control extends Revision { id: "state"; formatVersion: 7 }
-export interface PersonalStore { control: Control; personal?: Personal; lists: ListRecord[]; history: RecentHistoryV1; learning: LearningLabelsV1 }
+export interface Control extends Revision { id: "state"; formatVersion: 8 }
+export interface PersonalStore {
+  control: Control; personal?: Personal; lists: ListRecord[]; history: RecentHistoryV1;
+  learning: LearningLabelsV1; recitation: RecitationPositionV1;
+}
 export type PersonalErrorCode = "invalid" | "listInvalid" | "capacity" | "stale" | "duplicate";
 export class PersonalError extends Error {
   constructor(readonly code: PersonalErrorCode) {
@@ -41,6 +46,7 @@ const validLegacyList = ajv.compile<LegacyList>(legacyRecordSchema);
 const validReference = ajv.compile<PersonalReference>(referenceSchema);
 const validHistory = ajv.compile<RecentHistoryV1>(historySchema);
 const validLearning = ajv.compile<LearningLabelsV1>(learningSchema);
+const validRecitation = ajv.compile<RecitationPositionV1>(recitationSchema);
 const validSnapshotV1 = ajv.compile<ListSnapshotV1>(transferSchema), validSnapshotV2 = ajv.compile<ListTransferV2>(transferSchemaV2);
 const validSnapshot = (value: unknown): value is ListSnapshot => validSnapshotV1(value) || validSnapshotV2(value);
 const uuid = new RegExp(recordSchema.properties.id.pattern, "u");
@@ -105,6 +111,22 @@ export function promoteRecent(history: RecentHistoryV1, reference: PersonalRefer
   return { ...history, entries: [reference, ...history.entries.filter(value => referenceKey(value) !== key)].slice(0, limits.maxRecents) };
 }
 
+export function validateRecitation(value: unknown): asserts value is RecitationPositionV1 {
+  if (!validRecitation(value)) throw new PersonalError("invalid");
+}
+export function saveRecitationPosition(state: PersonalStore, position: NonNullable<RecitationPositionV1["position"]>,
+  expected: Revision, limits = __PERSONAL_LIMITS__): PersonalStore {
+  assertRevision(state.control, expected);
+  validateRecitation({ position });
+  const record = state.lists.find(record => record.id === position.listId);
+  if (!record?.entries.some(entry => entry.id === position.entryId)) throw new PersonalError("stale");
+  if (state.recitation.position?.listId === position.listId && state.recitation.position.entryId === position.entryId) return state;
+  const next = { ...nextRevision(state, expected),
+    recitation: { position: { listId: position.listId, entryId: position.entryId } } };
+  validateStore(next, limits);
+  return next;
+}
+
 export function defaultPersonal(preferredLanguages: readonly string[] = []): Personal {
   for (const tag of preferredLanguages) {
     const language = __WEB_CONFIG__.uiLanguages.find(value => value === tag.split("-")[0]?.toLowerCase());
@@ -143,7 +165,7 @@ export function setReadingDensity(personal: Personal, value: unknown): Personal 
   return personal.density === density ? personal : { ...personal, density };
 }
 export function newControl(): Control {
-  return { id: "state", formatVersion: 7, epoch: crypto.randomUUID(), revision: 0 };
+  return { id: "state", formatVersion: 8, epoch: crypto.randomUUID(), revision: 0 };
 }
 function controlRevision(controls: unknown[], version: number): Revision {
   const control = controls[0];
@@ -187,12 +209,34 @@ function learningRow(rows: unknown[]): LearningLabelsV1 {
   validateLearning(learning);
   return learning;
 }
-export function parseStore(controls: unknown[], personal: unknown[], lists: unknown[], histories: unknown[], learning: unknown[]): PersonalStore {
-  const control = controlRevision(controls, 7), preferences = preferenceRow(personal);
+function recitationRow(rows: unknown[]): RecitationPositionV1 {
+  const row = rows[0];
+  if (rows.length !== 1 || !object(row) || !keys(row, ["id", "position"]) || row.id !== "recitation") throw new PersonalError("invalid");
+  const recitation = { position: row.position };
+  validateRecitation(recitation);
+  return recitation;
+}
+export function parseStore(controls: unknown[], personal: unknown[], lists: unknown[], histories: unknown[], learning: unknown[],
+  recitation: unknown[]): PersonalStore {
+  const control = controlRevision(controls, 8), preferences = preferenceRow(personal);
   if (preferences !== undefined) validatePersonal(preferences);
-  const state: PersonalStore = { control: { id: "state", formatVersion: 7, ...control },
-    personal: preferences, lists: typedRecords(lists), history: historyRow(histories), learning: learningRow(learning) };
+  const state: PersonalStore = { control: { id: "state", formatVersion: 8, ...control },
+    personal: preferences, lists: typedRecords(lists), history: historyRow(histories), learning: learningRow(learning),
+    recitation: recitationRow(recitation) };
   validateStore(state);
+  return state;
+}
+export function migrateStoreV7(controls: unknown[], personal: unknown[], lists: unknown[], histories: unknown[], learning: unknown[],
+  limits = __PERSONAL_LIMITS__): PersonalStore {
+  const control = controlRevision(controls, 7), preferences = preferenceRow(personal);
+  if (preferences !== undefined) validatePersonal(preferences, limits);
+  const old = { control, personal: preferences, lists: typedRecords(lists), history: historyRow(histories), learning: learningRow(learning) };
+  validateCollections(old, limits);
+  validateHistory(old.history, limits);
+  validateLearning(old.learning, limits);
+  storedBytes(old, 7, limits.maxPersonalStoredBytes, old.history, old.learning);
+  const state = { ...old, control: newControl(), recitation: { position: null } };
+  validateStore(state, limits);
   return state;
 }
 export function migrateStoreV6(controls: unknown[], personal: unknown[], lists: unknown[], histories: unknown[],
@@ -203,7 +247,7 @@ export function migrateStoreV6(controls: unknown[], personal: unknown[], lists: 
   validateCollections(old, limits);
   validateHistory(history, limits);
   storedBytes(old, 6, limits.maxPersonalStoredBytes, history);
-  const state = { ...old, control: newControl(), history, learning: { entries: [] } };
+  const state = { ...old, control: newControl(), history, learning: { entries: [] }, recitation: { position: null } };
   validateStore(state, limits);
   return state;
 }
@@ -212,7 +256,7 @@ export function migrateStoreV4(controls: unknown[], personal: unknown[], lists: 
   validateCollections(old, limits);
   storedBytes(old, 4, limits.maxPersonalStoredBytes);
   const state: PersonalStore = { ...old, personal: old.personal && { ...old.personal, ...readingDefaults() },
-    control: newControl(), history: defaultHistory(), learning: { entries: [] } };
+    control: newControl(), history: defaultHistory(), learning: { entries: [] }, recitation: { position: null } };
   validateStore(state, limits);
   return state;
 }
@@ -223,7 +267,7 @@ export function migrateStoreV5(controls: unknown[], personal: unknown[], lists: 
   validateHistory(history, limits);
   storedBytes(old, 5, limits.maxPersonalStoredBytes, history);
   const state: PersonalStore = { ...old, personal: old.personal && { ...old.personal, ...readingDefaults() },
-    control: newControl(), history, learning: { entries: [] } };
+    control: newControl(), history, learning: { entries: [] }, recitation: { position: null } };
   validateStore(state, limits);
   return state;
 }
@@ -266,7 +310,7 @@ function migrateLegacy(controls: unknown[], personal: unknown[], lists: unknown[
     records.push(list);
   }
   if (version !== 1) storedBytes({ control, personal: preferences, lists: records }, version, limits.maxPersonalStoredBytes);
-  const state: PersonalStore = { control: newControl(), history: defaultHistory(), learning: { entries: [] }, personal: preferences && { ...preferences,
+  const state: PersonalStore = { control: newControl(), history: defaultHistory(), learning: { entries: [] }, recitation: { position: null }, personal: preferences && { ...preferences,
     favorites: preferences.favorites.map(videoId => ({ kind: "legacyVideo", videoId })), ...readingDefaults() },
     lists: records.map(list => ({ ...list, entries: list.entries.map(entry => ({ ...typedEntry(entry), id: entry.id })) })) };
   validateStore(state, limits);
@@ -327,10 +371,10 @@ export function jsonBytes(value: unknown, limit = Number.MAX_SAFE_INTEGER): numb
   return bytes;
 }
 export function storageBytes(state: PersonalStore, limit = Number.MAX_SAFE_INTEGER): number {
-  return storedBytes(state, 7, limit, state.history, state.learning);
+  return storedBytes(state, 8, limit, state.history, state.learning, state.recitation);
 }
 function storedBytes(state: { control: Revision; personal?: PreviousPersonal | LegacyPersonal; lists: (ListRecord | LegacyList)[] },
-  version: number, limit: number, history?: RecentHistoryV1, learning?: LearningLabelsV1): number {
+  version: number, limit: number, history?: RecentHistoryV1, learning?: LearningLabelsV1, recitation?: RecitationPositionV1): number {
   const personal = state.personal;
   return jsonBytes({
     format: version >= 4 ? "daasavaani-personal-storage" : "fixture-personal-storage", formatVersion: version,
@@ -347,6 +391,8 @@ function storedBytes(state: { control: Revision; personal?: PreviousPersonal | L
     ...(learning ? { learningLabels: [{ id: "learning", entries: learning.entries.map(entry => entry.kind === "lyric"
       ? { kind: "lyric", lyricId: entry.lyricId, label: entry.label }
       : { kind: "legacyVideo", videoId: entry.videoId, label: entry.label }) }] } : {}),
+    ...(recitation ? { recitationPosition: [{ id: "recitation", position: recitation.position
+      ? { listId: recitation.position.listId, entryId: recitation.position.entryId } : null }] } : {}),
   }, limit);
 }
 function validateCollections(state: { personal?: PreviousPersonal; lists: ListRecord[] }, limits: PersonalLimits): void {
@@ -370,6 +416,7 @@ export function validateStore(state: PersonalStore, limits = __PERSONAL_LIMITS__
   validateCollections(state, limits);
   validateHistory(state.history, limits);
   validateLearning(state.learning, limits);
+  validateRecitation(state.recitation);
   storageBytes(state, limits.maxPersonalStoredBytes);
 }
 export function nextRevision(state: PersonalStore, expected: Revision): PersonalStore {

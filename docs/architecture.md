@@ -70,7 +70,7 @@ Initial values and exact field bounds belong only in the linked owning files.
 | Owner/source and keys | Current application and validation | Compatibility/open work |
 | --- | --- | --- |
 | [Web settings/schema](../settings/web.schema.json): `base`, `descriptorUrl`, `canonicalBaseUrl`, `listLinkPath`, `listFileName` | Strict build-time settings; fixture artifact entry and minimal-list URL/file projection | Public route/origin changes require old-link/hosting review; distinct real-publication settings below never reinterpret fixture formats |
-| [Web settings/schema](../settings/web.schema.json): `lyricPreview.descriptorUrl`, `pageSize`, `maxItems`, `maxEncodedBytes`, `maxDecodedBytes`, `concurrentRequests` | Credential-free absolute HTTPS endpoint, verified metadata/catalog count, bounded requested-item cache/in-flight byte reservations and complete paging; complete-preparation helper retains whole-plan/concurrent-worker validation | Separate prelaunch `lyric-preview-v1`, on-demand online memory-only lifecycle; no persistent offline or complete production-profile claim; see the [reader lifecycle](lyric-preview.md#online-loading-and-failure-behavior) and independent personal v7 protocol below |
+| [Web settings/schema](../settings/web.schema.json): `lyricPreview.descriptorUrl`, `pageSize`, `maxItems`, `maxEncodedBytes`, `maxDecodedBytes`, `concurrentRequests` | Credential-free absolute HTTPS endpoint, verified metadata/catalog count, bounded requested-item cache/in-flight byte reservations and complete paging; complete-preparation helper retains whole-plan/concurrent-worker validation | Separate prelaunch `lyric-preview-v1`, on-demand online memory-only lifecycle; no persistent offline or complete production-profile claim; see the [reader lifecycle](lyric-preview.md#online-loading-and-failure-behavior) and independent personal v8 protocol below |
 | [Web settings](../settings/web.yml): `transferChunkBytes`, `listCompressionLevel` | Byte allocation/compression controls passed to the dedicated codec worker; schema and actual-ceiling codec tests | Encoding choices do not narrow accepted valid input or change decoded/text limits |
 | [Web settings](../settings/web.yml): `databaseName` | Build-time Dexie/native IndexedDB identity | Changing it is not a migration; it would strand the prior database and requires explicit compatibility handling |
 | [Web settings](../settings/web.yml): `fontFamily`, `readerFontSize`, `readerFontSizeMin`, `readerFontSizeMax`, `readerFontSizeStep`, `readerLineHeights`, `space`, `contentWidth`, `readerWidth`, `themes` | Typed CSS tokens, lyric-only bounded font/density preferences, system fonts, three palettes and measured contrast checks; portable density choices/default come from Shared | Onboarding/helper/script/Recite/Practice/offline integration and physical-device/font conformance remain incomplete |
@@ -250,27 +250,29 @@ snapshot readiness. Chromium manifest parsing/installability diagnostics and
 pixel/geometry tests do not prove OS installation, iOS/Safari/Firefox behavior,
 launcher/update rendering, signed Android association or the full platform matrix.
 
-## Web typed personal storage v7
+## Web typed personal storage v8
 
 This is the executable Website protocol for typed favorites/preferences and
-logical lists, recent history and learning labels, not the full production personal/backup contract. The
+logical lists, recent history, learning labels and latest recitation position,
+not the full production personal/backup contract. The
 [Shared typed-reference/local-record v2 contract](https://github.com/DaasaVaani/shared/blob/main/docs/list-transfer.md#typed-reference-and-list-v2)
-owns list/occurrence fields. All five tables share the configured personal DB:
+owns list/occurrence fields. All six tables share the configured personal DB:
 
 | Table | Exact logical rows |
 | --- | --- |
 | `personal` | Zero or one `{id:"personal", favorites, language, theme, fontSize, density}`; favorites are exact typed lyric/legacy references, unique by kind plus case-sensitive ID; absent row means first supported browser language plus validated configured defaults |
 | `lists` | Independently identified Shared list records; entry array order is authoritative |
-| `control` | Exactly one `{id:"state", formatVersion:7, epoch, revision}`; fresh local UUIDv4 epoch and nonnegative safe-integer revision |
+| `control` | Exactly one `{id:"state", formatVersion:8, epoch, revision}`; fresh local UUIDv4 epoch and nonnegative safe-integer revision |
 | `recentHistory` | Exactly one `{id:"history", enabled, entries}`; ordered unique typed references following the [Shared logical history record](https://github.com/DaasaVaani/shared/blob/main/docs/recent-history.md) |
 | `learningLabels` | Exactly one `{id:"learning", entries}`; ordered unique typed assignments following the [Shared learning-label contract](https://github.com/DaasaVaani/shared/blob/main/docs/learning-labels.md); absence from `entries` means unassigned |
+| `recitationPosition` | Exactly one `{id:"recitation", position:null\|{listId,entryId}}` following the [Shared position contract](https://github.com/DaasaVaani/shared/blob/main/docs/recitation-position.md); exact local UUIDv4 identities, including structurally valid unresolved pairs |
 
 ### Opening and migration
 
-Native IndexedDB version70 is the typed v7 schema. Supported migration inputs
+Native IndexedDB version80 is the typed v8 schema. Supported migration inputs
 are native version10 (personal-only v1), version20 (three-table v2) and version30
 (three-table v3), version40 (typed three-table v4), version50 (four-table v5)
-and version60 (four-table v6).
+and version60 (four-table v6), plus version70 (five-table v7).
 Open at the exact native version **before** opening Dexie,
 which can otherwise retry a newer version and patch missing schema parts.
 Native upgrade creates only the specified stores/header, validates legacy
@@ -281,19 +283,21 @@ old opaque-string favorites/v1 entries before structural adaptation. Convert
 favorites only to typed legacy references and `item` only to `legacyVideo`,
 retaining every raw ID, list/occurrence UUID, name, fallback, repetition and order.
 UUID-looking old IDs are never lyric aliases. Write converted rows and a fresh
-v7 epoch/revision0 together. Version40 validates its exact typed schema/old
+v8 epoch/revision0 together. Version40 validates its exact typed schema/old
 accounting; version50 additionally validates and preserves its exact history,
 including disabled state and unresolved typed references. Version60 additionally
 preserves exact font/density values. All preserve every existing typed value and
 identity. Pre-v6 preference rows gain only configured
 font/density defaults; absent rows remain absent. Upgrades from versions10..40
 create empty initially-enabled history; no activity is inferred from collections.
-Every supported upgrade initializes only empty learning labels, never inferring
-assignments from favorites, history or lists. Future80 and unfamiliar native
+Pre-v7 upgrades initialize only empty learning labels, never inferring
+assignments from favorites, history or lists; version70 preserves its existing
+labels. Every upgrade adds only a null recitation position, never reconstructing
+activity. Future90 and unfamiliar native
 schemas are refused. The longer representation can exceed capacity:
 abort rather than truncate/relax limits. New-mode or typed values mislabeled as
 older schemas are invalid. Any failure aborts the entire schema transaction.
-New initialization creates control, empty history and empty labels, not a personal
+New initialization creates control, empty history, empty labels and null position, not a personal
 preference or list row.
 For an absent preference row, inspect `navigator.languages` in preference order
 (or `navigator.language` if empty), matching each case-insensitive primary
@@ -362,9 +366,8 @@ Failures are shown explicitly and logged, including cleanup failures after the
 reader has departed. Unsupported/failed screen awake never blocks Recite.
 
 This slice does not force full-screen/orientation, load video/audio or promise
-to override OS restrictions. Durable latest
-occurrence/Continue recitation (REC-04), selected-script generation and persistent
-offline content remain separate open work.
+to override OS restrictions. Latest saved-list occurrence is handled separately
+below; selected-script generation and persistent offline content remain open.
 
 ### Saved-list Recite occurrences
 
@@ -375,12 +378,12 @@ equal references and literal placeholders. Previous/Next never wrap or skip an
 unavailable reference. Empty/start/end feedback is explicit; an empty list has no
 invented position. Typed legacy/lyric identities never imply a mapping.
 
-One session-only owner holds the captured list, position and optional awake
+One session-only mode owner holds the captured list, cursor and optional awake
 request through movement. Escape/Exit/Back end mode and restore the original
 mounted list/editor drafts and start control. A same-path history token creates
 the explicit Back boundary, but cannot recreate mode through Forward/reload.
-Settings/navigation departure also ends it. There is no new personal schema,
-stored position, automatic entry or Continue action.
+Settings/navigation departure also ends it. Mode ownership is never persisted;
+the separate v8 position record supports only explicit Continue, not automatic entry.
 
 The selected occurrence alone loads content. Canonical entries reuse the
 verified catalog/selected-object cache, lazily loading metadata when necessary;
@@ -390,7 +393,8 @@ distinct. Changing occurrence immediately removes prior text and aborts its
 request; late results cannot expose content or record history. Successful explicit
 opens project only the exact typed reference into normal recent history, excluding
 local occurrence IDs/fallbacks. Empty/placeholder/unavailable/failed/cancelled
-selections write nothing. Font/density changes do not reload or replay history.
+selections write no history. Explicit nonempty selections still remember their
+exact occurrence independently of content readiness. Font/density changes do not reload or replay history.
 The shared literal renderer preserves canonical line/layout identities and
 fixture paragraph/highlight behavior in both ordinary and list readers.
 
@@ -408,6 +412,37 @@ not bypass lyric recitation readiness. Android Back restores the original list
 context; movement retains one scoped awake owner. Its preserving typed history,
 active-list invalidation and device checks remain independently owned, not proof
 of durable snapshots or every device/OS power policy.
+
+### Exact latest occurrence and explicit Continue
+
+The [Shared contract](https://github.com/DaasaVaani/shared/blob/main/docs/recitation-position.md)
+owns REC-04's single pair. Explicit first-entry start, per-entry Recite or
+Previous/Next commits the exact list/occurrence before publishing the cursor.
+Empty-list Recite leaves the prior pair unchanged. Repeating the same pair is a
+no-op. Individual reading, mode exit, preference changes and successful-open
+history do not alter it; no content text, index, timestamp, scroll or mode flag
+is stored.
+
+Each position transaction reads and validates all six current stores, checks
+the captured epoch and complete list snapshot against current contents, validates
+the selected occurrence and full prospective bytes, then writes position/control
+atomically. Unrelated current personal state is preserved. Pending navigation
+keeps the old cursor and exposes saving state; failure retains all prior rows
+and exposes an error and retry. Departure aborts pending work; a committed pair
+may remain, but late completion cannot reopen mode. An editor's captured revision
+advances through an own-write receipt only when it exactly matches the receipt's
+before revision and unchanged list, never by rebasing an unrelated stale draft.
+
+Lists displays saved-position availability without fetching/preparing content.
+Continue resolves the exact list ID and then occurrence ID in current order,
+so rename/reorder and manual replacement retain identity and use current contents.
+Deletion leaves a valid unresolved pair: missing list/occurrence has a distinct
+explanation and normal explicit list/entry selection, never first/equal-reference
+fallback. Reload/Forward/foreground never enter mode or acquire wake ownership.
+Original list/editor DOM and the initiating control remain the return context.
+Minimal v1/v2 exports exclude this record and local IDs. Future same-platform
+full backup still needs its separate allowlist/version/restore implementation;
+this slice alone does not complete REC-04/XFER-09 or durable offline readiness.
 
 ### Personal schema refusal
 
@@ -460,7 +495,7 @@ locale, trim, lowercase or moving package table participates. Strict build check
 bind the pinned Shared settings/manifest/table/vector/license bytes; complete
 Unicode License V3 is included in the distribution.
 
-The v7 database stores raw names only, not derived keys or profile caches.
+The v8 database stores raw names only, not derived keys or profile caches.
 Compute this explicit profile on demand without rewriting any name, ID, occurrence,
 reference, order, preference or header. Existing names that now compare equal
 remain independent and opening a database does not ask for destructive repair.
@@ -535,7 +570,7 @@ same-document navigation from a saved list must decode the newly selected link,
 not depend on a reload or unrelated personal-state render.
 
 The exact logical accounting envelope, serialized as compact UTF8 JSON without
-BOM, is `{format:"daasavaani-personal-storage",formatVersion:7,control,personal,lists,recentHistory,learningLabels}`.
+BOM, is `{format:"daasavaani-personal-storage",formatVersion:8,control,personal,lists,recentHistory,learningLabels,recitationPosition}`.
 Key order is the order shown; header keys follow the table above. `personal` is
 an empty array or one row with keys `id,favorites,language,theme,fontSize,density`. `lists` is sorted
 by ASCII UUID; row keys are `id,name,entries`. Favorite keys are `kind,lyricId`
@@ -545,6 +580,8 @@ then optional `fallback`, or `id,kind,text`. No text/array normalization occurs.
 uses `kind,lyricId` or `kind,videoId` in authoritative most-recent-first order.
 `learningLabels` is one row with keys `id,entries`; assignments use
 `kind,lyricId,label` or `kind,videoId,label` in stable first-assignment order.
+`recitationPosition` is one row with keys `id,position`; a non-null position
+has only `listId,entryId` in that order.
 Every header, UUID, JSON escape, comma/bracket and revision digit is included.
 No timestamps exist in this version; adding them requires a versioned protocol
 and accounting change rather than an uncounted field.
@@ -560,8 +597,9 @@ version4 envelope without history. Old v5 uses its exact version5 envelope with
 history and only `id,favorites,language,theme` preferences. Validate that frozen
 old representation before constructing/counting new reading defaults.
 Old v6 uses its exact version6 envelope with font/density and history but no
-learning property. Every migration then validates the complete prospective v7
-envelope, including the initially empty label row.
+learning property. Old v7 includes its exact learning row but no recitation
+property. Every migration then validates the complete prospective v8 envelope,
+including the null position row and preserved or initially empty labels.
 Transport decoding never selects a database
 version. Unmodified v1 previews re-export v1; confirmed v1 imports structurally
 adapt to local v2 records with fresh IDs, while all saved-list exports use v2.

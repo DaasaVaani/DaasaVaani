@@ -12,9 +12,10 @@ const legacySnapshot: ListSnapshotV1 = { format: "daasavaani-list", formatVersio
 const snapshot: ListTransferV2 = { ...legacySnapshot, formatVersion: 2, entries: legacySnapshot.entries.map(typedEntry) };
 const legacyList = () => ({ id: crypto.randomUUID(), name: legacySnapshot.name,
   entries: legacySnapshot.entries.map(entry => ({ ...entry, id: crypto.randomUUID() })) });
-const empty = (): PersonalStore => ({ control: newControl(), lists: [], history: defaultHistory(), learning: { entries: [] } });
+const empty = (): PersonalStore => ({ control: newControl(), lists: [], history: defaultHistory(), learning: { entries: [] }, recitation: { position: null } });
 const historyRows = () => [{ id: "history", ...defaultHistory() }];
 const learningRows = () => [{ id: "learning", entries: [] }];
+const recitationRows = () => [{ id: "recitation", position: null }];
 const previousPersonal = () => ({ id: "personal" as const, favorites: [], language: "en" as const, theme: "light" as const });
 const readingDefaults = () => ({ fontSize: __WEB_CONFIG__.readerFontSize, density: __WEB_CONFIG__.defaultReadingDensity });
 function code(action: () => unknown, expected: string) {
@@ -64,15 +65,15 @@ describe("transactional personal model", () => {
     const migrated = migrateStoreV5([control], [personal], [list], rows);
     expect(migrated.personal).toEqual({ ...personal, ...readingDefaults() });
     expect(migrated.lists).toEqual([list]); expect(migrated.history).toEqual(history);
-    expect(migrated.control).toMatchObject({ formatVersion: 7, revision: 0 });
+    expect(migrated.control).toMatchObject({ formatVersion: 8, revision: 0 });
     expect(migrated.control.epoch).not.toBe(control.epoch);
     const oldBytes = jsonBytes({ format: "daasavaani-personal-storage", formatVersion: 5, control, personal: [personal],
       lists: [{ ...list, entries: list.entries.map(({ id, ...entry }) => ({ id, ...entry })) }], recentHistory: rows });
     const bytes = storageBytes(migrated);
     expect(bytes).toBeGreaterThan(oldBytes);
-    expect(bytes).toBe(jsonBytes({ format: "daasavaani-personal-storage", formatVersion: 7, control: migrated.control,
+    expect(bytes).toBe(jsonBytes({ format: "daasavaani-personal-storage", formatVersion: 8, control: migrated.control,
       personal: [migrated.personal], lists: [{ ...list, entries: list.entries.map(({ id, ...entry }) => ({ id, ...entry })) }],
-      recentHistory: rows, learningLabels: learningRows() }));
+      recentHistory: rows, learningLabels: learningRows(), recitationPosition: recitationRows() }));
     expect(() => migrateStoreV5([control], [personal], [list], rows, { ...__PERSONAL_LIMITS__, maxPersonalStoredBytes: bytes })).not.toThrow();
     for (const maxPersonalStoredBytes of [oldBytes - 1, oldBytes, bytes - 1]) {
       code(() => migrateStoreV5([control], [personal], [list], rows, { ...__PERSONAL_LIMITS__, maxPersonalStoredBytes }), "capacity");
@@ -122,7 +123,7 @@ describe("transactional personal model", () => {
     const migrated = migrateStoreV4([control], [personal], [list]);
     expect(migrated.personal).toEqual({ ...personal, ...readingDefaults() }); expect(migrated.lists).toEqual([list]);
     expect(migrated.history).toEqual(defaultHistory());
-    expect(migrated.control).toMatchObject({ formatVersion: 7, revision: 0 });
+    expect(migrated.control).toMatchObject({ formatVersion: 8, revision: 0 });
     expect(migrated.control.epoch).not.toBe(control.epoch);
     expect({ control, personal, list }).toEqual(before);
     const bytes = storageBytes(migrated);
@@ -135,12 +136,12 @@ describe("transactional personal model", () => {
     const state = empty(), reference = { kind: "legacyVideo" as const, videoId: "synthetic" };
     state.history = { enabled: false, entries: [reference] };
     const rows = [{ id: "history", ...state.history }];
-    expect(parseStore([state.control], [], [], rows, learningRows())).toEqual(state);
+    expect(parseStore([state.control], [], [], rows, learningRows(), recitationRows())).toEqual(state);
     for (const invalid of [[], [undefined], [...rows, ...rows], [{ ...rows[0], id: "other" }], [{ ...rows[0], title: "private" }]]) {
-      code(() => parseStore([state.control], [], [], invalid, learningRows()), "invalid");
+      code(() => parseStore([state.control], [], [], invalid, learningRows(), recitationRows()), "invalid");
     }
-    const expected = { format: "daasavaani-personal-storage", formatVersion: 7, control: state.control,
-      personal: [], lists: [], recentHistory: rows, learningLabels: learningRows() };
+    const expected = { format: "daasavaani-personal-storage", formatVersion: 8, control: state.control,
+      personal: [], lists: [], recentHistory: rows, learningLabels: learningRows(), recitationPosition: recitationRows() };
     expect(storageBytes(state)).toBe(new TextEncoder().encode(JSON.stringify(expected)).length);
     const bytes = storageBytes(state);
     expect(() => validateStore(state, { ...__PERSONAL_LIMITS__, maxPersonalStoredBytes: bytes })).not.toThrow();
@@ -180,7 +181,7 @@ describe("transactional personal model", () => {
       const personal = { ...previousPersonal(), theme, favorites: [id, "Case_Sensitive"] };
       const before = structuredClone({ control, personal, list });
       const next = migrateStoreV3([control], [personal], [list]);
-      expect(next.control).toMatchObject({ formatVersion: 7, revision: 0 });
+      expect(next.control).toMatchObject({ formatVersion: 8, revision: 0 });
       expect(next.control.epoch).not.toBe(control.epoch);
       expect(next.personal).toEqual({ ...personal, favorites: personal.favorites.map(videoId => ({ kind: "legacyVideo", videoId })), ...readingDefaults() });
       expect(next.lists).toEqual([{ ...list, entries: list.entries.map(entry => ({ ...typedEntry(entry), id: entry.id })) }]);
@@ -218,16 +219,16 @@ describe("transactional personal model", () => {
     expect(independent.id).not.toBe(repeated.id);
     expect(independent.entries.every(entry => !repeated.entries.some(other => other.id === entry.id))).toBe(true);
   });
-  test("v2 migration preserves every identity/value while structurally typing references behind a fresh v7 fence", () => {
+  test("v2 migration preserves every identity/value while structurally typing references behind a fresh current fence", () => {
     const control = { ...newControl(), formatVersion: 2, revision: 7 };
     const personal = { ...previousPersonal(), favorites: ["fixture_ref"] }, lists = [legacyList(), legacyList()];
     const before = structuredClone({ control, personal, lists });
     const migrated = migrateStoreV2([control], [personal], lists);
     expect(migrated.personal).toEqual({ ...personal, favorites: [{ kind: "legacyVideo", videoId: "fixture_ref" }], ...readingDefaults() });
     expect(migrated.lists).toEqual(lists.map(list => ({ ...list, entries: list.entries.map(entry => ({ ...typedEntry(entry), id: entry.id })) })));
-    expect(migrated.control).toMatchObject({ id: "state", formatVersion: 7, revision: 0 });
+    expect(migrated.control).toMatchObject({ id: "state", formatVersion: 8, revision: 0 });
     expect(migrated.control.epoch).not.toBe(control.epoch);
-    expect(parseStore([migrated.control], [migrated.personal], migrated.lists, historyRows(), learningRows())).toEqual(migrated);
+    expect(parseStore([migrated.control], [migrated.personal], migrated.lists, historyRows(), learningRows(), recitationRows())).toEqual(migrated);
     code(() => exportListSnapshot(migrated, lists[0]!.id, control), "stale");
     expect({ control, personal, lists }).toEqual(before);
   });
@@ -243,7 +244,7 @@ describe("transactional personal model", () => {
     code(() => migrateStoreV2([{ ...control, ignored: true }], [personal], []), "invalid");
     code(() => migrateStoreV2([{ ...control, revision: -1 }], [personal], []), "invalid");
     code(() => migrateStoreV2([{ ...control, formatVersion: 3 }], [personal], []), "invalid");
-    code(() => parseStore([control], [personal], [], historyRows(), learningRows()), "invalid");
+    code(() => parseStore([control], [personal], [], historyRows(), learningRows(), recitationRows()), "invalid");
   });
   test("all declared theme tokens are valid current personal values and exact accounting includes the longer device token", () => {
     const personal = defaultPersonal(); personal.theme = "light";
@@ -363,18 +364,18 @@ describe("transactional personal model", () => {
   });
   test("strict stored envelopes reject corruption rather than discarding unknown records or fields", () => {
     const state = empty(), personal = defaultPersonal();
-    expect(parseStore([state.control], [], [], historyRows(), learningRows()).personal).toBeUndefined();
-    expect(parseStore([state.control], [personal], [], historyRows(), learningRows()).personal).toEqual(personal);
+    expect(parseStore([state.control], [], [], historyRows(), learningRows(), recitationRows()).personal).toBeUndefined();
+    expect(parseStore([state.control], [personal], [], historyRows(), learningRows(), recitationRows()).personal).toEqual(personal);
     for (const bad of [{ ...personal, ignored: true }, { ...personal, favorites: ["same", "same"] },
       { ...personal, favorites: ["../unsafe"] }, { ...personal, favorites: new Array(1) },
       { ...personal, id: "another" }, { ...personal, language: "other" }]) {
       code(() => validatePersonal(bad), "invalid");
     }
-    code(() => parseStore([], [], [], historyRows(), learningRows()), "invalid");
-    code(() => parseStore([state.control], [undefined], [], historyRows(), learningRows()), "invalid");
-    code(() => parseStore([state.control], [personal, personal], [], historyRows(), learningRows()), "invalid");
-    code(() => parseStore([{ ...state.control, revision: -1 }], [], [], historyRows(), learningRows()), "invalid");
-    code(() => parseStore([{ ...state.control, ignored: true }], [], [], historyRows(), learningRows()), "invalid");
+    code(() => parseStore([], [], [], historyRows(), learningRows(), recitationRows()), "invalid");
+    code(() => parseStore([state.control], [undefined], [], historyRows(), learningRows(), recitationRows()), "invalid");
+    code(() => parseStore([state.control], [personal, personal], [], historyRows(), learningRows(), recitationRows()), "invalid");
+    code(() => parseStore([{ ...state.control, revision: -1 }], [], [], historyRows(), learningRows(), recitationRows()), "invalid");
+    code(() => parseStore([{ ...state.control, ignored: true }], [], [], historyRows(), learningRows(), recitationRows()), "invalid");
   });
   test("deterministic UTF8 accounting includes escaping, metadata, revision digits and exact capacity boundaries", () => {
     for (const text of ["", "\u0000", "é", "ಕ", "😀", "e\u0301", "\ud800", "\n", '"\\']) {

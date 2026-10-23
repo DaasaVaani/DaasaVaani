@@ -9,7 +9,7 @@ import type { PersonalReference } from "./list-transfer-types";
 
 const id = "00000000-0000-4000-8000-000000000001";
 const lyric: PersonalReference = { kind: "lyric", lyricId: id }, legacy: PersonalReference = { kind: "legacyVideo", videoId: id };
-const empty = (): PersonalStore => ({ control: newControl(), lists: [], history: defaultHistory(), learning: { entries: [] } });
+const empty = (): PersonalStore => ({ control: newControl(), lists: [], history: defaultHistory(), learning: { entries: [] }, recitation: { position: null } });
 function refuses(action: () => unknown, code: string) {
   expect(action).toThrow(PersonalError);
   try { action(); } catch (reason) { expect(reason).toMatchObject({ code }); }
@@ -70,7 +70,7 @@ test("v6 upgrade preserves every value and frozen old accounting, starts unlabel
   const migrated = migrateStoreV6([control], [personal], [list], rows);
   expect(migrated.personal).toEqual(personal); expect(migrated.lists).toEqual([list]); expect(migrated.history).toEqual(history);
   expect(migrated.learning).toEqual({ entries: [] });
-  expect(migrated.control).toMatchObject({ formatVersion: 7, revision: 0 });
+  expect(migrated.control).toMatchObject({ formatVersion: 8, revision: 0 });
   expect(migrated.control.epoch).not.toBe(control.epoch);
   const oldBytes = jsonBytes({ format: "daasavaani-personal-storage", formatVersion: 6, control, personal: [personal],
     lists: [{ ...list, entries: list.entries.map(({ id, ...entry }) => ({ id, ...entry })) }], recentHistory: rows });
@@ -89,12 +89,13 @@ test("v6 upgrade preserves every value and frozen old accounting, starts unlabel
 test("current learning row is required, strictly allowlisted and counted exactly with its envelope", () => {
   const initial = empty(), state = saveLearningLabel(initial, lyric, "comfortableReciting", initial.control);
   const history = [{ id: "history", ...state.history }], learning = [{ id: "learning", ...state.learning }];
-  expect(parseStore([state.control], [], [], history, learning)).toEqual(state);
+  const recitation = [{ id: "recitation", ...state.recitation }];
+  expect(parseStore([state.control], [], [], history, learning, recitation)).toEqual(state);
   for (const rows of [[], [undefined], [...learning, ...learning], [{ ...learning[0], id: "other" }],
-    [{ ...learning[0], score: 100 }]]) refuses(() => parseStore([state.control], [], [], history, rows), "invalid");
-  refuses(() => parseStore([{ ...state.control, formatVersion: 8 }], [], [], history, learning), "invalid");
-  expect(storageBytes(state)).toBe(jsonBytes({ format: "daasavaani-personal-storage", formatVersion: 7,
-    control: state.control, personal: [], lists: [], recentHistory: history, learningLabels: learning }));
+    [{ ...learning[0], score: 100 }]]) refuses(() => parseStore([state.control], [], [], history, rows, recitation), "invalid");
+  refuses(() => parseStore([{ ...state.control, formatVersion: 9 }], [], [], history, learning, recitation), "invalid");
+  expect(storageBytes(state)).toBe(jsonBytes({ format: "daasavaani-personal-storage", formatVersion: 8,
+    control: state.control, personal: [], lists: [], recentHistory: history, learningLabels: learning, recitationPosition: recitation }));
 });
 test("learning never leaks into minimal list snapshots or mutates any other personal collection", () => {
   const list = newList({ format: "daasavaani-list", formatVersion: 2, name: "Synthetic", entries: [lyric, legacy] });

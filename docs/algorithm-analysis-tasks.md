@@ -105,7 +105,7 @@ silent truncation, false success or weaker validation.
   v2 client-generated codec interoperability has actual round-trip evidence;
   OS delivery and signed-link sharing remain incomplete.
 - ALG-15: typed web-list writes have deterministic complete-envelope UTF8
-  accounting, atomic collection/identity checks, non-destructive v1/v2/v3/v4/v5/v6-to-v7 migration and
+  accounting, atomic collection/identity checks, non-destructive v1..v7-to-v8 migration and
   stale revision/epoch refusal. Actual configured byte/collection boundaries have
   executable coverage. Full recoverable backup/replacement is not implemented.
 - ALG-07/08: the separate canonical publication reader preplans descriptor,
@@ -117,7 +117,7 @@ silent truncation, false success or weaker validation.
 - Official Unicode16 personal-name normalization/folding resources and independent
   conformance fixtures drive the actual web/native adapters. Website checks the
   official normalization equations/full scalar folding and derives versioned
-  keys on demand; raw-name v7 records have no cached key to migrate. Stable
+  keys on demand; raw-name v8 records have no cached key to migrate. Stable
   insertion ordering is O(d squared) worst case/O(d) storage for decomposed name
   length d, bounded by personal-name policy. This is not linguistic search
   normalization, a performance benchmark or permission to merge/rename lists.
@@ -455,7 +455,7 @@ source migration, live ingestion or automatic updates to reviewed items.
 
 ### ALG-14: Bounded list encoding and decoding
 
-Web saved-list export uses the [typed personal protocol](architecture.md#web-typed-personal-storage-v7):
+Web saved-list export uses the [typed personal protocol](architecture.md#web-typed-personal-storage-v8):
 one validated read transaction, minimal allowlist projection, bounded worker
 encoding, then epoch/revision recheck before exposing the independent snapshot.
 This supplies partial stable-read/no-write/cancellation evidence, not native
@@ -487,7 +487,7 @@ round trips, platform share interoperability or full-backup exportability.
 
 ### ALG-15: Recoverable backup replacement and capacity accounting
 
-The [web typed storage protocol](architecture.md#web-typed-personal-storage-v7)
+The [web typed storage protocol](architecture.md#web-typed-personal-storage-v8)
 supplies partial executable accounting/migration/fencing evidence only. It is not
 the full-backup format and does not establish backup exportability or replacement.
 
@@ -657,6 +657,14 @@ validation must be settled before implementation.
   retain location, ambiguous splits/removals do not guess. Repeated songs resume
   the exact occurrence; switching lists replaces the sole recitation position.
   No similarity reanchoring, per-list resume or exact lyric-scroll restoration.
+- **Executable Website slice:** Shared exact-pair vectors drive strict shape and
+  resolution checks. Current-list lookup is linear in list count, followed by a
+  linear exact occurrence-ID search; equal references are never substitutes.
+  Writes validate current full list contents, epoch and all six personal stores
+  in one transaction, with full prospective-byte admission before cursor change.
+  Browser journeys cover restart/no autoentry, reorder/replacement/deletion,
+  empty-list preservation, rollback/retry and cancellation behind an actual
+  database lock. Full-backup inclusion and reviewed verse positions remain open.
 
 ### MED-08: Session navigation and pending destinations
 

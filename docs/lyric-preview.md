@@ -152,7 +152,7 @@ loads the requested UUID online, not a guessed substitute. Preview/save/export
 alone never downloads lyrics. List/Favorites origins restore
 available focus/scroll and the selected unsaved list editor in the same session.
 
-The [personal v7 protocol](architecture.md#web-typed-personal-storage-v7) validates
+The [personal v8 protocol](architecture.md#web-typed-personal-storage-v8) validates
 and structurally upgrades old local schemas atomically without changing existing
 list/occurrence IDs or raw legacy values. Transport families remain independent:
 v1 previews can re-export unchanged; confirmed v1 imports adapt to typed legacy
@@ -195,8 +195,16 @@ Exit/Escape/Back restore the original mounted list drafts and start focus;
 Forward/reload never reenter. An active stored-list change/deletion ends mode
 with a stale-state error rather than silently changing order. See the
 [occurrence lifecycle](architecture.md#saved-list-recite-occurrences).
-Continue recitation, persistent position and complete offline readiness remain
-unimplemented; management/preview is not native preparation.
+Website additionally persists the exact latest list occurrence and offers
+explicit Continue and per-entry Recite. Position writes precede cursor changes,
+are independent of successful-read history, retain unavailable references and
+roll back on failure; empty lists do not replace the pair. Continue uses current
+order/contents, explains missing lists/occurrences without substitution and never
+automatically enters after restart or reacquires screen awake. See the
+[position lifecycle](architecture.md#exact-latest-occurrence-and-explicit-continue).
+Native's equivalent upgrade and device validation are independently owned.
+Full-backup inclusion and complete offline readiness remain unimplemented;
+management/preview is not native preparation.
 
 ## Local learning labels
 
@@ -251,7 +259,7 @@ never record. Clear/disable preserve favorites/lists/preferences; unknown
 references remain visible. See the [history lifecycle](architecture.md#recently-opened-lifecycle).
 
 Still open: complete production-profile reading, bookmarks/verse Practice/
-latest-occurrence recitation resume for real UUIDs, full personal backups, full linguistic search/
+full-backup recitation-position inclusion, full personal backups, full linguistic search/
 profiles/helpers, populated classification/context/verse/media/eligible-Latin
 public adapters, rights/registry closure, persistent offline activation/repair,
 publication ledger/date/ZIP protocols and release/platform acceptance.

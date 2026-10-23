@@ -30,7 +30,7 @@ archive of questionnaires, alternatives, changes and dated observations.
 | Lists/backups | Portable new-list-only minimal transfers; same-platform logical gzip full backups/confirmed replacement, preview revision/fencing, truthful locale postcommit |
 | Reading | Independent UI/script preferences; explicit Latin choice, system fonts, themes/density/helper, accessible navigation and explicit latest-list resume |
 | Links/shell | Root Website and /open/ hash links, host-root association, normal worker activation, no forced reload or automatic content replacement |
-| Ingestion | Manual local full uploads scan/reconciliation/source PR; first API access blocked pending provider clarification |
+| Ingestion | YouTube automation deferred to a later release, not an initial-release gate; retain local full uploads scan/reconciliation/source PR design and provider clarification before first API access |
 | Releases | Full applicable checks before finalization/push; unsigned CI/local signing/protected verification; normal PR/check protection restored before release |
 | Performance | All numerical search/LCP/INP/CLS targets best effort; correctness/accessibility/cancellation/integrity/safety remain mandatory |
 
@@ -38,7 +38,7 @@ The [approved lyric identity contract](https://github.com/DaasaVaani/shared/blob
 owns typed lyric/legacy references, target minimal-list v2, text-only publication
 eligibility and staged compatibility. Real source/publication schemas and separate
 canonical readers implement the initial text-only slice. Website typed personal
-v7/v2 transfers and native Room6 typed collections preserve old identities through structural legacy adapters;
+v8/v2 transfers and native Room6 typed collections preserve old identities through structural legacy adapters;
 fixture/v1 formats remain legacy-only. Full personal collections/backup and
 production adapters remain open. The [preview guide](lyric-preview.md) defines the current narrower lifecycle,
 not a change to approved production PWA on-demand reading/offline behavior.
@@ -55,16 +55,16 @@ Practice and complete active-snapshot offline discovery remain open.
 Recently opened recording is initially enabled, device-only and bounded to the
 latest50 distinct successful opens, with separate clear/disable controls.
 The [Shared recent-history contract](https://github.com/DaasaVaani/shared/blob/main/docs/recent-history.md)
-owns the exact ordered typed record and portable default. Website v7 implements
+owns the exact ordered typed record and portable default. Website v8 implements
 the successful-open/controls/preserving-upgrade slice; native Room6 independently
 implements the same bounded device-only history. This is not permission to record search queries or send history.
 
 Website/native later reading/Settings controls independently persist native
 font units (CSS pixels/Android sp) and Shared Compact/Normal/Relaxed density, preserving canonical layout,
 UI/theme independence and mounted-reader history. The
-[v7 storage/reading protocol](architecture.md#web-typed-personal-storage-v7)
+[v8 storage/reading protocol](architecture.md#web-typed-personal-storage-v8)
 defines exact defaults, preserving older inputs and platform-owned spacing.
-Onboarding/helper/resume/Practice/offline and complete font/device evidence remain open.
+Onboarding/helper/full-backup resume inclusion/Practice/offline and complete font/device evidence remain open.
 
 The Website's [individual Recite lifecycle](architecture.md#focused-individual-recite-and-screen-awake)
 implements only REC-01/02 for exposed canonical/fixture text: explicit focused
@@ -73,11 +73,15 @@ It reuses current reading preferences without extra personal writes/history or
 content requests and ends on reader departure. Screen awake never blocks reading,
 silently reacquires or promises control over OS restrictions. Website
 [saved-list Recite](architecture.md#saved-list-recite-occurrences) additionally
-implements session-only REC-03 over exact ordered occurrences/placeholders, with
+implements REC-03 over exact ordered occurrences/placeholders, with
 explicit boundaries/unavailability and conservative active-list invalidation.
-Normal successful selected opens alone record history. REC-04 latest-occurrence
-resume, reviewed verse Practice and durable offline
-content remain open; no automatic entry or verse inference is authorized.
+Normal successful selected opens alone record history. Website's bounded
+REC-04 slice persists one exact list/occurrence pair with commit-gated movement
+and explicit Continue, preserving current contents and explaining deletion
+without substitution. Its [Shared contract](https://github.com/DaasaVaani/shared/blob/main/docs/recitation-position.md)
+keeps mode/wake ownership session-only. Native resume validation, full-backup
+position inclusion, reviewed verse Practice and durable offline content remain
+open; no automatic entry or fabricated linguistic review is authorized.
 
 Native independently implements the same bounded REC-01/02/03 surfaces and retains
 its own Shared pin and validation. Android Back first exits focused Recite;
@@ -90,7 +94,7 @@ typed history and original list/Back context; management preview is not readines
 
 The [Shared learning-label contract](https://github.com/DaasaVaani/shared/blob/main/docs/learning-labels.md)
 defines only optional Want to learn, Practising and Comfortable reciting
-assignments per exact typed reference. Website v7 and native Room6 independently
+assignments per exact typed reference. Website v8 and native Room6 independently
 add an initially empty local collection with preserving migrations, fenced atomic
 writes and a filtered, paged Learning view usable before preparation and offline
 (Website requires its installed interface).
@@ -112,13 +116,15 @@ evidence, persistent content/readiness/eviction and full upgrade evidence remain
 2. Complete exact source/settings/public/index/policy/list/backup/capability schemas.
 3. Review full language/native-approximation/alias/Unicode/technical-marker/digit tables.
 4. Specify exact journal/receipt/epoch/lock-order/locale/accounting protocols.
-5. Complete configurable UI/ingestion defaults, route/signing/runbook details.
+5. Complete configurable UI defaults, route/signing/runbook details; ingestion defaults belong to the later ingestion release.
 6. Demonstrate remaining production contracts and full requirement/release evidence;
    do not treat the authorized fixture milestone as complete product readiness.
 
 Builds, oracle/crash/migration/device/font/App Links/capacity evidence belongs to
-implementation validation, not an assumed design pass. First API ingestion needs
-external provider clarification independently. Follow [architecture](architecture.md),
+implementation validation, not an assumed design pass. Deferred first API ingestion needs
+external provider clarification independently, without blocking the initial release.
+Reviewed-content publication and its applicable checks remain required.
+Follow [architecture](architecture.md),
 [algorithm tasks](algorithm-analysis-tasks.md), [roadmap](implementation-roadmap.md)
 and [validation policy](testing-and-release.md). Do not reopen settled families
 or silently fill significant open choices.

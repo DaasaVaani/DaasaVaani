@@ -11,6 +11,8 @@ import { LyricText } from "./LyricText";
 import { ReadingPreferences, type ReadingPreferencesProps } from "./ReadingPreferences";
 import { Recite } from "./Recite";
 import { browserDefaultPersonal } from "./personal";
+import { personalMessage } from "./ListSave";
+import { PersonalError } from "./personal-model";
 import styles from "./App.module.css";
 
 type Reading = { entryId: string } & (
@@ -18,17 +20,21 @@ type Reading = { entryId: string } & (
   { status: "failed"; error: string } |
   { status: "ready"; item: LyricItem | FixtureItem }
 );
-export function ListRecite({ record, labels, personal, publication, lyrics, onLyrics, opened, change, exit }: {
-  record: ListRecord; labels: typeof messages.en; personal: PersonalStore;
+export function ListRecite({ record, initialIndex, remember, labels, personal, publication, lyrics, onLyrics, opened, change, exit }: {
+  record: ListRecord; initialIndex: number; labels: typeof messages.en; personal: PersonalStore;
+  remember: (entryId: string, signal: AbortSignal) => Promise<void>;
   publication?: Publication; lyrics?: LyricLibrary; onLyrics: (library: LyricLibrary) => void;
   opened: (reference: PersonalReference) => void; change: ReadingPreferencesProps["change"]; exit: () => void;
 }) {
-  const [index, setIndex] = useState(0), [attempt, setAttempt] = useState(0);
+  const [index, setIndex] = useState(initialIndex), [attempt, setAttempt] = useState(0);
+  const [moving, setMoving] = useState(false), [movementError, setMovementError] = useState<{ index: number; message: string }>();
+  const movement = useRef<AbortController | null>(null);
   const [reading, setReading] = useState<Reading>();
   const library = useRef(lyrics), cache = useRef(new Map<string, FixtureItem>());
   const controller = useRef<AbortController | null>(null);
   const position = useRef<HTMLHeadingElement>(null), focus = useRef(true);
   const entry = record.entries[index], current = reading?.entryId === entry?.id ? reading : undefined;
+  useEffect(() => () => { movement.current?.abort(); }, []);
   useLayoutEffect(() => {
     if (!focus.current) return;
     focus.current = false;
@@ -67,20 +73,35 @@ export function ListRecite({ record, labels, personal, publication, lyrics, onLy
     }).finally(() => { if (controller.current === request) controller.current = null; });
     return () => { request.abort(); if (controller.current === request) controller.current = null; };
   }, [entry, publication, attempt, onLyrics, opened]);
-  const move = (direction: -1 | 1) => {
-    focus.current = true;
-    setIndex(value => value + direction);
+  const move = async (targetIndex: number) => {
+    if (movement.current) return;
+    const request = new AbortController();
+    movement.current = request; setMoving(true); setMovementError(undefined);
+    try {
+      const target = record.entries[targetIndex];
+      if (!target) throw new PersonalError("stale");
+      await remember(target.id, request.signal);
+      request.signal.throwIfAborted();
+      focus.current = true; setIndex(targetIndex);
+    } catch (reason) {
+      if (!request.signal.aborted) setMovementError({ index: targetIndex, message: personalMessage(reason, labels) });
+    } finally {
+      if (movement.current === request) { movement.current = null; setMoving(false); }
+    }
   };
   return <section className={styles.reader}>
     <Recite labels={labels} heading={<header className={styles.readerHeader}><h1>{record.name}</h1></header>}
-      list={{ onExit: exit, navigation: <section aria-label={labels.reciteList} className={styles.recitationNavigation}>
+      list={{ onExit: exit, navigation: <section aria-label={labels.reciteList} className={styles.recitationNavigation} aria-busy={moving}>
         {entry ? <h2 ref={position} tabIndex={-1} aria-live="polite">{labels.entryNumber
           .replace("{position}", String(index + 1)).replace("{total}", String(record.entries.length))}</h2>
           : <h2 ref={position} tabIndex={-1}>{labels.emptyRecitation}</h2>}
         <div>
-          <button disabled={index === 0 || !entry} onClick={() => move(-1)}>{labels.previousRecitationEntry}</button>
-          <button disabled={!entry || index === record.entries.length - 1} onClick={() => move(1)}>{labels.nextRecitationEntry}</button>
+          <button disabled={moving || index === 0 || !entry} onClick={() => void move(index - 1)}>{labels.previousRecitationEntry}</button>
+          <button disabled={moving || !entry || index === record.entries.length - 1} onClick={() => void move(index + 1)}>{labels.nextRecitationEntry}</button>
         </div>
+        {moving && <p role="status">{labels.recitationPositionSaving}</p>}
+        {movementError && <><p role="alert">{movementError.message}</p>
+          <button disabled={moving} onClick={() => void move(movementError.index)}>{labels.retry}</button></>}
         {entry && index === 0 && <p role="status">{labels.recitationStart}</p>}
         {entry && index === record.entries.length - 1 && <p role="status">{labels.recitationEnd}</p>}
       </section> }}

@@ -1,7 +1,7 @@
 # DaasaVaani Requirements
 
 - Status: Approved product scope; staged implementation authorized, production gates incomplete
-- Scope: Initial release of the Android app, responsive website/PWA, and content automation
+- Scope: Initial release of the Android app, responsive website/PWA, and reviewed-content publication; YouTube ingestion automation is deferred to a later release
 
 The [Shared implementation specification](https://github.com/DaasaVaani/shared/blob/main/docs/implementation-specification.md)
 owns current technical contracts and unresolved gates. Staged implementation follows
@@ -239,6 +239,13 @@ automatic runtime translation. Shared YAML catalogs generate bundled web and
 native Android resources. Exact message/plural/escaping contracts remain open.
 
 ## 6. Ingestion and review workflow
+
+**Later-release scope:** YouTube ingestion automation (ING-01 through ING-11)
+is deferred and is not an initial-release implementation or acceptance gate.
+These requirements remain the target for that later release; first API access
+still requires provider clarification. Initial-release work continues using
+reviewed existing content and its publication pipeline. Deferral does not waive
+review before publication, source preservation or applicable provider terms.
 
 | ID | Requirement |
 | --- | --- |
@@ -610,7 +617,8 @@ The implementation must demonstrate at least the following outcomes.
   pending before first ingestion.
 - **YouTube access and quota:** Discovery depends on valid credentials, available
   quota, API access, and the channel's public content. Failures require visible
-  reporting and retry, not silent omission.
+  reporting and retry, not silent omission. This is a deferred-ingestion risk,
+  not an initial-release dependency.
 - **Extraction quality:** Description formats may vary. Kannada extraction and
   optional classification require review; missing data must not be fabricated.
 - **Transliteration quality:** Script mappings can be ambiguous or lossy. All five

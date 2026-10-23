@@ -1,7 +1,7 @@
 import { useEffect, useId, useLayoutEffect, useMemo, useRef, useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import type messages from "../shared/generated/web/ui.json";
-import { deleteList, saveList } from "./personal";
+import { deleteList, rememberRecitation, saveList, type RecitationReceipt } from "./personal";
 import { editEntry, listSnapshot, moveEntry, newList, removeEntry, type ListEntry, type ListRecord, type PersonalStore, type Revision } from "./personal-model";
 import { listNameHint, personalMessage, useListSave } from "./ListSave";
 import styles from "./App.module.css";
@@ -10,7 +10,7 @@ import type { Publication } from "./artifacts";
 import { ListEntryView } from "./ListEntryView";
 import type { LyricLibrary } from "./lyric-publication";
 import { ListRecite } from "./ListRecite";
-import { sameRecitationList } from "./list-recite";
+import { resolveRecitation, sameRecitationList } from "./list-recite";
 import type { PersonalReference } from "./list-transfer-types";
 import type { ReadingPreferencesProps } from "./ReadingPreferences";
 
@@ -25,8 +25,10 @@ export function Lists({ labels, personal, publication, lyrics, onLyrics, opened,
   const state: unknown = location.state;
   const routeSession = state !== null && typeof state === "object" && "listRecite" in state &&
     typeof state.listRecite === "string" ? state.listRecite : undefined;
-  const [reciting, setReciting] = useState<{ token: string; record: ListRecord }>();
-  const reciteButton = useRef<HTMLButtonElement>(null), restoreRecite = useRef(false);
+  const [reciting, setReciting] = useState<{ token: string; record: ListRecord; index: number; epoch: string }>();
+  const reciteButton = useRef<HTMLButtonElement | null>(null), restoreRecite = useRef(false);
+  const beginning = useRef<AbortController | null>(null);
+  const [reciteBusy, setReciteBusy] = useState(false);
   const [name, setName] = useState("");
   const [newName, setNewName] = useState("");
   const [selected, setSelected] = useState<{ record: ListRecord; expected: Revision }>();
@@ -40,7 +42,8 @@ export function Lists({ labels, personal, publication, lyrics, onLyrics, opened,
   const entryGroups = useRef(new Map<string, HTMLDivElement>());
   const focus = useRef<string | null | undefined>(undefined);
   const save = useListSave(labels, () => { focus.current = null; setSelected(undefined); });
-  const working = busy || save.busy || exportBusy;
+  const working = busy || save.busy || exportBusy || reciteBusy;
+  const resume = resolveRecitation(personal.recitation, personal.lists);
   const source = useMemo<ExportSource | undefined>(() => selected
     ? { kind: "stored", id: selected.record.id, expected: selected.expected } : undefined, [selected]);
   useEffect(() => {
@@ -50,11 +53,13 @@ export function Lists({ labels, personal, publication, lyrics, onLyrics, opened,
       return undefined;
     });
   }, [location.key, location.pathname, routeSession]);
+  useEffect(() => () => { beginning.current?.abort(); }, [location.key]);
   useEffect(() => {
-    if (!reciting || sameRecitationList(reciting.record, personal.lists.find(record => record.id === reciting.record.id))) return;
+    if (!reciting || (reciting.epoch === personal.control.epoch &&
+      sameRecitationList(reciting.record, personal.lists.find(record => record.id === reciting.record.id)))) return;
     restoreRecite.current = true; setReciting(undefined); setError(labels.personalStale);
     if (routeSession === reciting.token) navigate(-1);
-  }, [reciting, personal.lists, labels.personalStale, routeSession, navigate]);
+  }, [reciting, personal.lists, personal.control.epoch, labels.personalStale, routeSession, navigate]);
   useLayoutEffect(() => {
     if (restoreRecite.current && !reciting && location.pathname === "/lists") {
       (reciteButton.current && !reciteButton.current.disabled ? reciteButton.current : heading.current)
@@ -77,6 +82,29 @@ export function Lists({ labels, personal, publication, lyrics, onLyrics, opened,
       text: entry?.kind === "placeholder" ? entry.text : "",
       fallback: entry && entry.kind !== "placeholder" ? entry.fallback ?? "" : entry?.text ?? "" });
   }
+  function acceptReceipt(record: ListRecord, receipt: RecitationReceipt) {
+    setSelected(current => current && sameRecitationList(current.record, record) &&
+      current.expected.epoch === receipt.before.epoch && current.expected.revision === receipt.before.revision
+      ? { ...current, expected: receipt.after } : current);
+  }
+  async function begin(record: ListRecord, index: number, button: HTMLButtonElement) {
+    const request = new AbortController();
+    beginning.current?.abort(); beginning.current = request;
+    button.focus({ preventScroll: true }); reciteButton.current = button;
+    setReciteBusy(true); setError("");
+    const epoch = personal.control.epoch;
+    try {
+      const entry = record.entries[index];
+      if (entry) acceptReceipt(record, await rememberRecitation(record, entry.id, epoch, request.signal));
+      request.signal.throwIfAborted();
+      const token = crypto.randomUUID();
+      setReciting({ token, record, index, epoch });
+      navigate("/lists", { state: { listRecite: token } });
+    } catch (reason) { if (!request.signal.aborted) setError(personalMessage(reason, labels)); }
+    finally {
+      if (beginning.current === request) { beginning.current = null; setReciteBusy(false); }
+    }
+  }
   async function mutate(make: (record: ListRecord) => ListRecord, focusId?: string) {
     if (!selected) return;
     setBusy(true); setError(""); setEntrySaved(false); save.reset(); setDeleting(false);
@@ -96,8 +124,26 @@ export function Lists({ labels, personal, publication, lyrics, onLyrics, opened,
     finally { setBusy(false); }
   }
   const active = reciting !== undefined && routeSession === reciting.token && location.pathname === "/lists" &&
+    reciting.epoch === personal.control.epoch &&
     sameRecitationList(reciting.record, personal.lists.find(record => record.id === reciting.record.id));
   return <section className={styles.reader}><div hidden={active}><h1 ref={heading} tabIndex={-1}>{labels.lists}</h1>
+    <section aria-label={labels.savedRecitationPosition}>
+      <h2>{labels.savedRecitationPosition}</h2>
+      <p>{labels.recitationPositionNotice}</p>
+      {resume.status === "none" && <p>{labels.noRecitationPosition}</p>}
+      {resume.status === "listMissing" && <p>{labels.recitationListMissing}</p>}
+      {resume.status === "entryMissing" && <>
+        <p>{labels.recitationEntryMissing}</p>
+        <button disabled={working} onClick={() => choose(resume.record)}>{resume.record.name}</button>
+      </>}
+      {resume.status === "available" && <>
+        <p>{resume.record.name}: {labels.entryNumber.replace("{position}", String(resume.index + 1))
+          .replace("{total}", String(resume.record.entries.length))}</p>
+        <button disabled={working} onClick={event => void begin(resume.record, resume.index, event.currentTarget)}>
+          {labels.continueRecitation}</button>
+      </>}
+    </section>
+    {reciteBusy && <p role="status">{labels.recitationPositionSaving}</p>}
     {!personal.lists.length && <p>{labels.emptyLists}</p>}
     <form aria-label={labels.createList} onSubmit={event => {
       event.preventDefault();
@@ -114,12 +160,9 @@ export function Lists({ labels, personal, publication, lyrics, onLyrics, opened,
     </li>)}</ul>
     {selected && <section aria-label={selected.record.name}>
       <h2>{selected.record.name}</h2>
-      <button ref={reciteButton} disabled={working || !sameRecitationList(selected.record,
+      <button disabled={working || !sameRecitationList(selected.record,
         personal.lists.find(record => record.id === selected.record.id))} onClick={event => {
-        event.currentTarget.focus({ preventScroll: true });
-        const token = crypto.randomUUID();
-        setError(""); setReciting({ token, record: selected.record });
-        navigate("/lists", { state: { listRecite: token } });
+        void begin(selected.record, 0, event.currentTarget);
       }}>{labels.reciteList}</button>
       <form aria-label={labels.renameList} onSubmit={event => {
         event.preventDefault();
@@ -139,6 +182,9 @@ export function Lists({ labels, personal, publication, lyrics, onLyrics, opened,
             if (element) entryGroups.current.set(entry.id, element);
             else entryGroups.current.delete(entry.id);
           }} aria-label={labels.entryNumber.replace("{position}", String(index + 1)).replace("{total}", String(selected.record.entries.length))}>
+            <button disabled={working || !sameRecitationList(selected.record,
+              personal.lists.find(record => record.id === selected.record.id))}
+              onClick={event => void begin(selected.record, index, event.currentTarget)}>{labels.recite}</button>
             <button disabled={working} onClick={() => startEntry(entry.kind, entry)}>{labels.editEntry}</button>
             {entry.kind === "placeholder" && <>
               <button disabled={working} onClick={() => startEntry("legacyVideo", entry)}>{labels.replaceEntry}</button>
@@ -190,7 +236,9 @@ export function Lists({ labels, personal, publication, lyrics, onLyrics, opened,
     {entrySaved && <p role="status">{labels.listUpdated}</p>}
     {error && <p role="alert">{error}</p>}
     </div>
-    {active && reciting && <ListRecite record={reciting.record} labels={labels} personal={personal} publication={publication}
+    {active && reciting && <ListRecite record={reciting.record} initialIndex={reciting.index} labels={labels} personal={personal} publication={publication}
+      remember={async (entryId, signal) => acceptReceipt(reciting.record,
+        await rememberRecitation(reciting.record, entryId, reciting.epoch, signal))}
       lyrics={lyrics} onLyrics={onLyrics} opened={opened} change={change} exit={() => {
         restoreRecite.current = true; setReciting(undefined); navigate(-1);
       }} />}
