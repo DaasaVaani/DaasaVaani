@@ -6,7 +6,7 @@ interface WebConfig {
     descriptorUrl: string; pageSize: number; maxItems: number;
     maxEncodedBytes: number; maxDecodedBytes: number; concurrentRequests: number;
   };
-  canonicalBaseUrl: string; listLinkPath: string; listFileName: string; transferChunkBytes: number; listCompressionLevel: number;
+  canonicalBaseUrl: string; listLinkPath: string; listFileName: string; backupFileName: string; transferChunkBytes: number; listCompressionLevel: number;
   defaultUiLanguage: "en" | "kn"; defaultTheme: "light" | "dark" | "warm" | "device";
   defaultRecentHistoryEnabled: boolean;
   defaultReadingDensity: import("../shared/types/personal").ReadingDensity;
@@ -24,6 +24,7 @@ interface WebConfig {
 }
 declare const __WEB_CONFIG__: WebConfig;
 declare const __TRANSFER_LIMITS__: { maxListEncodedBytes: number; maxListDecodedBytes: number; maxSharedUrlAscii: number };
+declare const __BACKUP_LIMITS__: { maxBackupEncodedBytes: number; maxBackupDecodedBytes: number };
 interface PersonalLimits {
   maxFavorites: number; maxLists: number; maxEntriesPerList: number; maxTotalEntries: number; maxRecents: number; maxLearningLabels: number;
   maxPersonalStoredBytes: number; maxListDecodedBytes: number;

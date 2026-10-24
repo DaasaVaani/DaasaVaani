@@ -203,7 +203,8 @@ order/contents, explains missing lists/occurrences without substitution and neve
 automatically enters after restart or reacquires screen awake. See the
 [position lifecycle](architecture.md#exact-latest-occurrence-and-explicit-continue).
 Native's equivalent upgrade and device validation are independently owned.
-Full-backup inclusion and complete offline readiness remain unimplemented;
+Website [backup v1](architecture.md#same-platform-personal-backup-v1) separately
+includes this pair. Native full-backup inclusion and complete offline readiness remain unimplemented;
 management/preview is not native preparation.
 
 ## Local learning labels
@@ -259,7 +260,7 @@ never record. Clear/disable preserve favorites/lists/preferences; unknown
 references remain visible. See the [history lifecycle](architecture.md#recently-opened-lifecycle).
 
 Still open: complete production-profile reading, bookmarks/verse Practice/
-full-backup recitation-position inclusion, full personal backups, full linguistic search/
+native full-personal backups including recitation position, full linguistic search/
 profiles/helpers, populated classification/context/verse/media/eligible-Latin
 public adapters, rights/registry closure, persistent offline activation/repair,
 publication ledger/date/ZIP protocols and release/platform acceptance.

@@ -51,6 +51,12 @@ demonstrations do not close remaining production contracts or prove full readine
 | Tooling | Exact npm lockfiles and Gradle wrapper/version catalog; use the current command registry |
 | Approval | Staged implementation authorized; production language/lifecycle/personal/publication gates and release evidence remain incomplete |
 
+Website Settings additionally implements the current-state same-platform
+[personal-backup v1 protocol](architecture.md#same-platform-personal-backup-v1):
+stable worker export, complete preview, explicit fenced atomic replacement and
+offline installed-interface use. This is not native backup, future personal
+feature coverage or offline lyric readiness.
+
 Website/native personal-name matching uses the official Shared Unicode16 profile.
 Website v8 stores only raw names and computes explicit-profile keys on demand:
 there is no stored cache to rewrite or schema migration to invent. Keep existing
@@ -87,7 +93,7 @@ See [the storage/name protocol](architecture.md#transactions-names-and-exact-acc
   authoritative; no full offline-shell/device/font coverage is inferred.
   Independent lyric font/density controls in Settings and both readers affect
   body text only and preserve canonical layout/history; onboarding/helper/
-  full-backup resume inclusion/Practice/offline preference coverage remains incomplete.
+  native full-backup/Practice/offline-content preference coverage remains incomplete.
 - Learning labels follow the [Shared contract](https://github.com/DaasaVaani/shared/blob/main/docs/learning-labels.md):
   exact typed identity, stable assignment order, explicit linear duplicate check,
   fenced/no-op writes and complete personal accounting. Learning management
@@ -108,7 +114,8 @@ See [the storage/name protocol](architecture.md#transactions-names-and-exact-acc
   [REC-04 record](architecture.md#exact-latest-occurrence-and-explicit-continue)
   persists only the exact latest pair, commits before cursor changes and requires
   explicit Continue. Never autoenter, substitute missing occurrences or claim
-  durable offline readiness/full-backup support. Native independently
+  durable offline readiness. Website backup v1 separately includes the exact
+  saved pair without mode/wake ownership. Native independently
   implements the same bounded saved-list surface, retaining its complete-
   preparation gate, original list/Android Back context and separate validation.
 - Shared owns portable contracts/settings/fixtures and UI catalogs/generator/

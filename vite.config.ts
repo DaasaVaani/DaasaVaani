@@ -34,7 +34,7 @@ const validateDefaults = new Ajv2020({ strict: true }).compile<{
 }>(defaultsSchema);
 if (!validateDefaults(defaults)) throw new Error("Invalid portable defaults: " + JSON.stringify(validateDefaults.errors));
 const personal = strictYaml(readFileSync(new URL("./shared/settings/personal-transfer.yml", import.meta.url), "utf8"));
-const validatePersonal = new Ajv2020({ strict: true }).compile<typeof __TRANSFER_LIMITS__ & PersonalLimits>(personalSchema);
+const validatePersonal = new Ajv2020({ strict: true }).compile<typeof __TRANSFER_LIMITS__ & typeof __BACKUP_LIMITS__ & PersonalLimits>(personalSchema);
 if (!validatePersonal(personal)) throw new Error("Invalid portable personal limits: " + JSON.stringify(validatePersonal.errors));
 const canonical = new URL(config.canonicalBaseUrl);
 if (canonical.protocol !== "https:" || canonical.username || canonical.password || canonical.search || canonical.hash) throw new Error("Invalid canonical Website URL");
@@ -107,6 +107,7 @@ export default defineConfig({
     defaultReadingDensity: defaults.readingDensity, readingDensities: defaults.supportedReadingDensities,
     uiLanguages: defaults.supportedUiLanguages, uiThemes: defaults.supportedThemes,
     maxFavorites: personal.maxFavorites }), __BOUNDS__: JSON.stringify(bounds), __PERSONAL_LIMITS__: JSON.stringify(personal),
+    __BACKUP_LIMITS__: JSON.stringify({ maxBackupEncodedBytes: personal.maxBackupEncodedBytes, maxBackupDecodedBytes: personal.maxBackupDecodedBytes }),
     __TRANSFER_LIMITS__: JSON.stringify({ maxListEncodedBytes: personal.maxListEncodedBytes,
       maxListDecodedBytes: personal.maxListDecodedBytes, maxSharedUrlAscii: personal.maxSharedUrlAscii }) },
   test: { include: ["src/**/*.test.ts"], environment: "node" },

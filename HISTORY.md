@@ -1,5 +1,50 @@
 # Documentation history
 
+## 2026-10-24: resumed Website backup consumer implementation
+
+- Owner explicitly resumed work after the saved local05900bd checkpoint.
+  Adopted published Shared b9ed532 in Website only; native remains independently
+  c386bf8 while finishing REC-04 validation. Provisional transliteration resources
+  included in the new pin are not activated by either consumer.
+- Superseded the Website replacement-only/no-user-facing-backup limitation with
+  current-state backup v1 Settings export, complete local preview and explicit
+  atomic replacement. Existing fields/identities/raw text, absent preferences and
+  unavailable exact positions are preserved; no future personal collections,
+  content snapshots, native backup or full product conformance is claimed.
+- Extracted the existing bounded gzip/fatal-UTF8/duplicate-key JSON primitives
+  from minimal lists for reuse. Added strict Shared-schema/semantic/real-date/
+  byte validation and canonical-key encoding in an owned cancellable worker,
+  stable-snapshot export, revision-bound confirmation, privacy disclosures and
+  actual six-store replacement. Website locale remains a postcommit observer
+  binding, not a native OS-language setter.
+- Incremental strict typecheck and focused codec/transaction checks passed.
+  Browser development first exposed locale-sensitive test scoping after a real
+  Kannada restore; the expected region now follows the restored locale. A later
+  locked-cancel test exposed retained confirmation after cancellation; cancellation
+  now ends that preview only after the aborted transaction outcome is known,
+  without misrepresenting committed results. Final `npm test` passed137/137
+  across16 files. With the documented clean pinned fixture override,
+  `node node_modules\@playwright\test\cli.js test --workers=2` passed447/447
+  across all three projects in6.4 minutes, including fresh fixture publication
+  and strict production build, zero failures/skips. Production64MiB decoded and
+  65MiB encoded equality/+1 were tested with actual bytes, not reduced proxies.
+  The24 new UI cases include actual offline worker restore, peer invalidation,
+  final-write quota retry and real locked-transaction cancellation/departure.
+- Native's fresh host-only checks independently passed54 core tests/12 suites,
+  all builds/instrumentation compilation, both lints (58 debug/59 release
+  warnings, zero errors), config/hygiene/YAML/workflow/whitespace. App JVM remains
+  NO-SOURCE, not a pass. Fresh responsive emulator-service evidence permitted a
+  newly granted frozen-dist/device slot after the Website137/447 source pass.
+  Connected validation and publication remain independently pending.
+- Final ancillary checks: installed actionlint1.7.12/ShellCheck0.11.0 passed;
+  both GitHub YAML files passed strict parsing; current Markdown validation
+  passed19 files/180 local links/153 unique requirement IDs; staged/working
+  whitespace passed. `python shared\tools\check_repository.py` passed97 files
+  in the pinned Shared repository (that script resolves its own root, not the
+  Website root). Website Markdown/YAML/whitespace checks above are independent.
+  Large-chunk/plugin-timing build warnings remain visible. No app release,
+  peak-heap guarantee or full XFER-09/10 native-system-backup claim follows.
+
 ## 2026-10-23: current-state backup scope and replacement prerequisite
 
 - Owner approved same-platform backup v1 covering every currently implemented

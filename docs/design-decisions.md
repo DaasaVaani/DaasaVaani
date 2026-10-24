@@ -39,8 +39,11 @@ owns typed lyric/legacy references, target minimal-list v2, text-only publicatio
 eligibility and staged compatibility. Real source/publication schemas and separate
 canonical readers implement the initial text-only slice. Website typed personal
 v8/v2 transfers and native Room6 typed collections preserve old identities through structural legacy adapters;
-fixture/v1 formats remain legacy-only. Full personal collections/backup and
-production adapters remain open. The [preview guide](lyric-preview.md) defines the current narrower lifecycle,
+fixture/v1 formats remain legacy-only. Future personal collections and
+production adapters remain open. Website current-state backup v1 separately
+implements the [same-platform protocol](architecture.md#same-platform-personal-backup-v1);
+native backup and future personal collections remain open.
+The [preview guide](lyric-preview.md) defines the current narrower lifecycle,
 not a change to approved production PWA on-demand reading/offline behavior.
 
 The clients' explicit [Show another lyric](lyric-preview.md#show-another-lyric)
@@ -64,7 +67,7 @@ font units (CSS pixels/Android sp) and Shared Compact/Normal/Relaxed density, pr
 UI/theme independence and mounted-reader history. The
 [v8 storage/reading protocol](architecture.md#web-typed-personal-storage-v8)
 defines exact defaults, preserving older inputs and platform-owned spacing.
-Onboarding/helper/full-backup resume inclusion/Practice/offline and complete font/device evidence remain open.
+Onboarding/helper/native full-backup/Practice/offline and complete font/device evidence remain open.
 
 The Website's [individual Recite lifecycle](architecture.md#focused-individual-recite-and-screen-awake)
 implements only REC-01/02 for exposed canonical/fixture text: explicit focused
@@ -79,8 +82,9 @@ Normal successful selected opens alone record history. Website's bounded
 REC-04 slice persists one exact list/occurrence pair with commit-gated movement
 and explicit Continue, preserving current contents and explaining deletion
 without substitution. Its [Shared contract](https://github.com/DaasaVaani/shared/blob/main/docs/recitation-position.md)
-keeps mode/wake ownership session-only. Native resume validation, full-backup
-position inclusion, reviewed verse Practice and durable offline content remain
+keeps mode/wake ownership session-only. Website backup v1 includes the exact
+pair without mode/wake state. Native resume validation/native full-backup,
+reviewed verse Practice and durable offline content remain
 open; no automatic entry or fabricated linguistic review is authorized.
 
 Native independently implements the same bounded REC-01/02/03 surfaces and retains

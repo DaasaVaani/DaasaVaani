@@ -11,6 +11,7 @@ lyricPreview:
 canonicalBaseUrl: https://daasavaani.github.io/
 listLinkPath: open/
 listFileName: list.dvlist.json.gz
+backupFileName: personal.dvbackup.json.gz
 transferChunkBytes: 65536
 listCompressionLevel: 6
 demoPort: 5173

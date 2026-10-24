@@ -15,6 +15,7 @@ import { Learning, LearningControl } from "./Learning";
 import { Recite } from "./Recite";
 import { LyricText } from "./LyricText";
 import { ReadingPreferences, type ReadingPreferencesProps } from "./ReadingPreferences";
+import { PersonalBackup } from "./PersonalBackup";
 import { useAppShell } from "./app-shell";
 import type { LyricLibrary } from "./lyric-publication";
 import type { PersonalReference } from "./list-transfer-types";
@@ -352,6 +353,7 @@ export default function App() {
           </fieldset>
           <ReadingPreferences labels={labels} personal={personal} change={change} />
           {store && <HistoryControls labels={labels} history={store.history} />}
+          {store && <PersonalBackup labels={labels} store={store} />}
           </>}
           <ListPreview labels={labels} personal={store} publication={publication} lyrics={lyrics} />
           <section><h2>{labels.appShell}</h2><p>{labels.appShellNotice}</p></section>

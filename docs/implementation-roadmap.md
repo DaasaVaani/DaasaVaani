@@ -16,7 +16,8 @@ is the target for P1/P4/P5a/P7: text-only lyric publication, permanent UUID look
 typed references and versioned legacy-preserving transfers. Source/publication
 schemas and separate real readers implement the initial slice. Website typed
 favorites/lists/recent history/learning labels/font/density/latest recitation position, v1/v2 transfer adapters and preserving personal v8 upgrades are
-implemented; full personal collections/backups and production publication remain open. Follow its
+implemented; Website also implements same-platform current-state backup v1.
+Future personal collections, native backups and production publication remain open. Follow its
 Shared-first rollout without inferred legacy mapping or identity changes.
 
 Publication requires exact main checks, successful deployment and live HTTPS
@@ -37,11 +38,17 @@ implements the same bounded saved-list surface with the existing complete
 compatible preparation gate and original list/Android Back context.
 Website implements bounded REC-04 explicit exact-occurrence Continue, with
 commit-gated cursor changes, preserving upgrade and missing-position recovery.
-Native's independent upgrade/device checks and full-backup position inclusion,
+Native's independent upgrade/device checks and native full-backup position inclusion,
 reviewed verse Practice and persistent offline content remain separate gates;
 this is not complete recitation.
 
 ## Current implementation coverage
+
+Website P5a now includes [backup v1](architecture.md#same-platform-personal-backup-v1):
+all currently implemented personal state, stable export, strict local preview and
+explicit atomic replacement with fresh fencing. It is not a backup of future
+bookmarks/Practice, native state, lyrics or readiness. The remaining-backup work
+in the table below refers to native adoption and future versioned personal fields.
 
 | Surface | Available | Still incomplete |
 | --- | --- | --- |

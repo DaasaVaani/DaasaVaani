@@ -79,8 +79,15 @@ checks. Supported browsers offer explicit system sharing and clipboard copy;
 selectable links and complete downloads remain available as fallbacks. System
 handoff is not delivery confirmation. Available verified catalog titles resolve list references without fetching
 lyrics; explicit Read opens known entries, and readers can add independent
-occurrences to chosen lists. Same-platform full backups (including the saved
-recitation pair) and durable offline recitation remain incomplete.
+occurrences to chosen lists. Settings also exports a separate same-platform
+personal backup and previews it before explicit replacement of all current
+personal data, including the saved recitation pair. Files are not encrypted and
+contain personal settings, lists and activity; nothing is uploaded. Restore is
+atomic, preserves identities and unresolved records, and refuses stale previews
+without merging. An installed interface can perform this locally offline.
+See the [backup protocol](docs/architecture.md#same-platform-personal-backup-v1).
+Native backups, future bookmarks/Practice and durable offline recitation remain
+incomplete; personal backups contain no lyric content or offline-readiness state.
 Shared generates the English/Kannada UI resources; Android has separate real
 text-only preparation/reading and fixture features with typed Room favorites,
 durable lists/independent occurrences, recent history, learning labels, preferences and locale/theme controls.

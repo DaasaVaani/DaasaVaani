@@ -38,6 +38,18 @@ activating content. These logical bounds are not allocator/peak-heap or full
 production/offline proofs. Literal title filtering remains a catalog scan, not
 the reviewed linguistic search algorithm.
 
+Website [current-state backup v1](architecture.md#same-platform-personal-backup-v1)
+uses off-UI bounded gzip/JSON validation in O(E+D+N) time for encoded bytes E,
+decoded bytes D and personal records N, plus object-key canonical sorting.
+Typed-reference/occurrence uniqueness and duplicate-name preview use sets/maps;
+array order and raw user text are not normalized. Logical and prospective
+database accounting both apply. Atomic replacement checks a captured revision
+and allocates a fresh fence; it neither merges nor resolves missing identities.
+Retained decoded candidates, preview text, structured-clone messages and bounded
+compression chunks are additional live allocations: wire ceilings are not
+measured peak-heap guarantees. Native restore and crash/device evidence remain
+separate work.
+
 Priority is a proposed analysis order, not an approved delivery commitment:
 **A** = resolve correctness/feasibility or data-preservation risks early;
 **B** = resolve before the owning implementation slice. Work can proceed

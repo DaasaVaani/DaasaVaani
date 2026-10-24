@@ -77,7 +77,7 @@ Initial values and exact field bounds belong only in the linked owning files.
 | [Web settings](../settings/web.yml): `demoPort`, `demoViewports` | Development server and desktop/mobile demo tooling, not a runtime user preference | Supported-browser/device acceptance is broader than configured demo viewports |
 | [Web settings](../settings/web.yml): `appShell` | Workbox worker filename/cache namespace, complete shell-byte ceiling, visible-focus update interval and manifest filename/icon basename; see the [shell protocol](#web-app-interface-shell-and-normal-updates) and [installation metadata](#web-installation-metadata-and-original-icons) | No Library/content readiness, automatic snapshot replacement or browser installation guarantee; `base` must be a directory path |
 | [Portable defaults/schema](../shared/schemas/ui-defaults.schema.json) | Build-time locale/theme/default history recording and allowed choices; first supported browser locale, explicit persisted override, independent device appearance | Canonical `lyricScript` remains the fixture invariant, not an implemented selectable transliteration profile; explicit stored history choices win |
-| [Personal-transfer settings/schema](../shared/schemas/personal-transfer-settings.schema.json) | Build-time favorite/list/occurrence/recent-window/text/logical-byte and encoded/decoded/link bounds; generated schemas and transactional/codec tests | Bookmark/learning/backup bounds are declared but their complete features and protocols are not implemented |
+| [Personal-transfer settings/schema](../shared/schemas/personal-transfer-settings.schema.json) | Build-time favorite/list/occurrence/recent-window/text/logical-byte and encoded/decoded/link bounds; generated schemas and transactional/codec tests | Native backups and future bookmark/Practice features remain incomplete |
 | [Publication-safety settings/schema](../shared/schemas/publication-policy-settings.schema.json) | Strict build-time required fields, safe byte counts, platform-bounded request milliseconds and implemented required capabilities; artifact fetch/decoder checks | Untrusted remote data cannot raise these limits; this is not the full production publication/offline policy |
 | [Search settings](../shared/settings/search.yml) | Publisher emits a policy artifact; Website uses its verified snapshot-bound rules, not newer source settings | Full reviewed profiles/aliases/technical grammar, filters and excerpt conformance remain open |
 | [Fixture-tool settings](../settings/tooling.yml) | Strict helper validation of repository/full revision/local checkout; a local path override never waives exact clean revision validation | Independent producer/consumer pins; no production ingestion or source migration authorization |
@@ -440,9 +440,10 @@ Deletion leaves a valid unresolved pair: missing list/occurrence has a distinct
 explanation and normal explicit list/entry selection, never first/equal-reference
 fallback. Reload/Forward/foreground never enter mode or acquire wake ownership.
 Original list/editor DOM and the initiating control remain the return context.
-Minimal v1/v2 exports exclude this record and local IDs. Future same-platform
-full backup still needs its separate allowlist/version/restore implementation;
-this slice alone does not complete REC-04/XFER-09 or durable offline readiness.
+Minimal v1/v2 exports exclude this record and local IDs. Website
+[backup v1](#same-platform-personal-backup-v1) separately includes the exact pair
+and identities; native backup remains open. This position slice alone does not
+complete REC-04/XFER-09 or durable offline readiness.
 
 ### Personal schema refusal
 
@@ -469,8 +470,8 @@ The [Learning view](lyric-preview.md#local-learning-labels) reads local assignme
 before preparation without requests. Filtering/pagination scan the bounded
 ordered collection; unresolved IDs remain editable. Only an explicit Read may
 load canonical content. Minimal exports exclude labels, as they exclude history.
-No label mutation replays an exposed reader's history. Full backups and reviewed
-verse Practice remain separate unimplemented requirements.
+No label mutation replays an exposed reader's history. Website backup v1 includes
+the exact assignments; native backups and reviewed verse Practice remain open.
 
 ### Transactions, names and exact accounting
 
@@ -613,11 +614,59 @@ positions without merging or repair guesses. A quota error or cancellation befor
 commit rolls the entire transaction back. Old editor revisions are invalid after
 success. The local control header is never imported.
 
-The staged backup v1 scope covers every currently implemented personal field;
-new personal features require a versioned backup extension, not fabricated empty
-bookmarks, Practice or setup records. Full-backup file headers, codec/adapter,
-preview/confirmation UI, locale recovery and exportability remain separate
-prerequisites. The replacement API alone does not provide a user-facing backup.
+### Same-platform personal backup v1
+
+Settings implements the [Shared v1 wire contract](../shared/docs/full-personal-backup.md)
+for all current Website v8 personal fields. New personal features require a
+versioned backup extension, not fabricated empty bookmarks, Practice or setup
+records. The independently adopted Shared revision also contains provisional
+transliteration resources; this pin does not activate those converters.
+
+The [backup worker](../src/personal-backup.worker.ts) validates the complete
+strict generated schema and semantic typed uniqueness, globally distinct
+occurrence IDs, aggregate counts, real UTC millisecond timestamps, Unicode
+scalars, logical data bytes and prospective v8 storage overhead. One valid gzip
+member, fatal UTF8 and duplicate-key rejection use the same
+[bounded byte primitives](../src/transfer-bytes.ts) as minimal lists, with separate
+Shared backup ceilings: 65MiB encoded and64MiB decoded including whitespace/BOM.
+Input size is checked before file allocation; decompression stops at cap+1.
+Valid optional headers are accepted; CRC/ISIZE, truncation, concatenation,
+trailing bytes, ambiguous keys, other platforms and newer formats are refused.
+No compression-ratio cap or truncating fallback is used.
+
+Export captures a complete committed snapshot, encodes canonical-key JSON off
+the UI thread and rechecks its local fence before exposing a download. Changed
+local revisions hide the old download. The owning web setting `backupFileName`
+selects the `.dvbackup.json.gz` filename. No writer epoch, revision, row wrapper,
+cache, journal, media, content or readiness flag enters the file. Absent saved
+preferences remain null with empty favorites; saved CSS font units and raw user
+text are preserved.
+
+Import retains a validated candidate plus the observed local fence. A complete
+read-only JSON preview exposes every value as text, with platform/date,
+collection counts, exact recitation IDs and equal-name groups derived with the
+pinned Unicode16 profile. Existing-data export is offered before replacement.
+Choosing/previewing a file changes no personal data. Confirmation invokes the
+atomic replacement above; peer edits disable confirmation and require a new
+preview. Same-name lists remain independent; this is not minimal-list import,
+merge or selective restore. Transaction errors permit explicit retry, while
+cancellation ends the confirmation. Worker errors are visible; cancellation/
+departure terminates owned workers and revokes download URLs. A completed commit
+reports restored data even if a cancellation arrives afterward; it never claims
+that committed data was rolled back or reopens a departed workflow.
+
+Website interface language/theme/font/density follow the committed state through
+the normal personal observer; there is no OS-language setter to fail or call
+before commit. Native postcommit OS-language retry remains an independent
+consumer obligation. Neither restore nor preview fetches content, enters Recite,
+requests screen awake or repairs unavailable positions. The installed interface
+caches the backup worker for local offline use, not lyric data.
+
+The privacy notice explains same-platform-only restore and that gzip files are
+not encrypted: recipients can read personal settings, lists and activity. Files
+are local downloads, not uploads, synchronization or account backups. Native
+system backup, native file restore and complete platform/device interoperability
+remain open.
 
 ### Recently opened lifecycle
 

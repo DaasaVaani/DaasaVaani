@@ -107,8 +107,19 @@ without mutation. `node node_modules\@playwright\test\cli.js test personal-resto
 checks the actual six-store transaction, stale writers and final-write
 quota/cancellation rollback across all configured layouts. Its API harness is
 compiled from current source entirely in memory; it adds no production route,
-test hook or file-format support. These checks do not establish the still-pending
-full-backup file/preview/confirmation UI or native restore.
+test hook or file-format support. These API checks alone do not establish the
+separate full-backup UI or native restore.
+`npm test -- personal-backup list-transfer personal-restore` covers Shared web
+vectors and all rejected mutations, same-platform refusal, absent preferences,
+semantic duplicates, actual65MiB encoded/64MiB decoded equality/+1, gzip framing,
+UTF8/JSON and preserving minimal-list behavior. Run
+`node node_modules\@playwright\test\cli.js test personal-backup personal-restore`
+for complete-file export/preview/confirmation, locale/theme/font restoration,
+restart, source-revision invalidation, malformed/native/newer refusal, real
+quota and locked-transaction cancellation/departure, worker failure/cancellation
+and installed-shell offline restore without content requests. These map to
+XFER-09/10 and REC-04; native backup/system backup and receiving-device matrices
+remain separate gates.
 The configured suite exercises desktop, Pixel7 and320px layouts, explicit index
 consent, actual search/reading, preference/favorite persistence and corrupt-artifact
 errors. First-use locale cases exercise ordered supported/regional browser
